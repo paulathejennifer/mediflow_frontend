@@ -1,0 +1,10 @@
+{
+  "name": "MediFlow",
+  "short_name": "MediFlow",
+  "description": "AI-Powered Healthcare Referral Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait"
+}
