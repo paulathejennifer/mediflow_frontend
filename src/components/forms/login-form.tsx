@@ -76,7 +76,7 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
           src="/images/logo(1).png" 
           alt="MediFlow" 
           width={70} 
-          height={40}
+          height={70}
           className="h-10 w-10"
         />
         <h1 className="text-2xl font-bold text-white">MediFlow</h1>
@@ -110,7 +110,7 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`pl-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent focus:ring-offset-0 focus-visible:ring-offset-0 ${fieldErrors.email ? 'border-red-500' : ''}`}
+                className={`pl-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent focus:ring-offset-0 focus-visible:ring-offset-0 focus:bg-gray-700 ${fieldErrors.email ? 'border-red-500' : ''}`}
                 disabled={isLoading}
               />
             </div>
@@ -130,7 +130,7 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                className={`pl-10 pr-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent focus:ring-offset-0 focus-visible:ring-offset-0 ${fieldErrors.password ? 'border-red-500' : ''}`}
+                className={`pl-10 pr-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent focus:ring-offset-0 focus-visible:ring-offset-0 focus:bg-gray-700 ${fieldErrors.password ? 'border-red-500' : ''}`}
                 disabled={isLoading}
               />
               <Button

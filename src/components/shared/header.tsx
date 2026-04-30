@@ -1,8 +1,9 @@
 'use client'
 
-import { Bell, Settings, User } from 'lucide-react'
+import { Settings, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SearchBar } from '@/components/shared/search-bar'
+import { NotificationDropdown } from '@/components/notifications/notification-dropdown'
 
 export function Header() {
   return (
@@ -16,12 +17,7 @@ export function Header() {
         
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <div className="relative">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-transparent">
-              <Bell className="h-5 w-5" />
-            </Button>
-            <span className="absolute top-0.5 right-2 h-2 w-2 bg-destructive rounded-full"></span>
-          </div>
+          <NotificationDropdown />
           
           {/* Settings */}
           <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-transparent">

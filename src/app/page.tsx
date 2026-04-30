@@ -17,7 +17,7 @@ export default function HomePage() {
     // Redirect to login after 2.5 seconds (logo animation + text display)
     const redirectTimer = setTimeout(() => {
       router.push('/auth/login')
-    }, 2500)
+    }, 3000)
 
     return () => {
       clearTimeout(textTimer)
@@ -38,8 +38,8 @@ export default function HomePage() {
           <Image 
             src="/images/logo.png" 
             alt="MediFlow" 
-            width={165} 
-            height={165}
+            width={180} 
+            height={180}
             className="mx-auto"
           />
         </div>
@@ -53,11 +53,11 @@ export default function HomePage() {
           }`}
         >
           <div className="flex items-center justify-center gap-4">
-            <div className="h-px bg-[hsl(var(--primary))] w-12"></div>
-            <h1 className="text-md font-light text-[hsl(var(--primary))]">
+            <div className="h-px bg-foreground w-12"></div>
+            <h1 className="text-md font-light text-foreground">
               Healthcare. Connected
             </h1>
-            <div className="h-px bg-[hsl(var(--primary))] w-12"></div>
+            <div className="h-px bg-foreground w-12"></div>
           </div>
         </div>
       </div>

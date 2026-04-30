@@ -1,126 +1,29 @@
+import { TrendingUp } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart3, PieChart, LineChart, TrendingUp, Stethoscope, Building } from 'lucide-react'
+import { ReferralTrends } from '@/components/charts/referral-trends'
+import { ReferralsByStatus } from '@/components/charts/referrals-by-status'
+import { TurnaroundTimeTrend } from '@/components/charts/turnaround-time-trend'
+import { FacilityPerformance } from '@/components/charts/facility-performance'
+import { ReferralsBySpecialty } from '@/components/charts/referrals-by-specialty'
 
 export function DetailedAnalytics() {
   return (
     <div className="space-y-6">
       {/* Row 1: Referral Trends and Referrals by Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Referral Trends
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">Monthly referral volume and outcomes</p>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <BarChart3 className="h-12 w-12 mx-auto mb-2" />
-                <p>Stacked Area Chart</p>
-                <p className="text-sm">Total referrals (blue) • Completed referrals (green)</p>
-                <p className="text-xs">Jul → Jan</p>
-              </div>
-            </div>
-            <div className="flex justify-center gap-4 mt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                <span className="text-sm text-gray-400">Total referrals</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span className="text-sm text-gray-400">Completed referrals</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <PieChart className="h-5 w-5" />
-              Referrals by Status
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">Current distribution of referral statuses</p>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <PieChart className="h-12 w-12 mx-auto mb-2" />
-                <p>Pie/Donut Chart</p>
-                <p className="text-sm">Status distribution</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ReferralTrends />
+        <ReferralsByStatus />
       </div>
 
       {/* Row 2: Turnaround Time Trend and Facility Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <LineChart className="h-5 w-5" />
-              Turnaround Time Trend
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">Average days to complete referrals</p>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <LineChart className="h-12 w-12 mx-auto mb-2" />
-                <p>Line Graph</p>
-                <p className="text-sm">Days across weeks 1-5</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <Building className="h-5 w-5" />
-              Facility Performance
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">Referral volume and processing time by facility</p>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <div className="grid grid-cols-3 gap-1 mb-2">
-                  {[...Array(9)].map((_, i) => (
-                    <div key={i} className={`w-8 h-8 rounded ${i % 3 === 0 ? 'bg-green-600' : i % 3 === 1 ? 'bg-yellow-600' : 'bg-red-600'}`}></div>
-                  ))}
-                </div>
-                <p>Heat Map</p>
-                <p className="text-sm">Facility performance matrix</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <TurnaroundTimeTrend />
+        <FacilityPerformance />
       </div>
 
       {/* Row 3: Referrals by Specialty and Top Referring Facilities */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <Stethoscope className="h-5 w-5" />
-              Referrals by Specialty
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">Distribution across medical specialties</p>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <BarChart3 className="h-12 w-12 mx-auto mb-2" />
-                <p>Bar Chart</p>
-                <p className="text-sm">Specialty breakdown</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ReferralsBySpecialty />
 
         <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
           <CardHeader>

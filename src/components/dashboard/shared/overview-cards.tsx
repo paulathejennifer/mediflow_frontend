@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { TrendingUp, TrendingDown, Activity, Clock, CheckCircle, FileText } from 'lucide-react'
+import { TrendingUp, TrendingDown, Activity, Clock, CheckCircle, FileText, Building2, Users, Zap } from 'lucide-react'
 
 interface KPICardProps {
   title: string
@@ -30,7 +30,7 @@ hover:-translate-y-1
           </div>
         </div>
         <div className="text-3xl font-bold text-foreground mb-2">{value}</div>
-        <div className={`flex items-center text-xs ${trend.isPositive ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`flex items-center text-xs ${trend.isPositive ? 'text-primary' : 'text-red-400'}`}>
           {trend.isPositive ? (
             <TrendingUp className="h-4 w-4 mr-1" />
           ) : (
