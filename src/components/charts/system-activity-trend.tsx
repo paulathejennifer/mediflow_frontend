@@ -1,6 +1,6 @@
 'use client'
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface SystemActivityData {
@@ -16,18 +16,46 @@ interface SystemActivityTrendProps {
 }
 
 export function SystemActivityTrend({ data, isLoading = false }: SystemActivityTrendProps) {
-  // Mock data for development - this will be replaced with real data
-  const mockData: SystemActivityData[] = [
-    { month: '0', patients: 120, referrals: 80, documents: 200 },
-    { month: '1', patients: 150, referrals: 95, documents: 220 },
-    { month: '2', patients: 180, referrals: 110, documents: 250 },
-    { month: '3', patients: 220, referrals: 130, documents: 280 },
-    { month: '4', patients: 260, referrals: 155, documents: 320 },
-    { month: '5', patients: 310, referrals: 185, documents: 380 },
-    { month: '6', patients: 380, referrals: 220, documents: 450 }
-  ]
+  // Generate month names for the last 6 months
+  const generateMonthNames = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentDate = new Date();
+    const monthNames = [];
+    
+    // Generate exactly 6 months (5 months back + current month)
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      monthNames.push(months[date.getMonth()]);
+    }
+    
+    return monthNames; // This should already be exactly 6 months
+  };
 
-  const chartData = data || mockData
+  // Generate mock data with exactly 6 months
+  const generateMockData = () => {
+    const monthNames = generateMonthNames();
+    return [
+      { month: monthNames[0], patients: 120, referrals: 80, documents: 200 },
+      { month: monthNames[1], patients: 150, referrals: 95, documents: 220 },
+      { month: monthNames[2], patients: 180, referrals: 110, documents: 250 },
+      { month: monthNames[3], patients: 220, referrals: 130, documents: 280 },
+      { month: monthNames[4], patients: 260, referrals: 155, documents: 320 },
+      { month: monthNames[5], patients: 310, referrals: 185, documents: 380 }
+    ];
+  };
+
+  const mockData = generateMockData();
+
+  // Transform any incoming data to use month names (limit to 6 months)
+  const transformData = (incomingData: SystemActivityData[]) => {
+    const monthNames = generateMonthNames();
+    return incomingData.slice(0, 6).map((item, index) => ({
+      ...item,
+      month: monthNames[index] || item.month
+    }));
+  };
+
+  const chartData = data ? transformData(data) : mockData
 
   if (isLoading) {
     return (
@@ -53,38 +81,55 @@ export function SystemActivityTrend({ data, isLoading = false }: SystemActivityT
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={320}>
-          <LineChart data={chartData}>
+          <AreaChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 
-            <XAxis stroke="hsl(var(--muted-foreground))" />
-            <YAxis stroke="hsl(var(--muted-foreground))" />
+            <XAxis 
+            stroke="hsl(var(--muted-foreground))" 
+            dataKey="month"
+            tick={{ fontSize: 12 }}
+          />
+            <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 13 }}/>
 
-            <Tooltip />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: 'rgb(17, 24, 39)', // gray-900
+                border: '1px solid rgb(55, 65, 81)', // gray-700
+                borderRadius: '8px'
+              }}
+              labelStyle={{ color: 'rgb(156, 163, 175)' }} // gray-400
+            />
 
-            <Line 
+            <Area 
               type="monotone" 
               dataKey="patients" 
+              stackId="1"
               stroke="#67E8F9"
-              strokeOpacity={0.9}
-              strokeWidth={2.5}
+              fill="#67E8F9"
+              fillOpacity={0.6}
+              strokeWidth={2}
             />
 
-            <Line 
+            <Area 
               type="monotone" 
               dataKey="referrals" 
+              stackId="1"
               stroke="#38BDF8"
-              strokeOpacity={0.9}
-              strokeWidth={2.5}
+              fill="#38BDF8"
+              fillOpacity={0.4}
+              strokeWidth={2}
             />
 
-            <Line 
+            <Area 
               type="monotone" 
               dataKey="documents" 
+              stackId="1"
               stroke="#2563EB"
-              strokeOpacity={0.9}
-              strokeWidth={2.5}
+              fill="#2563EB"
+              fillOpacity={0.3}
+              strokeWidth={2}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

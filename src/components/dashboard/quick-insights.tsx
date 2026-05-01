@@ -46,7 +46,7 @@ export function QuickInsights() {
               <div className="scale-110">
                 {insight.icon}
               </div>
-              <span className="text-muted-foreground text-sm hover:text-primary/80">{insight.text}</span>
+              <span className="text-muted-foreground text-sm hover:text-primary">{insight.text}</span>
             </div>
           ))}
         </div>

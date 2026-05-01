@@ -62,16 +62,20 @@ export function Sidebar() {
   const pathname = usePathname()
   const { user } = useAuthStore()
 
-  const userRole = user?.role || ROLES.CLINICIAN
+  const userRole = user?.role
   const navigation =
-    navigationItems[userRole] || navigationItems[ROLES.CLINICIAN]
+    userRole ? navigationItems[userRole] : []
   
   // Debug: Log user role and navigation
   console.log('Sidebar Debug - User:', user)
   console.log('Sidebar Debug - User Role:', userRole)
   console.log('Sidebar Debug - Navigation Items:', navigation)
 
-  return (
+  if (!user) {
+  return null // Don't render sidebar for unauthenticated users
+}
+
+return (
     <aside className="w-72 min-h-screen border-r border-border bg-background/95 backdrop-blur-xl flex flex-col">
 
       {/* LOGO */}
@@ -107,7 +111,7 @@ export function Sidebar() {
         </p>
 
         <nav className="space-y-1.5">
-          {navigation.map((item) => {
+          {navigation.map((item: { name: string; href: string; icon: any }) => {
             const isActive = pathname === item.href
 
             return (

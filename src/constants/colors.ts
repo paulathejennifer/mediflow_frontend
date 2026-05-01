@@ -22,15 +22,13 @@ export const COLORS = {
     info: '#3b82f6'
   },
   
-  // Referral status colors
-  referralStatus: {
-    pending: '#f59e0b',
-    approved: '#10b981',
-    rejected: '#ef4444',
-    in_progress: '#3b82f6',
-    completed: '#6b7280'
-  },
-  
+referralStatus: {
+  submitted: '#475569',     // Muted slate blue-gray (neutral start)
+  accepted:  '#3b82f6',     // Bright but pleasant blue (good visibility)
+  in_transit: '#60a5fa',    // Lighter mid-blue
+  received:  '#93c5fd',     // Soft light blue
+  completed: '#67e8f9',     // Your existing primary cyan (keeps the highlight)
+},
   // Role colors
   roles: {
     super_admin: '#7c3aed',

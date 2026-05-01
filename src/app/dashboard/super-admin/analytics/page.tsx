@@ -7,7 +7,7 @@ import { SystemActivityTrend } from '@/components/charts/system-activity-trend'
 import { ReferralTrends } from '@/components/charts/referral-trends'
 import { ReferralsByStatus } from '@/components/charts/referrals-by-status'
 import { TurnaroundTimeTrend } from '@/components/charts/turnaround-time-trend'
-import { ReferralsBySpecialty } from '@/components/charts/referrals-by-specialty'
+import { ReferralReasons } from '@/components/charts/referrals-by-reason'
 import { FacilityPerformance } from '@/components/charts/facility-performance'
 import { TopReferringFacilities } from '@/components/tables/top-referring-facilities'
 import { useAnalytics } from '@/hooks/useAnalytics'
@@ -81,7 +81,7 @@ export default function AnalyticsPage() {
         {/* Row 2: Turnaround Time Trend and Referrals by Specialty */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TurnaroundTimeTrend />
-          <ReferralsBySpecialty />
+          <ReferralReasons />
         </div>
         
         {/* Facility Performance - Full Width */}
