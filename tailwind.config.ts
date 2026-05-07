@@ -43,6 +43,28 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // Badge colors using CSS custom properties
+        'badge-super-admin': 'hsl(var(--badge-super-admin))',
+        'badge-facility-admin': 'hsl(var(--badge-facility-admin))',
+        'badge-clinician': 'hsl(var(--badge-clinician))',
+        'badge-gender-male': 'hsl(var(--badge-gender-male))',
+        'badge-gender-female': 'hsl(var(--badge-gender-female))',
+        'badge-gender-other': 'hsl(var(--badge-gender-other))',
+        'badge-status-active': 'hsl(var(--badge-status-active))',
+        'badge-status-inactive': 'hsl(var(--badge-status-inactive))',
+        // Facility level colors
+        'badge-facility-level-1': 'hsl(var(--badge-facility-level-1))',
+        'badge-facility-level-2': 'hsl(var(--badge-facility-level-2))',
+        'badge-facility-level-3': 'hsl(var(--badge-facility-level-3))',
+        'badge-facility-level-4': 'hsl(var(--badge-facility-level-4))',
+        'badge-facility-level-5': 'hsl(var(--badge-facility-level-5))',
+        'badge-facility-level-6': 'hsl(var(--badge-facility-level-6))',
+        // Facility performance colors
+        'badge-performance-low': 'hsl(var(--badge-performance-low))',
+        'badge-performance-medium-low': 'hsl(var(--badge-performance-medium-low))',
+        'badge-performance-medium': 'hsl(var(--badge-performance-medium))',
+        'badge-performance-medium-high': 'hsl(var(--badge-performance-medium-high))',
+        'badge-performance-high': 'hsl(var(--badge-performance-high))',
       },
       borderRadius: {
         lg: 'var(--radius)',

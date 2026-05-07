@@ -1,6 +1,6 @@
 'use client'
 
-import { AnalyticsOverviewCards } from '@/components/dashboard/shared/analytics-overview-cards'
+import { OverviewCards, KPICardData } from '@/components/shared/overview-cards'
 import { DetailedAnalytics } from '@/components/dashboard/detailed-analytics'
 import { SkeletonLoadingSection } from '@/components/dashboard/shared/skeleton-loading-section'
 import { SystemActivityTrend } from '@/components/charts/system-activity-trend'
@@ -11,9 +11,49 @@ import { ReferralReasons } from '@/components/charts/referrals-by-reason'
 import { FacilityPerformance } from '@/components/charts/facility-performance'
 import { TopReferringFacilities } from '@/components/tables/top-referring-facilities'
 import { useAnalytics } from '@/hooks/useAnalytics'
+import { Building2, Users, Activity, Zap } from 'lucide-react'
 
 export default function AnalyticsPage() {
   const { systemActivityTrend, isLoading, error, refetch } = useAnalytics()
+
+  const analyticsOverviewData: KPICardData[] = [
+    {
+      title: 'New Facilities',
+      value: '12',
+      trend: {
+        value: '+15%',
+        isPositive: true
+      },
+      icon: <Building2 className="h-5 w-5" />
+    },
+    {
+      title: 'Active Users',
+      value: '2,847',
+      trend: {
+        value: '+12.3%',
+        isPositive: true
+      },
+      icon: <Users className="h-5 w-5" />
+    },
+    {
+      title: 'System Health',
+      value: '98.5%',
+      trend: {
+        value: '+1.2%',
+        isPositive: true
+      },
+      icon: <Activity className="h-5 w-5" />
+    },
+    {
+      title: 'API Requests (24h)',
+      value: '1.2M',
+      trend: {
+        value: '-5.4%',
+        isPositive: false
+      },
+      icon: <Zap className="h-5 w-5" />
+    }
+  ]
 
   if (isLoading) {
     return (
@@ -64,12 +104,7 @@ export default function AnalyticsPage() {
         </div>
         
         <div className="mt-8">
-          <AnalyticsOverviewCards />
-        </div>
-        
-        {/* System Activity Trend - Full Width */}
-        <div className="mt-8">
-          <SystemActivityTrend data={systemActivityTrend} isLoading={isLoading} />
+          <OverviewCards data={analyticsOverviewData} />
         </div>
         
         {/* Row 1: Referral Trends and Referrals by Status */}
@@ -84,8 +119,9 @@ export default function AnalyticsPage() {
           <ReferralReasons />
         </div>
         
-        {/* Facility Performance - Full Width */}
-        <div className="mt-8">
+        {/* Row 3: System Activity Trend and Facility Performance */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SystemActivityTrend data={systemActivityTrend} isLoading={isLoading} />
           <FacilityPerformance />
         </div>
         

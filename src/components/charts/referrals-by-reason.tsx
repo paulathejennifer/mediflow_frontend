@@ -36,7 +36,7 @@ export function ReferralReasons() {
           {data.map((item, index) => (
             <div key={item.reason} className="flex items-center gap-3">
               {/* Label */}
-              <div className="w-20 text-sm text-gray-400 text-right">
+              <div className="w-20 text-[14px] text-gray-400 text-right">
                 {item.reason}
               </div>
               
@@ -52,7 +52,12 @@ export function ReferralReasons() {
                 </div>
                 
                 {/* Count label on bar */}
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white font-medium">
+                <div 
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium"
+                  style={{ 
+                    color: (item.count / maxCount) * 100 > 85 ? '#2563EB' : 'white'
+                  }}
+                >
                   {item.count}
                 </div>
               </div>

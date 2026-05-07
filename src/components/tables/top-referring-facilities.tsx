@@ -88,7 +88,7 @@ export function TopReferringFacilities() {
             </thead>
             <tbody className="text-foreground">
               {facilitiesData.map((facility, index) => (
-                <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
+                <tr key={index} className="border-b border-border hover:bg-gray-900 transition-colors">
                   <td className="py-3 px-3 font-medium">{facility.name}</td>
                   <td className="text-right py-3 px-3 font-mono">{facility.referrals.toLocaleString()}</td>
                   <td className="text-right py-3 px-3 font-mono">{facility.avgTurnaround}</td>

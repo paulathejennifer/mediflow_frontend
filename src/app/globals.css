@@ -31,6 +31,34 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Badge colors */
+    --badge-super-admin: 262 83% 58%;
+    --badge-facility-admin: 187 84% 42%;
+    --badge-clinician: 163 35% 34%;
+    --badge-status-active: 160 40% 38%;
+
+    --badge-gender-male: 217 55% 58%;
+    --badge-gender-female: 330 55% 58%;
+    --badge-gender-other: 258 50% 62%;
+
+    --badge-status-active: 160 50% 42%;
+    --badge-status-inactive: 220 8% 55%;
+
+    /* Facility level colors */
+    --badge-facility-level-1: 207 92% 94%;
+    --badge-facility-level-2: 196 96% 86%;
+    --badge-facility-level-3: 197 92% 74%;
+    --badge-facility-level-4: 199 89% 60%;
+    --badge-facility-level-5: 198 93% 47%;
+    --badge-facility-level-6: 198 89% 39%;
+
+    /* Facility performance colors (using primary shades - darker = better performance) */
+    --badge-performance-low: 199 89% 60%;     /* Primary 400 */
+    --badge-performance-medium-low: 198 93% 47%; /* Primary 500 */
+    --badge-performance-medium: 198 89% 39%;   /* Primary 600 */
+    --badge-performance-medium-high: 198 88% 30%; /* Primary 700 */
+    --badge-performance-high: 199 41% 23%;     /* Primary 800 */
   }
 
   .dark {
@@ -66,18 +94,20 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
-  
-  html, body {
+
+  html,
+  body {
     min-height: 100vh;
   }
-  
+
   #__next {
     min-height: 100vh;
   }
-  
+
   /* Override input background on focus to maintain dark theme */
   input:focus {
     background-color: hsl(214, 31.8%, 25%) !important;
@@ -88,22 +118,23 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   /* Custom scrollbar styles */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
-  
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--primary) / 0.3);
     border-radius: 9999px;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--primary) / 0.6);
   }
+
 }

@@ -27,7 +27,8 @@ const navigationItems = {
   [ROLES.SUPER_ADMIN]: [
     { name: 'Dashboard', href: ROUTES.SUPER_ADMIN.DASHBOARD + '/dashboard', icon: LayoutDashboard },
     { name: 'Analytics', href: ROUTES.SUPER_ADMIN.ANALYTICS, icon: BarChart3 },
-    { name: 'Users', href: ROUTES.SUPER_ADMIN.USERS, icon: Users },
+    { name: 'Staff', href: ROUTES.SUPER_ADMIN.STAFF, icon: Users },
+    { name: 'Patients', href: ROUTES.SUPER_ADMIN.PATIENTS, icon: User },
     { name: 'Facilities', href: ROUTES.SUPER_ADMIN.FACILITIES, icon: Building2 },
     { name: 'Reports', href: '/dashboard/super-admin/reports', icon: FileText },
     { name: 'Notifications', href: ROUTES.SUPER_ADMIN.NOTIFICATIONS, icon: Bell },
@@ -80,7 +81,7 @@ return (
 
       {/* LOGO */}
       <div className="h-20 px-6 flex items-center bg-gray-900">
-        <Link href={navigation[0]?.href} className="flex items-center gap-3 group">
+        <Link href={navigation[0]?.href || '/dashboard'} className="flex items-center gap-3 group">
 
           <div className="relative h-10 w-10 rounded-xl overflow-hidden ring-1 ring-primary/40 shadow-lg shadow-primary/20">
             <Image

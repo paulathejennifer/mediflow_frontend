@@ -15,13 +15,13 @@ export default function DashboardLayout({
         </div>
         
         {/* Main content - Scrollable only */}
-        <div className="flex-1 ml-72">
+        <div className="flex-1 ml-72 min-w-0">
           <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <Header />
           </div>
           
           {/* Page content */}
-          <main className="p-6">
+          <main className="p-6 overflow-x-hidden">
             {children}
           </main>
         </div>

@@ -3,21 +3,34 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { Bell, X, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { Bell, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { useMockNotifications } from '@/hooks/useMockNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Scrollbar } from '@/components/shared/scrollbar';
+import { DropdownCloseButton } from '@/components/shared/dropdown-close-button';
 
 export function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
 
   const router = useRouter();
   const { notifications, stats, markAsRead, markAllAsRead } = useMockNotifications();
+
+  // Handle opening/closing animations
+  const handleToggle = () => {
+    if (isOpen) {
+      setIsAnimating(false);
+      setTimeout(() => setIsOpen(false), 200);
+    } else {
+      setIsOpen(true);
+      setTimeout(() => setIsAnimating(true), 10);
+    }
+  };
 
   // Update position when opening
   useEffect(() => {
@@ -39,7 +52,7 @@ export function NotificationDropdown() {
         buttonRef.current &&
         !buttonRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        handleToggle();
       }
     };
 
@@ -50,7 +63,7 @@ export function NotificationDropdown() {
   // Close on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape') handleToggle();
     };
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
@@ -84,7 +97,7 @@ export function NotificationDropdown() {
         variant="ghost"
         size="icon"
         className="relative hover:bg-transparent hover:text-primary"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         aria-label="Notifications"
       >
         <Bell size={20} />
@@ -104,18 +117,21 @@ export function NotificationDropdown() {
           <>
             {/* Backdrop */}
             <div
-              className="fixed inset-0 z-40 bg-black/30 dark:bg-black/50"
-              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 z-40 bg-black/30 dark:bg-black/50 transition-opacity duration-200"
+              style={{ opacity: isAnimating ? 1 : 0 }}
+              onClick={handleToggle}
               aria-hidden="true"
             />
 
             {/* Dropdown */}
             <div
               ref={dropdownRef}
-              className="fixed z-50 w-96 rounded-xl border border-gray-700 bg-gray-900 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_12px_30px_-12px_hsl(var(--primary)/0.35)] overflow-hidden"
+              className="fixed z-50 w-96 rounded-xl border border-gray-700 bg-gray-900 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_12px_30px_-12px_hsl(var(--primary)/0.35)] overflow-hidden transition-all duration-200 ease-out"
               style={{
                 top: `${position.top}px`,
                 left: `${position.left}px`,
+                transform: isAnimating ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(-10px)',
+                opacity: isAnimating ? 1 : 0,
               }}
             >
               <Card className="border-0 shadow-none bg-transparent">
@@ -135,7 +151,7 @@ export function NotificationDropdown() {
                         onClick={(e) => {
                           e.stopPropagation();
                           markAllAsRead();
-                          setIsOpen(false);
+                          handleToggle();
                         }}
                         className="text-gray-400 hover:text-primary hover:bg-transparent text-sm"
                       >
@@ -144,14 +160,7 @@ export function NotificationDropdown() {
                       </Button>
                     )}
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setIsOpen(false)}
-                      className="h-8 w-8 text-gray-400 hover:text-foreground hover:bg-gray-800"
-                    >
-                      <X size={18} />
-                    </Button>
+                    <DropdownCloseButton onClick={handleToggle} />
                   </div>
                 </CardHeader>
 
@@ -220,7 +229,7 @@ export function NotificationDropdown() {
                       onClick={(e) => {
                         e.stopPropagation();
                         router.push('/dashboard/super-admin/notifications');
-                        setIsOpen(false);
+                        handleToggle();
                       }}
                     >
                       View all notifications ({notifications.length})

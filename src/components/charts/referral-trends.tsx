@@ -89,7 +89,7 @@ export function ReferralTrends() {
               dataKey="completed" 
               stroke="#67e8f9" // light cyan (same as patients in system activity)
               fill="#67e8f9"
-              fillOpacity={0.5}
+              fillOpacity={0.7}
               strokeWidth={2}
             />
           </AreaChart>

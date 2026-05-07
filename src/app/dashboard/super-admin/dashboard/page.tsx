@@ -1,15 +1,54 @@
 'use client'
 
-import { OverviewCards } from '@/components/dashboard/shared/overview-cards'
+import { OverviewCards, KPICardData } from '@/components/shared/overview-cards'
 import { SkeletonLoadingSection } from '@/components/dashboard/shared/skeleton-loading-section'
 import { RecentAlerts } from '@/components/dashboard/recent-alerts'
 import { QuickInsights } from '@/components/dashboard/quick-insights'
 import { useDashboard } from '@/hooks/useDashboard'
 import { Button } from '@/components/ui/button'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, FileText, Clock, Activity, CheckCircle } from 'lucide-react'
 
 export default function SuperAdminDashboard() {
   const { isLoading, error } = useDashboard()
+
+  const dashboardOverviewData: KPICardData[] = [
+    {
+      title: 'Total Referrals',
+      value: '1,284',
+      trend: {
+        value: '+12.5%',
+        isPositive: true
+      },
+      icon: <FileText className="h-5 w-5" />
+    },
+    {
+      title: 'Avg Turnaround',
+      value: '2.4 days',
+      trend: {
+        value: '-18.2%',
+        isPositive: false
+      },
+      icon: <Clock className="h-5 w-5" />
+    },
+    {
+      title: 'System Health',
+      value: '99.7%',
+      trend: {
+        value: '+3.1%',
+        isPositive: true
+      },
+      icon: <Activity className="h-5 w-5" />
+    },
+    {
+      title: 'AI Documents Processed',
+      value: '45,892',
+      trend: {
+        value: '+8%',
+        isPositive: true
+      },
+      icon: <CheckCircle className="h-5 w-5" />
+    }
+  ]
 
   if (isLoading) {
     return (
@@ -60,7 +99,7 @@ export default function SuperAdminDashboard() {
       
       <div className="container mx-auto px-4 py-3 space-y-6">
         {/* Overview Cards */}
-        <OverviewCards />
+        <OverviewCards data={dashboardOverviewData} />
         
         {/* Recent Alerts and Quick Insights Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
