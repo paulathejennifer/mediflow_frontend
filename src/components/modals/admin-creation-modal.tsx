@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Modal } from '@/components/shared/modal'
+import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { mockFacilitiesData } from '@/services/facility.service'
 import { Eye, EyeOff, Check, ChevronDown } from 'lucide-react'
@@ -295,7 +295,17 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) return
+    if (!validateForm()) {
+      // Scroll to first error
+      const firstErrorField = Object.keys(errors)[0]
+      if (firstErrorField) {
+        const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
+      return
+    }
 
     setIsSubmitting(true)
 
@@ -493,7 +503,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
               </div>
             </div>
           
-          <div className="sticky bottom-0 bg-gray-900 border-t border-gray-800 p-4 -mx-6 -mb-6 flex justify-end gap-3">
+          <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
             <Button
               variant="outline"
               onClick={handleClose}

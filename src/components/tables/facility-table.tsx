@@ -1,13 +1,21 @@
-import { Badge } from '@/components/shared/badge'
+import { Badge } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Building, Phone, MapPin, Calendar, TrendingUp } from 'lucide-react'
 import { Facility, getPerformanceVariant, getLevelVariant } from '@/services/facility.service'
+import { ActionDropdown } from '@/components/shared'
 
 interface FacilityTableProps {
   facilities: Facility[]
+  userRole: 'super-admin' | 'facility-admin'
+  onViewProfile?: (facility: Facility) => void
+  onEdit?: (facility: Facility) => void
+  onManageStaff?: (facility: Facility) => void
+  onViewAnalytics?: (facility: Facility) => void
+  onActivate?: (facility: Facility) => void
+  onDeactivate?: (facility: Facility) => void
 }
 
-export function FacilityTable({ facilities }: FacilityTableProps) {
+export function FacilityTable({ facilities, userRole, onViewProfile, onEdit, onManageStaff, onViewAnalytics, onActivate, onDeactivate }: FacilityTableProps) {
   return (
     <div className="w-full overflow-x-auto">
       <table className="text-sm bg-gray-900/60 backdrop-blur-md border border-border" style={{ minWidth: '1400px', borderRadius: '0.5rem' }}>
@@ -48,14 +56,21 @@ export function FacilityTable({ facilities }: FacilityTableProps) {
                 </div>
               </td>
               <td className="px-4 py-3">
-                <Badge variant="outline" className="capitalize">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-transparent text-gray-700 border-gray-400 capitalize">
                   {facility.type.replace('_', ' ')}
-                </Badge>
+                </span>
               </td>
               <td className="px-4 py-3">
-                <Badge variant={getLevelVariant(facility.level) as any}>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                  facility.level === 1 ? 'bg-blue-200 text-blue-800 border-blue-300'
+                  : facility.level === 2 ? 'bg-blue-300 text-blue-800 border-blue-400'
+                  : facility.level === 3 ? 'bg-blue-400 text-white border-blue-500'
+                  : facility.level === 4 ? 'bg-blue-500 text-white border-blue-600'
+                  : facility.level === 5 ? 'bg-blue-600 text-white border-blue-700'
+                  : 'bg-blue-700 text-white border-blue-800'
+                }`}>
                   Level {facility.level}
-                </Badge>
+                </span>
               </td>
               <td className="px-4 py-3 text-sm text-foreground">{facility.county}</td>
               <td className="px-4 py-3 text-xs text-muted-foreground">
@@ -65,9 +80,13 @@ export function FacilityTable({ facilities }: FacilityTableProps) {
                 </div>
               </td>
               <td className="px-4 py-3">
-                <Badge variant={facility.status as any}>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                  facility.status === 'active' 
+                    ? 'bg-green-600/10 text-green-600 border-green-600/20'
+                    : 'bg-gray-600/10 text-gray-600 border-gray-600/20'
+                }`}>
                   {facility.status}
-                </Badge>
+                </span>
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
@@ -75,12 +94,17 @@ export function FacilityTable({ facilities }: FacilityTableProps) {
                     <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-sm font-medium">{facility.performance}%</span>
                   </div>
-                  <Badge variant={getPerformanceVariant(facility.performance) as any} className="text-xs">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                    facility.performance >= 80 ? 'bg-green-600/10 text-green-600 border-green-600/20'
+                    : facility.performance >= 60 ? 'bg-yellow-600/10 text-yellow-600 border-yellow-600/20'
+                    : facility.performance >= 40 ? 'bg-orange-600/10 text-orange-600 border-orange-600/20'
+                    : 'bg-red-600/10 text-red-600 border-red-600/20'
+                  }`}>
                     {facility.performance >= 80 ? 'High' : 
                      facility.performance >= 60 ? 'Good' : 
                      facility.performance >= 40 ? 'Average' : 
-                     facility.performance >= 20 ? 'Low' : 'Critical'}
-                  </Badge>
+                     'Low'}
+                  </span>
                 </div>
               </td>
               <td className="px-4 py-3 text-xs text-muted-foreground">
@@ -94,9 +118,17 @@ export function FacilityTable({ facilities }: FacilityTableProps) {
                 </div>
               </td>
               <td className="px-4 py-3">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                <ActionDropdown
+                  type="facility"
+                  userRole={userRole}
+                  isActive={facility.status === 'active'}
+                  onViewProfile={() => onViewProfile?.(facility)}
+                  onEdit={() => onEdit?.(facility)}
+                  onManageStaff={() => onManageStaff?.(facility)}
+                  onViewAnalytics={() => onViewAnalytics?.(facility)}
+                  onActivate={() => onActivate?.(facility)}
+                  onDeactivate={() => onDeactivate?.(facility)}
+                />
               </td>
             </tr>
           ))}

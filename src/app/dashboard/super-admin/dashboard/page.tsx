@@ -1,7 +1,7 @@
 'use client'
 
-import { OverviewCards, KPICardData } from '@/components/shared/overview-cards'
-import { SkeletonLoadingSection } from '@/components/dashboard/shared/skeleton-loading-section'
+import { OverviewCards, KPICardData } from '@/components/shared'
+import { SkeletonLoadingSection } from '@/components/shared'
 import { RecentAlerts } from '@/components/dashboard/recent-alerts'
 import { QuickInsights } from '@/components/dashboard/quick-insights'
 import { useDashboard } from '@/hooks/useDashboard'

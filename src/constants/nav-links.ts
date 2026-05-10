@@ -8,7 +8,7 @@ export interface NavLink {
   children?: NavLink[]
 }
 
-export const NAV_LINKS: Record<UserRole, NavLink[]> = {
+export const NAV_LINKS: Record<'super_admin' | 'facility_admin' | 'clinician', NavLink[]> = {
   super_admin: [
     {
       title: 'Dashboard',
@@ -22,7 +22,7 @@ export const NAV_LINKS: Record<UserRole, NavLink[]> = {
     },
     {
       title: 'Users',
-      href: ROUTES.SUPER_ADMIN.USERS,
+      href: ROUTES.SUPER_ADMIN.STAFF,
       icon: 'Users'
     },
     {
@@ -49,6 +49,16 @@ export const NAV_LINKS: Record<UserRole, NavLink[]> = {
       title: 'Settings',
       href: ROUTES.SUPER_ADMIN.SETTINGS,
       icon: 'Settings'
+    },
+    {
+      title: 'Patient Profile',
+      href: '/dashboard/super-admin/patients/view',
+      icon: 'UserCheck'
+    },
+    {
+      title: 'Patients',
+      href: ROUTES.SUPER_ADMIN.PATIENTS,
+      icon: 'UserCheck'
     }
   ],
   
@@ -131,5 +141,6 @@ export const NAV_LINKS: Record<UserRole, NavLink[]> = {
       href: ROUTES.CLINICIAN.SETTINGS,
       icon: 'Settings'
     }
-  ]
-}
+  ],
+
+  }

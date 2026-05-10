@@ -45,6 +45,21 @@
     --badge-status-active: 160 50% 42%;
     --badge-status-inactive: 220 8% 55%;
 
+    /* Urgency badge colors */
+    --badge-urgency-low: 160 84% 39%;
+    --badge-urgency-medium: 38 95% 56%;
+    --badge-urgency-high: 25 95% 53%;
+    --badge-urgency-emergency: 0 84% 60%;
+
+    /* Referral status badge colors */
+    --badge-status-draft: 210 40% 96%;
+    --badge-status-pending: 38 95% 56%;
+    --badge-status-accepted: 188 84% 71%;
+    --badge-status-in-progress: 27 87% 67%;
+    --badge-status-completed: 160 84% 39%;
+    --badge-status-rejected: 0 84% 60%;
+    --badge-status-cancelled: 210 40% 96%;
+
     /* Facility level colors */
     --badge-facility-level-1: 207 92% 94%;
     --badge-facility-level-2: 196 96% 86%;

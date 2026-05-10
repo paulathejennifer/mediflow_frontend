@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { User, Settings, LogOut, ChevronDown, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/shared/badge'
-import { DropdownCloseButton } from '@/components/shared/dropdown-close-button'
+import { Badge } from '@/components/shared/ui/badge'
+import { DropdownCloseButton } from '@/components/shared/ui/dropdown-close-button'
 
 export function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false)

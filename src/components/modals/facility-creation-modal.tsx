@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Modal } from '@/components/shared/modal'
+import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { generateFacilityCode, validateFacilityCode } from '@/utils/facility-code-generator'
 
@@ -549,7 +549,7 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
           </div>
         </div>
           
-          <div className="sticky bottom-0 bg-gray-900 border-t border-gray-800 p-4 -mx-6 -mb-6 flex justify-end gap-3">
+          <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
             <Button
               variant="outline"
               onClick={handleClose}

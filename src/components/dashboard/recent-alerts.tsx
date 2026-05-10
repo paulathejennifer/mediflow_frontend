@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Scrollbar } from '@/components/shared/scrollbar'
+import { Scrollbar } from '@/components/shared'
 import { ChevronDown, ChevronRight, Circle } from 'lucide-react'
 
 interface AlertItem {
@@ -109,7 +109,11 @@ export function RecentAlerts() {
           <Scrollbar className="h-full">
         <div className="space-y-4">
           {alertData.map((alert, index) => (
-            <div key={alert.id} className={`border-l-2 border-primary/50 pl-4 ${index % 2 === 0 ? 'bg-gray-800/50' : 'bg-gray-900'}`}>
+            <div 
+              key={alert.id} 
+              className={`border-l-2 border-primary/50 pl-4 cursor-pointer transition-colors hover:bg-gray-800/30 ${index % 2 === 0 ? 'bg-gray-800/50' : 'bg-gray-900'}`}
+              onClick={() => toggleExpanded(alert.id)}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -129,18 +133,13 @@ export function RecentAlerts() {
                   )}
                 </div>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => toggleExpanded(alert.id)}
-                  className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-primary hover:text-primary border-0 shadow-none"
-                >
+                <div className="flex items-center">
                   {expandedItems.has(alert.id) ? (
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4 text-primary" />
                   ) : (
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4 text-primary" />
                   )}
-                </Button>
+                </div>
               </div>
             </div>
           ))}

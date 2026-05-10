@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Scrollbar } from '@/components/shared/scrollbar'
+import { Scrollbar } from '@/components/shared'
 import { TrendingUp, AlertTriangle, Activity, Clock, Users, MapPin, Zap } from 'lucide-react'
 
 export function QuickInsights() {

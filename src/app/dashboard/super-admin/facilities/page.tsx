@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Building, Activity, TrendingUp, MapPin } from 'lucide-react'
-import { OverviewCards, KPICardData } from '@/components/shared/overview-cards'
-import { SearchBar } from '@/components/shared/search-bar'
-import { FacilityFilters } from '@/components/shared/facility-filters'
+import { OverviewCards, KPICardData } from '@/components/shared'
+import { SearchBar } from '@/components/shared'
+import { FacilityFilters } from '@/components/shared/forms/facility-filters'
 import { FacilityTable } from '@/components/tables/facility-table'
-import { Pagination } from '@/components/shared/pagination'
+import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { FacilityCreationModal } from '@/components/modals/facility-creation-modal'
 import { mockFacilitiesData } from '@/services/facility.service'
@@ -156,7 +156,7 @@ export default function FacilitiesPage() {
       </Card>
 
       {/* Facility Table */}
-      <FacilityTable facilities={paginatedFacilities} />
+      <FacilityTable facilities={paginatedFacilities} userRole="super-admin" />
 
       {/* Pagination */}
       <Pagination

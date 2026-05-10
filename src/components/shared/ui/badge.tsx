@@ -1,15 +1,44 @@
 import { cn } from '@/lib/utils'
-import { COLORS } from '@/constants/colors'
-const { gender, statusBadge, roles } = COLORS
+
+type UrgencyLevel = 'low' | 'medium' | 'high' | 'emergency'
+type ReferralStatus = 'draft' | 'pending' | 'accepted' | 'in_progress' | 'completed' | 'rejected' | 'cancelled'
+
+const urgencyConfig: Record<UrgencyLevel, { label: string; className: string }> = {
+  low: { label: 'Low', className: 'bg-success/10 text-success border-success/20' },
+  medium: { label: 'Medium', className: 'bg-warning/10 text-warning border-warning/20' },
+  high: { label: 'High', className: 'bg-orange-500/10 text-orange-500 border-orange-500/20' },
+  emergency: { label: 'Emergency', className: 'bg-destructive/10 text-destructive border-destructive/20' },
+}
+
+const statusConfig: Record<ReferralStatus, { label: string; className: string }> = {
+  draft: { label: 'Draft', className: 'bg-muted text-muted-foreground' },
+  pending: { label: 'Pending', className: 'bg-warning/10 text-warning' },
+  accepted: { label: 'Accepted', className: 'bg-primary/10 text-primary' },
+  in_progress: { label: 'In Progress', className: 'bg-chart-5/10 text-chart-5' },
+  completed: { label: 'Completed', className: 'bg-success/10 text-success' },
+  rejected: { label: 'Rejected', className: 'bg-destructive/10 text-destructive' },
+  cancelled: { label: 'Cancelled', className: 'bg-muted text-muted-foreground' },
+}
 
 interface BadgeProps {
   children: React.ReactNode
-  variant?: 'default' | 'secondary' | 'outline' | 'super_admin' | 'facility_admin' | 'clinician' | 'male' | 'female' | 'other' | 'active' | 'inactive' | 'facility_level_1' | 'facility_level_2' | 'facility_level_3' | 'facility_level_4' | 'facility_level_5' | 'facility_level_6' | 'performance_low' | 'performance_medium_low' | 'performance_medium' | 'performance_medium_high' | 'performance_high'
+  variant?: 'default' | 'secondary' | 'outline' | UrgencyLevel | ReferralStatus | 'super_admin' | 'facility_admin' | 'clinician' | 'male' | 'female' | 'other' | 'active' | 'inactive' | 'facility_level_1' | 'facility_level_2' | 'facility_level_3' | 'facility_level_4' | 'facility_level_5' | 'facility_level_6' | 'performance_low' | 'performance_medium_low' | 'performance_medium' | 'performance_medium_high' | 'performance_high'
   className?: string
 }
 
 export function Badge({ children, variant = 'default', className }: BadgeProps) {
   const getVariantStyles = () => {
+    // Check if it's an urgency level
+    if (variant in urgencyConfig) {
+      return urgencyConfig[variant as UrgencyLevel].className
+    }
+    
+    // Check if it's a status
+    if (variant in statusConfig) {
+      return statusConfig[variant as ReferralStatus].className
+    }
+    
+    // Legacy and other variants
     switch (variant) {
       case 'super_admin':
         return 'bg-badge-super-admin text-white border-badge-super-admin'

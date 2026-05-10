@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth-store'
-import { Scrollbar } from '@/components/shared/scrollbar'
-import { UserProfileCard } from '@/components/shared/user-profile-card'
+import { Scrollbar } from '@/components/shared'
+import { UserProfileCard } from '@/components/shared'
 import { ROLES } from '@/constants/roles'
 import { ROUTES } from '@/constants/routes'
 
@@ -30,7 +30,7 @@ const navigationItems = {
     { name: 'Staff', href: ROUTES.SUPER_ADMIN.STAFF, icon: Users },
     { name: 'Patients', href: ROUTES.SUPER_ADMIN.PATIENTS, icon: User },
     { name: 'Facilities', href: ROUTES.SUPER_ADMIN.FACILITIES, icon: Building2 },
-    { name: 'Reports', href: '/dashboard/super-admin/reports', icon: FileText },
+    // { name: 'Reports', href: '/dashboard/super-admin/reports', icon: FileText },
     { name: 'Notifications', href: ROUTES.SUPER_ADMIN.NOTIFICATIONS, icon: Bell },
     { name: 'Settings', href: ROUTES.SUPER_ADMIN.SETTINGS, icon: Settings },
   ],

@@ -1,8 +1,8 @@
 'use client'
 
-import { OverviewCards, KPICardData } from '@/components/shared/overview-cards'
+import { OverviewCards, KPICardData } from '@/components/shared'
 import { DetailedAnalytics } from '@/components/dashboard/detailed-analytics'
-import { SkeletonLoadingSection } from '@/components/dashboard/shared/skeleton-loading-section'
+import { SkeletonLoadingSection } from '@/components/shared'
 import { SystemActivityTrend } from '@/components/charts/system-activity-trend'
 import { ReferralTrends } from '@/components/charts/referral-trends'
 import { ReferralsByStatus } from '@/components/charts/referrals-by-status'

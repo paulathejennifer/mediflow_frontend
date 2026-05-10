@@ -8,8 +8,8 @@ import { useMockNotifications } from '@/hooks/useMockNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Scrollbar } from '@/components/shared/scrollbar';
-import { DropdownCloseButton } from '@/components/shared/dropdown-close-button';
+import { Scrollbar } from '@/components/shared';
+import { DropdownCloseButton } from '@/components/shared';
 
 export function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);

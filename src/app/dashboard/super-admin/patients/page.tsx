@@ -4,16 +4,19 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Users, Activity, Calendar, UserPlus } from 'lucide-react'
-import { OverviewCards, KPICardData } from '@/components/shared/overview-cards'
-import { SearchBar } from '@/components/shared/search-bar'
-import { PatientFilters } from '@/components/shared/patient-filters'
+import { OverviewCards, KPICardData } from '@/components/shared'
+import { SearchBar } from '@/components/shared'
+import { PatientFilters } from '@/components/shared/forms/patient-filters'
 import { PatientTable } from '@/components/tables/patient-table'
-import { Pagination } from '@/components/shared/pagination'
+import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
+import { EditPatientModal } from '@/components/modals/edit-patient-modal'
 import { mockPatientsData } from '@/services/patient.service'
+import { useRouter } from 'next/navigation'
 
 export default function PatientsPage() {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedGender, setSelectedGender] = useState('all')
@@ -22,6 +25,8 @@ export default function PatientsPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedPatient, setSelectedPatient] = useState<any>(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -77,6 +82,16 @@ export default function PatientsPage() {
     // In a real app, this would add to the database
     console.log('Patient created:', newPatient)
     // For now, just log it - in production this would refresh data or add to state
+  }
+
+  const handleViewProfile = (patient: any) => {
+    // Navigate to patient profile page
+    router.push(`/dashboard/super-admin/patients/${patient.id}`)
+  }
+
+  const handleEditPatient = (patient: any) => {
+    setSelectedPatient(patient)
+    setIsEditModalOpen(true)
   }
 
   const patientsOverviewData: KPICardData[] = [
@@ -168,7 +183,12 @@ export default function PatientsPage() {
       </Card>
 
       {/* Patient Table */}
-      <PatientTable patients={paginatedPatients} />
+      <PatientTable 
+        patients={paginatedPatients} 
+        userRole="super-admin"
+        onViewProfile={handleViewProfile}
+        onEdit={handleEditPatient}
+      />
 
       {/* Pagination */}
       <Pagination
@@ -185,6 +205,21 @@ export default function PatientsPage() {
         isOpen={isPatientModalOpen}
         onClose={() => setIsPatientModalOpen(false)}
         onSuccess={handlePatientCreated}
+      />
+
+      {/* Edit Patient Modal */}
+      <EditPatientModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setSelectedPatient(null)
+        }}
+        onSuccess={(updatedPatient) => {
+          console.log('Patient updated:', updatedPatient)
+          setIsEditModalOpen(false)
+          setSelectedPatient(null)
+        }}
+        patient={selectedPatient}
       />
     </div>
   )

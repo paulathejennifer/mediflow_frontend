@@ -167,7 +167,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
                   variant="outline"
                   size="sm"
                   onClick={markAllAsRead}
-                  className="border-gray-700 text-primary hover:bg-gray-800 hover:text-secondary"
+                  className="border-gray-700 text-primary hover:bg-gray-800 hover:text-foreground"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Mark All Read
@@ -179,7 +179,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
                 size="sm"
                 onClick={refreshNotifications}
                 disabled={isLoading}
-                className="border-gray-700 text-primary hover:bg-gray-800 hover:text-secondary"
+                className="border-gray-700 text-primary hover:bg-gray-800 hover:text-foreground"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh

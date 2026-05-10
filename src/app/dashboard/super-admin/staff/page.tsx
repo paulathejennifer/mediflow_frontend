@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Users, ChevronDown, User, Activity, Building2 } from 'lucide-react'
-import { OverviewCards, KPICardData } from '@/components/shared/overview-cards'
-import { SearchBar } from '@/components/shared/search-bar'
-import { StaffFilters } from '@/components/shared/filters'
+import { OverviewCards, KPICardData } from '@/components/shared'
+import { SearchBar } from '@/components/shared'
+import { StaffFilters } from '@/components/shared/forms/filters'
 import { StaffTable } from '@/components/tables/staff-table'
-import { Pagination } from '@/components/shared/pagination'
+import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { UserCreationModal } from '@/components/modals/user-creation-modal'
 import { mockStaffData } from '@/services/staff.service'
@@ -141,7 +141,7 @@ export default function StaffPage() {
       </Card>
 
       {/* Staff Table */}
-      <StaffTable staff={paginatedStaff} />
+      <StaffTable staff={paginatedStaff} userRole="super-admin" />
 
       {/* Pagination */}
       <Pagination
