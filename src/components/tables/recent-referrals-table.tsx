@@ -1,7 +1,9 @@
 import { Badge } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, User, Calendar, MapPin } from 'lucide-react'
+import { MoreHorizontal, User, Calendar, MapPin, FileText } from 'lucide-react'
 import { ActionDropdown } from '@/components/shared'
+import { useRouter } from 'next/navigation'
+import { formatTableDate } from '@/utils/date-utils'
 
 interface Referral {
   id: string
@@ -25,34 +27,50 @@ interface RecentReferralsTableProps {
 }
 
 export function RecentReferralsTable({ referrals, userRole, onViewMore }: RecentReferralsTableProps) {
+  const router = useRouter()
   const displayedReferrals = referrals.slice(0, 5)
+
+  const handleViewDetails = (referralId: string) => {
+    // Navigate based on user role
+    if (userRole === 'facility-admin') {
+      router.push(`/dashboard/facility-admin/referrals/${referralId}`)
+    } else if (userRole === 'clinician') {
+      router.push(`/dashboard/clinician/referrals/${referralId}`)
+    } else {
+      router.push(`/dashboard/super-admin/referrals/${referralId}`)
+    }
+  }
 
   return (
     <div className="w-full overflow-x-auto">
-      <table className="text-sm bg-gray-900/60 backdrop-blur-md border border-border" style={{ minWidth: '1000px', borderRadius: '0.5rem' }}>
+      <table className="text-sm bg-gray-900/60 backdrop-blur-md border border-border" style={{ minWidth: '1100px', borderRadius: '0.5rem' }}>
         <thead>
           <tr className="border-b border-border bg-background/60">
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[200px]">Patient</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[140px]">Referral ID</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[150px]">Patient</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[150px]">Condition</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[100px]">Priority</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[100px]">Status</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[150px]">Receiving Facility</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[120px]">Date</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[140px]">Date</th>
             <th className="px-4 py-3 min-w-[50px]"></th>
           </tr>
         </thead>
         <tbody>
           {displayedReferrals.map((referral) => (
             <tr key={referral.id} className="border-b border-gray-800 hover:bg-gray-900">
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
+              <td className="px-4 py-3 text-sm text-muted-foreground font-mono">
+                <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-4 w-4 text-primary" />
+                    <FileText className="h-4 w-4 text-primary" />
                   </div>
-                  <div>
-                    <div className="font-medium text-foreground text-sm">{referral.patient}</div>
-                    <div className="text-xs text-muted-foreground">MRN: {referral.id.slice(-6)}</div>
-                  </div>
+                  {referral.id}
+                </div>
+              </td>
+              <td className="px-4 py-3">
+                <div>
+                  <div className="font-medium text-foreground text-sm">{referral.patient}</div>
+                  <div className="text-xs text-muted-foreground">MRN: {referral.id.slice(-6)}</div>
                 </div>
               </td>
               <td className="px-4 py-3 text-sm text-foreground">{referral.condition}</td>
@@ -88,34 +106,20 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
               <td className="px-4 py-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5" />
-                  {referral.date}
+                  {formatTableDate(referral.date)}
                 </div>
               </td>
               <td className="px-4 py-3 text-right">
                 <ActionDropdown
                   type="referral"
                   userRole={userRole}
-                  onViewDetails={() => console.log('View details:', referral.id)}
+                  onViewDetails={() => handleViewDetails(referral.id)}
                 />
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      
-      {/* View More Button */}
-      {referrals.length > 5 && (
-        <div className="mt-4 text-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onViewMore}
-            className="text-primary hover:text-primary/80"
-          >
-            View More Referrals
-          </Button>
-        </div>
-      )}
     </div>
   )
 }

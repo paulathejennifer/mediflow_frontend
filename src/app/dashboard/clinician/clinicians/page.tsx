@@ -4,5 +4,5 @@ import { ROLES } from '@/constants/roles'
 import { SharedCliniciansPage } from '@/components/shared/pages/shared-clinicians-page'
 
 export default function CliniciansPage() {
-  return <SharedCliniciansPage userRole={ROLES.FACILITY_ADMIN} />
+  return <SharedCliniciansPage userRole={ROLES.CLINICIAN} />
 }

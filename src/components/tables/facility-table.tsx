@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Building, Phone, MapPin, Calendar, TrendingUp } from 'lucide-react'
 import { Facility, getPerformanceVariant, getLevelVariant } from '@/services/facility.service'
 import { ActionDropdown } from '@/components/shared'
+import { formatTableDate } from '@/utils/date-utils'
 
 interface FacilityTableProps {
   facilities: Facility[]
@@ -110,11 +111,7 @@ export function FacilityTable({ facilities, userRole, onViewProfile, onEdit, onM
               <td className="px-4 py-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5" />
-                  {new Date(facility.joined).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })}
+                  {formatTableDate(facility.joined)}
                 </div>
               </td>
               <td className="px-4 py-3">

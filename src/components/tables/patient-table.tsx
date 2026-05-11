@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/button'
 import { MoreHorizontal, User, Phone, Calendar } from 'lucide-react'
 import { Patient } from '@/services/patient.service'
 import { ActionDropdown } from '@/components/shared'
+import { formatTableDate } from '@/utils/date-utils'
 
 interface PatientTableProps {
   patients: Patient[]
-  userRole: 'super-admin' | 'facility-admin'
+  userRole: 'super-admin' | 'facility-admin' | 'clinician'
   onViewProfile?: (patient: Patient) => void
   onEdit?: (patient: Patient) => void
   onCreateReferral?: (patient: Patient) => void
@@ -75,7 +76,7 @@ export function PatientTable({ patients, userRole, onViewProfile, onEdit, onCrea
               <td className="px-4 py-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5" />
-                  {patient.lastVisit}
+                  {formatTableDate(patient.lastVisit)}
                 </div>
               </td>
               <td className="px-4 py-3 text-xs text-muted-foreground">{patient.referrals}</td>

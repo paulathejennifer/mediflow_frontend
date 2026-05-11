@@ -6,6 +6,7 @@ import { User, Settings, LogOut, ChevronDown, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/shared/ui/badge'
 import { DropdownCloseButton } from '@/components/shared/ui/dropdown-close-button'
+import { useAuthStore } from '@/store/auth-store'
 
 export function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false)
@@ -13,6 +14,7 @@ export function ProfileDropdown() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [position, setPosition] = useState({ top: 0, left: 0 })
+  const { user } = useAuthStore()
 
   // Handle opening/closing animations
   const handleToggle = () => {
@@ -36,10 +38,10 @@ export function ProfileDropdown() {
 
     let left = rect.left
 
-    // 1. Default: align left edge with button
-    if (left + dropdownWidth > window.innerWidth) {
-      // 2. If overflowing right → shift left
-      left = window.innerWidth - dropdownWidth - gap
+    // 1. Default: align right edge with button (to avoid right edge cutoff)
+    if (left + dropdownWidth > window.innerWidth - gap) {
+      // 2. If overflowing right → shift left with more gap
+      left = window.innerWidth - dropdownWidth - gap * 4
     }
 
     if (left < gap) {
@@ -106,8 +108,14 @@ export function ProfileDropdown() {
         
         {/* Profile Content */}
         <div className="text-left">
-          <p className="text-sm font-medium text-foreground">Dr. Sarah Johnson</p>
-          <p className="text-xs text-muted-foreground">Super Admin</p>
+          <p className="text-sm font-medium text-foreground">
+            {user?.first_name} {user?.last_name}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {user?.role === 'super_admin' ? 'Super Admin' : 
+             user?.role === 'facility_admin' ? 'Facility Admin' :
+             user?.role === 'clinician' ? 'Clinician' : 'User'}
+          </p>
         </div>
 
         <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -139,10 +147,12 @@ export function ProfileDropdown() {
               {/* Profile Info Section */}
               <div className="p-4 border-b border-gray-800">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-white">Dr. Sarah Johnson</p>
+                  <p className="text-sm font-medium text-white">
+                    {user?.first_name} {user?.last_name}
+                  </p>
                   <DropdownCloseButton onClick={handleToggle} />
                 </div>
-                <p className="text-xs text-gray-400 mt-1">sarah.johnson@mediflow.com</p>
+                <p className="text-xs text-gray-400 mt-1">{user?.email}</p>
               </div>
 
               {/* Menu Items */}
@@ -150,7 +160,11 @@ export function ProfileDropdown() {
                 {/* Role */}
                 <div className="px-4 py-2 flex items-center gap-2">
                   <Tag className="h-4 w-4 text-gray-300" />
-                  <Badge variant="super_admin">super admin</Badge>
+                  <Badge variant={user?.role || 'clinician'}>
+                    {user?.role === 'super_admin' ? 'Super Admin' : 
+                     user?.role === 'facility_admin' ? 'Facility Admin' :
+                     user?.role === 'clinician' ? 'Clinician' : 'User'}
+                  </Badge>
                 </div>
 
                 {/* Divider */}

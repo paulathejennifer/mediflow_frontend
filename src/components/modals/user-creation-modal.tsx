@@ -224,7 +224,9 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
     first_name: '',
     last_name: '',
     email: '',
+    phone: '',
     password: '',
+    confirm_password: '',
     role: preSelectedFacilityId ? 'facility_admin' : '',
     facility_id: preSelectedFacilityId || '',
     is_active: true
@@ -234,6 +236,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [filteredFacilities, setFilteredFacilities] = useState(mockFacilitiesData)
 
   // User roles
@@ -250,7 +253,9 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
         first_name: '',
         last_name: '',
         email: '',
+        phone: '',
         password: '',
+        confirm_password: '',
         role: preSelectedFacilityId ? 'facility_admin' : '',
         facility_id: preSelectedFacilityId || '',
         is_active: true
@@ -258,6 +263,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
       setErrors({})
       setShowSuccess(false)
       setShowPassword(false)
+      setShowConfirmPassword(false)
     }
   }, [isOpen, preSelectedFacilityId])
 
@@ -308,6 +314,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
     if (!formData.last_name.trim()) newErrors.last_name = 'Last name is required'
     if (!formData.email.trim()) newErrors.email = 'Email is required'
     if (!formData.password.trim()) newErrors.password = 'Password is required'
+    if (!formData.confirm_password.trim()) newErrors.confirm_password = 'Confirm password is required'
     if (!formData.role) newErrors.role = 'User role is required'
 
     // Facility validation for specific roles
@@ -328,6 +335,11 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
       else if (!requirements.hasLower) newErrors.password = 'Password must contain at least one lowercase letter'
       else if (!requirements.hasNumber) newErrors.password = 'Password must contain at least one number'
       else if (!requirements.hasSpecial) newErrors.password = 'Password must contain at least one special character'
+    }
+
+    // Confirm password validation
+    if (formData.password && formData.confirm_password && formData.password !== formData.confirm_password) {
+      newErrors.confirm_password = 'Passwords do not match'
     }
 
     setErrors(newErrors)
@@ -369,7 +381,9 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
         first_name: '',
         last_name: '',
         email: '',
+        phone: '',
         password: '',
+        confirm_password: '',
         role: preSelectedFacilityId ? 'facility_admin' : '',
         facility_id: preSelectedFacilityId || '',
         is_active: true
@@ -449,6 +463,22 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
                 {errors.email && <p className="mt-1 text-sm text-red-500" data-field="email">{errors.email}</p>}
               </div>
 
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="e.g., +254 712 345678"
+                  data-field="phone"
+                />
+                {errors.phone && <p className="mt-1 text-sm text-red-500" data-field="phone">{errors.phone}</p>}
+              </div>
+
               {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -518,6 +548,41 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
                 </div>
               </div>
 
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Confirm Password <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={formData.confirm_password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirm_password: e.target.value }))}
+                    className="w-full px-2 py-1.5 pr-10 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Confirm your password"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    style={{
+                      WebkitTextSecurity: 'none',
+                      MozTextSecurity: 'none'
+                    } as React.CSSProperties}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 focus:outline-none"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.confirm_password && <p className="mt-1 text-sm text-red-500" data-field="confirm_password">{errors.confirm_password}</p>}
+              </div>
+
               {/* Role */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -528,6 +593,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
                   onChange={(value) => handleRoleChange(value)}
                   options={userRoles}
                   placeholder="Select Role"
+                  disabled={!!preSelectedFacilityId}
                 />
                 {errors.role && <p className="mt-1 text-sm text-red-500" data-field="role">{errors.role}</p>}
               </div>

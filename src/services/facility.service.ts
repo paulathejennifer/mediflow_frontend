@@ -14,6 +14,7 @@ export interface Facility {
   referrals: number
 }
 
+
 // Kenyan counties
 export const counties = [
   'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Kisii', 'Thika', 'Kitale',
@@ -22,6 +23,7 @@ export const counties = [
   'Marsabit', 'Moyale', 'Wajir', 'Mandera', 'Lodwar', 'Kajiado', 'Namanga', 'Taveta'
 ]
 
+
 // Generate facility code
 const generateFacilityCode = (county: string, type: string): string => {
   const countyCode = county.substring(0, 3).toUpperCase()
@@ -29,6 +31,7 @@ const generateFacilityCode = (county: string, type: string): string => {
   const randomNum = Math.floor(Math.random() * 9000) + 1000
   return `FAC-${countyCode}-${typeCode}-${randomNum}`
 }
+
 
 // Get performance badge variant based on score
 const getPerformanceBadgeVariant = (score: number): string => {
@@ -39,10 +42,12 @@ const getPerformanceBadgeVariant = (score: number): string => {
   return 'performance_low'
 }
 
+
 // Get level badge variant
 const getLevelBadgeVariant = (level: number): string => {
   return `facility_level_${level}` as const
 }
+
 
 // Mock facility data
 export const mockFacilitiesData: Facility[] = [
@@ -348,6 +353,10 @@ export const mockFacilitiesData: Facility[] = [
   }
 ]
 
+
 // Helper functions
 export const getPerformanceVariant = getPerformanceBadgeVariant
 export const getLevelVariant = getLevelBadgeVariant
+
+
+

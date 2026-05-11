@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ROLES, UserRole } from '@/constants/roles'
 import { FacilityCreationModal } from '@/components/modals/facility-creation-modal'
 import { UserCreationModal } from '@/components/modals/user-creation-modal'
+import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
 import { AdminCreationModal } from '@/components/modals/admin-creation-modal'
 
 interface CTAButtonProps {
@@ -23,6 +24,7 @@ export function CTAButton({ userRole }: CTAButtonProps) {
   // Modal states
   const [isFacilityModalOpen, setIsFacilityModalOpen] = useState(false)
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false)
   const [adminFacility, setAdminFacility] = useState<any>(null)
 
@@ -35,7 +37,7 @@ export function CTAButton({ userRole }: CTAButtonProps) {
         ]
       case ROLES.FACILITY_ADMIN:
         return [
-          { label: 'Create User', action: 'create-user' },
+          { label: 'Create Patient', action: 'create-patient' },
           { label: 'Create Referral', action: 'create-referral' }
         ]
       case ROLES.CLINICIAN:
@@ -69,7 +71,7 @@ export function CTAButton({ userRole }: CTAButtonProps) {
         setIsFacilityModalOpen(true)
         break
       case 'create-patient':
-        setIsUserModalOpen(true)
+        setIsPatientModalOpen(true)
         break
       case 'create-referral':
         // TODO: Implement referral creation modal
@@ -87,6 +89,11 @@ export function CTAButton({ userRole }: CTAButtonProps) {
 
   const handleUserCreated = (newUser: any) => {
     console.log('User created:', newUser)
+    // In production, this would refresh data or show notification
+  }
+
+  const handlePatientCreated = (newPatient: any) => {
+    console.log('Patient created:', newPatient)
     // In production, this would refresh data or show notification
   }
 
@@ -218,6 +225,13 @@ export function CTAButton({ userRole }: CTAButtonProps) {
         isOpen={isUserModalOpen}
         onClose={() => setIsUserModalOpen(false)}
         onSuccess={handleUserCreated}
+      />
+      
+      {/* Patient Creation Modal */}
+      <PatientCreationModal
+        isOpen={isPatientModalOpen}
+        onClose={() => setIsPatientModalOpen(false)}
+        onSuccess={handlePatientCreated}
       />
       
       {/* Admin Creation Modal */}

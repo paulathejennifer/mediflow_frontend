@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Scrollbar } from '@/components/shared';
 import { DropdownCloseButton } from '@/components/shared';
+import { useAuthStore } from '@/store/auth-store';
 
 export function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,7 @@ export function NotificationDropdown() {
   const [position, setPosition] = useState({ top: 0, left: 0 });
 
   const router = useRouter();
+  const { user } = useAuthStore();
   const { notifications, stats, markAsRead, markAllAsRead } = useMockNotifications();
 
   // Handle opening/closing animations

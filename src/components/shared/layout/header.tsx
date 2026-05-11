@@ -8,12 +8,21 @@ import { ProfileDropdown } from '@/components/dashboard/profile-dropdown'
 import { CTAButton } from '@/components/shared'
 import { ROLES } from '@/constants/roles'
 import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/store/auth-store'
 
 export function Header() {
   const router = useRouter()
+  const { user } = useAuthStore()
 
   const handleSettingsClick = () => {
-    router.push('/dashboard/super-admin/settings')
+    const userRole = user?.role
+    if (userRole === 'super_admin') {
+      router.push('/dashboard/super-admin/settings')
+    } else if (userRole === 'facility_admin') {
+      router.push('/dashboard/facility-admin/settings')
+    } else if (userRole === 'clinician') {
+      router.push('/dashboard/clinician/settings')
+    }
   }
 
   return (
@@ -27,7 +36,7 @@ export function Header() {
         
         <div className="flex items-center space-x-4">
           {/* CTA Button */}
-          <CTAButton userRole={ROLES.SUPER_ADMIN} />
+          <CTAButton userRole={user?.role || ROLES.CLINICIAN} />
           
 
           

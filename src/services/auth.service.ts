@@ -1,5 +1,6 @@
 import { LoginRequest, LoginResponse, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest, ChangePasswordRequest, User } from '@/types/auth'
 import apiClient from '@/lib/axios'
+import { mockFacilitiesData } from '@/services/facility.service'
 
 // Data Abstraction Layer - Switch between mock and real API here
 const USE_MOCK_DATA = process.env.NEXT_PUBLIC_ENABLE_MOCK_DATA === 'true'
@@ -15,6 +16,35 @@ const mockUser: User = {
   email_verified: true,
   created_at: '2024-01-15T10:30:00Z',
   updated_at: '2024-01-15T10:30:00Z',
+}
+
+// Current facility admin's facility (for default in creation modals)
+export const getCurrentFacilityAdminFacilityId = () => {
+  // In a real app, this would come from the current user's session
+  // For mock, we'll return Jane Smith's facility ID
+  return 'facility-1'
+}
+
+// Get facility name by ID
+export const getFacilityNameById = (facilityId: string): string => {
+  // Import facility service to get facility data
+  const { facilities } = require('./facilities.service')
+  const facility = facilities.find((f: any) => f.id === facilityId)
+  return facility ? facility.name : ''
+}
+
+// Get facility data by ID (for debugging)
+export const getFacilityById = (facilityId: string) => {
+  const { facilities } = require('./facilities.service')
+  return facilities.find((f: any) => f.id === facilityId)
+}
+
+// Debug: Check if facility data is loading correctly
+export const debugFacilityData = () => {
+  const { facilities } = require('./facilities.service')
+  console.log('Facility data:', facilities)
+  console.log('Facility with ID facility-1:', facilities.find((f: any) => f.id === 'facility-1'))
+  return facilities
 }
 
 const mockLoginResponse: LoginResponse = {

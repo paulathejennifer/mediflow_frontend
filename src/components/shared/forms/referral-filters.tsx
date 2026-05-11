@@ -74,64 +74,59 @@ function FilterDropdown({ value, onChange, options, placeholder }: FilterDropdow
   )
 }
 
-interface StaffFiltersProps {
-  selectedRole: string
+interface ReferralFiltersProps {
   selectedStatus: string
+  selectedPriority: string
   selectedSort: string
-  onRoleChange: (role: string) => void
-  onStatusChange: (status: string) => void
-  onSortChange: (sort: string) => void
-  excludeRoles?: string[]
+  onStatusChange: (value: string) => void
+  onPriorityChange: (value: string) => void
+  onSortChange: (value: string) => void
 }
 
-export function StaffFilters({ 
-  selectedRole, 
-  selectedStatus, 
+export function ReferralFilters({
+  selectedStatus,
+  selectedPriority,
   selectedSort,
-  onRoleChange, 
   onStatusChange,
+  onPriorityChange,
   onSortChange,
-  excludeRoles = []
-}: StaffFiltersProps) {
-  const allRoleOptions = [
-    { value: 'all', label: 'All Roles' },
-    { value: 'super_admin', label: 'Super Admin' },
-    { value: 'facility_admin', label: 'Facility Admin' },
-    { value: 'clinician', label: 'Clinician' }
-  ]
-  
-  const roleOptions = allRoleOptions.filter(option => 
-    option.value === 'all' || !excludeRoles.includes(option.value)
-  )
-
+}: ReferralFiltersProps) {
   const statusOptions = [
     { value: 'all', label: 'All Status' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' }
+    { value: 'pending', label: 'Pending' },
+    { value: 'accepted', label: 'Accepted' },
+    { value: 'completed', label: 'Completed' },
+  ]
+
+  const priorityOptions = [
+    { value: 'all', label: 'All Priority' },
+    { value: 'high', label: 'High' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'low', label: 'Low' },
   ]
 
   const sortOptions = [
     { value: 'all', label: 'Sort By' },
-    { value: 'referrals', label: 'Referrals' },
-    { value: 'lastLogin', label: 'Last Login' }
+    { value: 'date', label: 'Date' },
+    { value: 'priority', label: 'Priority' },
   ]
 
   return (
     <div className="flex items-center gap-3">
-      {/* Role Filter */}
-      <FilterDropdown
-        value={selectedRole}
-        onChange={onRoleChange}
-        options={roleOptions}
-        placeholder="Role"
-      />
-
       {/* Status Filter */}
       <FilterDropdown
         value={selectedStatus}
         onChange={onStatusChange}
         options={statusOptions}
         placeholder="Status"
+      />
+
+      {/* Priority Filter */}
+      <FilterDropdown
+        value={selectedPriority}
+        onChange={onPriorityChange}
+        options={priorityOptions}
+        placeholder="Priority"
       />
 
       {/* Sort Filter */}

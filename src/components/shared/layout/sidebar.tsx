@@ -49,6 +49,7 @@ const navigationItems = {
 
   [ROLES.CLINICIAN]: [
     { name: 'Dashboard', href: ROUTES.CLINICIAN.DASHBOARD + '/dashboard', icon: LayoutDashboard },
+    { name: 'Clinicians', href: ROUTES.CLINICIAN.CLINICIANS, icon: Users },
     { name: 'Patients', href: ROUTES.CLINICIAN.PATIENTS, icon: User },
     { name: 'Referrals', href: ROUTES.CLINICIAN.REFERRALS, icon: FileText },
     { name: 'Voice Notes', href: ROUTES.CLINICIAN.VOICE_NOTES, icon: FileAudio },
@@ -105,9 +106,9 @@ return (
       </div>
 
       {/* NAVIGATION */}
-      <div className="flex-1 px-4 py-5 overflow-y-auto">
+      <div className="h-[calc(100vh-14rem)] px-4 py-5 overflow-y-auto">
 
-        <p className="px-3 mb-3 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="px-3 mb-3 text-[11px] uppercase tracking-[0.22em] text-muted-foreground sticky top-0 bg-background/95 backdrop-blur-xl pb-2">
           Navigation
         </p>
 

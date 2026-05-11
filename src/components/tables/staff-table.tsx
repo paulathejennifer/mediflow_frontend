@@ -3,12 +3,15 @@ import { Button } from '@/components/ui/button'
 import { MoreHorizontal, User, Phone } from 'lucide-react'
 import { StaffMember } from '@/services/staff.service'
 import { ActionDropdown } from '@/components/shared'
+import { formatTableDate } from '@/utils/date-utils'
 
 interface StaffTableProps {
   staff: StaffMember[]
-  userRole: 'super-admin' | 'facility-admin'
+  userRole: 'super-admin' | 'facility-admin' | 'clinician'
   onViewProfile?: (staff: StaffMember) => void
   onEdit?: (staff: StaffMember) => void
+  onManageStaff?: (staff: StaffMember) => void
+  onViewAnalytics?: (staff: StaffMember) => void
   onActivate?: (staff: StaffMember) => void
   onDeactivate?: (staff: StaffMember) => void
   onManagePermissions?: (staff: StaffMember) => void
@@ -27,7 +30,7 @@ export function StaffTable({ staff, userRole, onViewProfile, onEdit, onActivate,
             <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[80px]">Status</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[120px]">Last Login</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground min-w-[80px]">Referrals</th>
-            <th className="px-4 py-3 min-w-[50px]"></th>
+            {userRole !== 'clinician' && <th className="px-4 py-3 min-w-[50px]"></th>}
           </tr>
         </thead>
         <tbody>
@@ -74,8 +77,9 @@ export function StaffTable({ staff, userRole, onViewProfile, onEdit, onActivate,
                   {staffMember.status}
                 </span>
               </td>
-              <td className="px-4 py-3 text-xs text-muted-foreground">{staffMember.lastLogin}</td>
+              <td className="px-4 py-3 text-xs text-muted-foreground">{formatTableDate(staffMember.lastLogin)}</td>
               <td className="px-4 py-3 text-xs text-muted-foreground">{staffMember.referrals}</td>
+              {userRole !== 'clinician' && (
               <td className="px-4 py-3 text-right">
                 <ActionDropdown
                   type="staff"
@@ -88,6 +92,7 @@ export function StaffTable({ staff, userRole, onViewProfile, onEdit, onActivate,
                   onManagePermissions={() => onManagePermissions?.(staffMember)}
                 />
               </td>
+            )}
             </tr>
           ))}
         </tbody>

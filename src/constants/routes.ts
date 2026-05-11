@@ -44,6 +44,8 @@ export const ROUTES = {
   // Clinician
   CLINICIAN: {
     DASHBOARD: '/dashboard/clinician',
+    CLINICIANS: '/dashboard/clinician/clinicians',
+    CLINICIAN_DETAIL: (id: string) => `/dashboard/clinician/clinicians/${id}`,
     PATIENTS: '/dashboard/clinician/patients',
     REFERRALS: '/dashboard/clinician/referrals',
     DOCUMENTS: '/dashboard/clinician/documents',
