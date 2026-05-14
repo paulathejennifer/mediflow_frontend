@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, FileText, Users, Activity, TrendingUp } from 'lucide-react'
@@ -17,6 +18,7 @@ interface SharedReferralsPageProps {
 }
 
 export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedPriority, setSelectedPriority] = useState('all')
@@ -113,7 +115,10 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
           </p>
         </div>
 
-        <Button className="h-8 px-3 text-sm bg-primary/90 hover:bg-primary/80">
+        <Button 
+          className="h-8 px-3 text-sm bg-primary/90 hover:bg-primary/80"
+          onClick={() => router.push(`/dashboard/${userRole.replace('_', '-')}/referrals/create`)}
+        >
           <Plus className="h-4 w-4 mr-1" />
           Create Referral
         </Button>

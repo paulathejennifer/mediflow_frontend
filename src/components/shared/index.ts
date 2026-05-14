@@ -2,7 +2,7 @@
 export * from './users'
 
 // UI components
-export { Badge, CTAButton, Modal, Scrollbar, ActionDropdown, DropdownCloseButton, OverviewCards, Pagination, type KPICardData } from './ui'
+export { Badge, CTAButton, Modal, Scrollbar, ActionDropdown, DropdownCloseButton, OverviewCards, Pagination, SearchBar, type KPICardData } from './ui'
 
 // Form components
 export * from './forms'
