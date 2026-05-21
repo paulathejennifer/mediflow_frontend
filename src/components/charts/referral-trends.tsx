@@ -10,7 +10,11 @@ interface ReferralData {
   completed: number
 }
 
-export function ReferralTrends() {
+interface ReferralTrendsProps {
+  data?: ReferralData[]
+}
+
+export function ReferralTrends({ data }: ReferralTrendsProps) {
   // Generate month names for the last 6 months
   const generateMonthNames = () => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -25,20 +29,16 @@ export function ReferralTrends() {
     return monthNames;
   };
 
-  // Mock data for referral trends (last 6 months)
-  const generateMockData = (): ReferralData[] => {
+  // Transform any incoming data to use month names (limit to 6 months)
+  const transformData = (incomingData: ReferralData[]) => {
     const monthNames = generateMonthNames();
-    return [
-      { month: monthNames[0], total: 145, completed: 120 },
-      { month: monthNames[1], total: 162, completed: 138 },
-      { month: monthNames[2], total: 178, completed: 155 },
-      { month: monthNames[3], total: 195, completed: 172 },
-      { month: monthNames[4], total: 210, completed: 188 },
-      { month: monthNames[5], total: 235, completed: 205 }
-    ];
+    return incomingData.slice(0, 6).map((item, index) => ({
+      ...item,
+      month: monthNames[index] || item.month
+    }));
   };
 
-  const data = generateMockData();
+  const chartData = data ? transformData(data) : []
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">

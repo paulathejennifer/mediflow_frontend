@@ -12,8 +12,8 @@ import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
 import { EditPatientModal } from '@/components/modals/edit-patient-modal'
-import { mockPatientsData } from '@/services/patient.service'
 import { useRouter } from 'next/navigation'
+import { usePatients, UIPatient } from '@/hooks/usePatients'
 
 export default function PatientsPage() {
   const router = useRouter()
@@ -27,12 +27,13 @@ export default function PatientsPage() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
+  const { patients, isLoading } = usePatients()
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  const filteredPatients = mockPatientsData.filter(patient => {
+  const filteredPatients = patients.filter(patient => {
     const matchesSearch =
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,7 +81,6 @@ export default function PatientsPage() {
 
   const handlePatientCreated = (newPatient: any) => {
     // In a real app, this would add to the database
-    console.log('Patient created:', newPatient)
     // For now, just log it - in production this would refresh data or add to state
   }
 
@@ -97,19 +97,19 @@ export default function PatientsPage() {
   const patientsOverviewData: KPICardData[] = [
     {
       title: 'Total Patients',
-      value: mockPatientsData.length,
+      value: patients.length,
       trend: { value: '+12', isPositive: true },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'Active Patients',
-      value: mockPatientsData.filter(p => p.status === 'active').length,
+      value: patients.filter(p => p.status === 'active').length,
       trend: { value: '+8', isPositive: true },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'New This Month',
-      value: mockPatientsData.filter(p => {
+      value: patients.filter(p => {
         const registrationDate = new Date(p.registrationDate)
         const currentMonth = new Date().getMonth()
         const currentYear = new Date().getFullYear()
@@ -120,13 +120,13 @@ export default function PatientsPage() {
     },
     {
       title: 'Referral Volume',
-      value: mockPatientsData.reduce((sum, p) => sum + p.referrals, 0),
+      value: patients.reduce((sum, p) => sum + p.referrals, 0),
       trend: { value: '+15', isPositive: true },
       icon: <Calendar className="h-5 w-5" />
     }
   ]
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return null
   }
 
@@ -215,7 +215,6 @@ export default function PatientsPage() {
           setSelectedPatient(null)
         }}
         onSuccess={(updatedPatient) => {
-          console.log('Patient updated:', updatedPatient)
           setIsEditModalOpen(false)
           setSelectedPatient(null)
         }}

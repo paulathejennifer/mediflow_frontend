@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Upload, Mic, FileText, AlertCircle, Clock, Zap, Shield } from 'lucide-react'
-import { mockPatientsData } from '@/services/patient.service'
-import { mockFacilitiesData } from '@/services/facility.service'
+import { patientService } from '@/services/patient.service'
+import { facilityService } from '@/services/facility.service'
 import { formatTableDate } from '@/utils/date-utils'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
 
@@ -151,7 +151,41 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
-  const [patients, setPatients] = useState(mockPatientsData)
+  const [patients, setPatients] = useState<any[]>([])
+  const [facilities, setFacilities] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      const [patientsData, facilitiesData] = await Promise.all([
+        patientService.getPatients(),
+        facilityService.getFacilities()
+      ])
+      // Transform patients data to match expected format
+      const transformedPatients = patientsData.map((patient: any) => ({
+        ...patient,
+        name: `${patient.first_name} ${patient.last_name}`,
+        mrn: patient.identifiers?.[0]?.mrn || 'N/A'
+      }))
+      setPatients(transformedPatients)
+      // Transform facilities data to match expected format
+      const transformedFacilities = facilitiesData.map((facility: any) => ({
+        ...facility,
+        facilityCode: facility.facility_code
+      }))
+      setFacilities(transformedFacilities)
+    } catch (error) {
+      console.error('Failed to fetch data:', error)
+      setPatients([])
+      setFacilities([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
   
   const [formData, setFormData] = useState({
     patientId: '',
@@ -178,7 +212,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
   }
 
   // Prepare facility options for autocomplete
-  const facilityOptions = mockFacilitiesData.map(facility => ({
+  const facilityOptions = facilities.map(facility => ({
     value: facility.id,
     label: `${facility.name} (${facility.facilityCode})`
   }))
@@ -271,13 +305,11 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
         }
       }
 
-      console.log('New referral created:', newReferral)
       
       // Navigate back to referrals page
       router.push(`/dashboard/${userRole}/referrals`)
       
     } catch (error) {
-      console.error('Error creating referral:', error)
     } finally {
       setIsSubmitting(false)
     }
@@ -311,6 +343,10 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       ...prev,
       voiceNotes: prev.voiceNotes.filter((_, i) => i !== index)
     }))
+  }
+
+  if (isLoading) {
+    return <div className="p-6 max-w-4xl mx-auto">Loading...</div>
   }
 
   return (

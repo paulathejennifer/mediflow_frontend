@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Scrollbar } from '@/components/shared'
 import { ChevronDown, ChevronRight, Circle } from 'lucide-react'
 
@@ -14,64 +13,10 @@ interface AlertItem {
   details: string[]
 }
 
-const alertData: AlertItem[] = [
-  {
-    id: '1',
-    time: '15 minutes ago',
-    status: 'success',
-    title: 'Facility: "Riverside Medical Center" successfully onboarded',
-    details: [
-      'Added 24 clinicians to the system',
-      'Facility Level: Level 4 (Regional Hospital)',
-      'Location: Kilimani, Nairobi'
-    ]
-  },
-  {
-    id: '2',
-    time: '2 hours ago',
-    status: 'warning',
-    title: 'AI Service Health Check: Whisper Large-v3 processing delay detected',
-    details: [
-      'Current queue: 12 voice notes pending',
-      'Average processing time: 4.2 minutes (normal: 2.3)'
-    ]
-  },
-  {
-    id: '3',
-    time: '4 hours ago',
-    status: 'info',
-    title: 'Bulk user activation completed at "St. Mary\'s Hospital"',
-    details: [
-      '15 clinicians activated successfully',
-      '2 accounts pending verification',
-      'Role assignments: 12 clinicians, 3 facility admins'
-    ]
-  },
-  {
-    id: '4',
-    time: '6 hours ago',
-    status: 'success',
-    title: 'System milestone achieved: 10,000th referral processed',
-    details: [
-      'Total processing time: 1.8 minutes average',
-      'AI accuracy: 98.7% for this batch',
-      'Facilities involved: 127 across 12 counties'
-    ]
-  },
-  {
-    id: '5',
-    time: '8 hours ago',
-    status: 'warning',
-    title: 'Security audit completed successfully',
-    details: [
-      '45,892 user sessions analyzed',
-      '3 suspicious login attempts blocked',
-      '2 facilities required password policy updates',
-      'Overall security score: 97.3/100',
-      'Next audit scheduled: 30 days'
-    ]
-  }
-]
+interface RecentAlertsProps {
+  alerts?: AlertItem[]
+  isLoading?: boolean
+}
 
 function getStatusColor(status: AlertItem['status']) {
   switch (status) {
@@ -87,7 +32,7 @@ function getStatusIcon(status: AlertItem['status']) {
   return <Circle className={`h-3 w-3 ${getStatusColor(status)} fill-current`} />
 }
 
-export function RecentAlerts() {
+export function RecentAlerts({ alerts = [], isLoading = false }: RecentAlertsProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
 
   const toggleExpanded = (id: string) => {
@@ -100,6 +45,32 @@ export function RecentAlerts() {
     setExpandedItems(newExpanded)
   }
 
+  if (isLoading) {
+    return (
+      <Card className="bg-background border border-border rounded-2xl h-[400px]">
+        <CardHeader>
+          <div className="h-6 bg-muted rounded animate-pulse"></div>
+        </CardHeader>
+        <CardContent className="h-[320px]">
+          <div className="h-full bg-muted rounded animate-pulse"></div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (alerts.length === 0) {
+    return (
+      <Card className="bg-background border border-border rounded-2xl h-[400px]">
+        <CardHeader>
+          <CardTitle className="text-foreground text-lg">Recent Alerts / Activity</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[320px] flex items-center justify-center">
+          <p className="text-muted-foreground">No recent alerts</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="bg-background border border-border rounded-2xl transition-all duration-300 hover:border-primary/40 hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_12px_30px_-12px_hsl(var(--primary)/0.35)] hover:-translate-y-1 h-[400px]">
       <CardHeader>
@@ -108,7 +79,7 @@ export function RecentAlerts() {
       <CardContent className="h-[320px]">
           <Scrollbar className="h-full">
         <div className="space-y-4">
-          {alertData.map((alert, index) => (
+          {alerts.map((alert, index) => (
             <div 
               key={alert.id} 
               className={`border-l-2 border-primary/50 pl-4 cursor-pointer transition-colors hover:bg-gray-800/30 ${index % 2 === 0 ? 'bg-gray-800/50' : 'bg-gray-900'}`}

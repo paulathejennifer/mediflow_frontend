@@ -10,7 +10,12 @@ interface ReferralVolumeData {
   outgoing: number
 }
 
-export function ReferralVolume() {
+interface ReferralVolumeProps {
+  data?: ReferralVolumeData[]
+  isLoading?: boolean
+}
+
+export function ReferralVolume({ data, isLoading = false }: ReferralVolumeProps) {
   // Generate month names for the last 6 months
   const generateMonthNames = () => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -25,20 +30,30 @@ export function ReferralVolume() {
     return monthNames;
   };
 
-  // Mock data for referral volume (last 6 months)
-  const generateMockData = (): ReferralVolumeData[] => {
+  // Transform any incoming data to use month names (limit to 6 months)
+  const transformData = (incomingData: ReferralVolumeData[]) => {
     const monthNames = generateMonthNames();
-    return [
-      { month: monthNames[0], incoming: 145, outgoing: 138 },
-      { month: monthNames[1], incoming: 162, outgoing: 155 },
-      { month: monthNames[2], incoming: 178, outgoing: 172 },
-      { month: monthNames[3], incoming: 195, outgoing: 188 },
-      { month: monthNames[4], incoming: 210, outgoing: 205 },
-      { month: monthNames[5], incoming: 235, outgoing: 228 }
-    ];
+    return incomingData.slice(0, 6).map((item, index) => ({
+      ...item,
+      month: monthNames[index] || item.month
+    }));
   };
 
-  const data = generateMockData();
+  const chartData = data ? transformData(data) : []
+
+  if (isLoading) {
+    return (
+      <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
+        <CardHeader>
+          <div className="h-6 bg-muted rounded animate-pulse"></div>
+          <div className="h-4 bg-muted rounded w-1/2 animate-pulse"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 bg-muted rounded animate-pulse"></div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">

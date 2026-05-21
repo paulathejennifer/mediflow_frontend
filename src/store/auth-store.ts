@@ -26,7 +26,11 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true })
         try {
           const response = await authService.login({ email, password })
-          const { user } = response
+          const { user, access_token, refresh_token } = response
+          
+          // Store tokens in localStorage
+          localStorage.setItem('access_token', access_token)
+          localStorage.setItem('refresh_token', refresh_token)
           
           set({
             user,
@@ -44,8 +48,10 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authService.logout()
         } catch (error) {
-          console.error('Logout error:', error)
         } finally {
+          // Clear tokens from localStorage
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
           set({
             user: null,
             isAuthenticated: false,
@@ -59,7 +65,7 @@ export const useAuthStore = create<AuthState>()(
         if (user) {
           // User is already in state, validate token
           try {
-            await authService.validateToken()
+            await authService.getCurrentUser()
             set({ isAuthenticated: true })
           } catch (error) {
             // Token is invalid, clear state

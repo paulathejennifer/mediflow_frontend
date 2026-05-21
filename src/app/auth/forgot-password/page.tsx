@@ -1,39 +1,36 @@
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
-import { Button } from '../../../components/ui/button'
+'use client'
+
+import { useState } from 'react'
+import { ForgotPasswordForm } from '@/components/forms/forgot-password-form'
+import { authService } from '@/services/auth.service'
 
 export default function ForgotPasswordPage() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | undefined>()
+  const [success, setSuccess] = useState(false)
+
+  const handleForgotPassword = async (data: { email: string }) => {
+    setIsLoading(true)
+    setError(undefined)
+    
+    try {
+      await authService.forgotPassword({ email: data.email })
+      setSuccess(true)
+    } catch (err) {
+      setError('Failed to send verification code. Please check your email and try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Reset password</CardTitle>
-        <CardDescription>
-          Enter your email address and we'll send you a link to reset your password
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        <Button className="w-full">
-          Send reset link
-        </Button>
-        
-        <div className="text-center text-sm">
-          <Link href="/login" className="text-blue-600 hover:underline">
-            Back to sign in
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <ForgotPasswordForm 
+        onSubmit={handleForgotPassword}
+        isLoading={isLoading}
+        error={error}
+        success={success}
+      />
+    </div>
   )
 }

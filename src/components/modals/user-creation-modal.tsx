@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, FormEvent } from 'react'
 import { ChevronDown, Eye, EyeOff } from 'lucide-react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { counties } from '@/services/facility.service'
-import { mockFacilitiesData } from '@/services/facility.service'
+import { useFacilities } from '@/hooks/useFacilities'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 
 // AutocompleteInput component for long lists like counties and facilities
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {
@@ -233,11 +233,11 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [filteredFacilities, setFilteredFacilities] = useState(mockFacilitiesData)
+  const { facilities: facilitiesData } = useFacilities()
 
   // User roles
   const userRoles = [
@@ -361,9 +361,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
       return
     }
 
-    setIsSubmitting(true)
-
-    try {
+    await execute(async () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500))
       
@@ -388,12 +386,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
         facility_id: preSelectedFacilityId || '',
         is_active: true
       })
-      
-    } catch (error) {
-      console.error('Error creating user:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   const handleClose = () => {
@@ -607,8 +600,8 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
                   <AutocompleteInput
                     value={formData.facility_id}
                     onChange={(value) => setFormData(prev => ({ ...prev, facility_id: value }))}
-                    options={filteredFacilities.map(facility => ({
-                      value: facility.id,
+                    options={facilitiesData.map(facility => ({
+                      value: String(facility.id),
                       label: `${facility.name} (${facility.facilityCode})`
                     }))}
                     placeholder="Type to search facility..."

@@ -1,17 +1,17 @@
 import { Badge } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, User, Phone, Calendar } from 'lucide-react'
-import { Patient } from '@/services/patient.service'
+import { UIPatient } from '@/hooks/usePatients'
 import { ActionDropdown } from '@/components/shared'
 import { formatTableDate } from '@/utils/date-utils'
 
 interface PatientTableProps {
-  patients: Patient[]
+  patients: UIPatient[]
   userRole: 'super-admin' | 'facility-admin' | 'clinician'
-  onViewProfile?: (patient: Patient) => void
-  onEdit?: (patient: Patient) => void
-  onCreateReferral?: (patient: Patient) => void
-  onTransferFacility?: (patient: Patient) => void
+  onViewProfile?: (patient: UIPatient) => void
+  onEdit?: (patient: UIPatient) => void
+  onCreateReferral?: (patient: UIPatient) => void
+  onTransferFacility?: (patient: UIPatient) => void
 }
 
 export function PatientTable({ patients, userRole, onViewProfile, onEdit, onCreateReferral, onTransferFacility }: PatientTableProps) {

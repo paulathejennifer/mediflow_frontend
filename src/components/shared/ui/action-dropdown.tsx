@@ -2,10 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Eye, Edit, UserPlus, FileText, Settings, Ban, CheckCircle, Building, Users, BarChart3, ArrowRightLeft } from 'lucide-react'
+import { MoreHorizontal, Eye, Edit, UserPlus, FileText, Settings, Ban, CheckCircle, Building, Users, BarChart3, ArrowRightLeft, Download, Trash2, type LucideIcon } from 'lucide-react'
+
+interface Action {
+  label: string
+  icon: LucideIcon
+  onClick?: (() => void) | undefined
+  show: boolean
+  isDanger?: boolean
+}
 
 interface ActionDropdownProps {
-  type: 'staff' | 'patient' | 'facility' | 'clinician' | 'referral'
+  type: 'staff' | 'patient' | 'facility' | 'clinician' | 'referral' | 'document'
   userRole: 'super-admin' | 'facility-admin' | 'clinician'
   isActive?: boolean
   onViewProfile?: () => void
@@ -18,11 +26,13 @@ interface ActionDropdownProps {
   onTransferFacility?: () => void
   onViewAnalytics?: () => void
   onViewDetails?: () => void
+  onDownload?: () => void
+  onDelete?: () => void
 }
 
-export function ActionDropdown({ 
-  type, 
-  userRole, 
+export function ActionDropdown({
+  type,
+  userRole,
   isActive = true,
   onViewProfile,
   onEdit,
@@ -33,7 +43,9 @@ export function ActionDropdown({
   onManagePermissions,
   onTransferFacility,
   onViewAnalytics,
-  onViewDetails
+  onViewDetails,
+  onDownload,
+  onDelete
 }: ActionDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom')
@@ -54,8 +66,8 @@ export function ActionDropdown({
     }
   }, [isOpen])
 
-  const getActions = () => {
-    const baseActions = [
+  const getActions = (): Action[] => {
+    const baseActions: Action[] = [
       {
         label: 'View Profile',
         icon: Eye,
@@ -78,7 +90,7 @@ export function ActionDropdown({
           icon: Settings,
           onClick: onManagePermissions,
           show: true
-        }] : []),
+        } as Action] : []),
         {
           label: isActive ? 'Deactivate' : 'Activate',
           icon: isActive ? Ban : CheckCircle,
@@ -111,6 +123,30 @@ export function ActionDropdown({
       ].filter(action => action.show)
     }
 
+    if (type === 'document') {
+      return [
+        {
+          label: 'View',
+          icon: Eye,
+          onClick: onViewDetails,
+          show: true
+        },
+        {
+          label: 'Download',
+          icon: Download,
+          onClick: onDownload,
+          show: true
+        },
+        {
+          label: 'Delete',
+          icon: Trash2,
+          onClick: onDelete,
+          show: true,
+          isDanger: true
+        }
+      ].filter(action => action.show)
+    }
+
     if (type === 'facility') {
       return [
         ...baseActions,
@@ -125,13 +161,13 @@ export function ActionDropdown({
           icon: BarChart3,
           onClick: onViewAnalytics,
           show: true
-        }] : []),
+        } as Action] : []),
         ...(userRole === 'super-admin' ? [{
           label: isActive ? 'Deactivate Facility' : 'Activate Facility',
           icon: isActive ? Ban : CheckCircle,
           onClick: isActive ? onDeactivate : onActivate,
           show: true
-        }] : [])
+        } as Action] : [])
       ].filter(action => action.show)
     }
 
@@ -143,7 +179,7 @@ export function ActionDropdown({
           icon: Settings,
           onClick: onManagePermissions,
           show: true
-        }] : [])
+        } as Action] : [])
       ].filter(action => action.show)
     }
 
@@ -180,7 +216,11 @@ export function ActionDropdown({
                     action.onClick?.()
                     setIsOpen(false)
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
+                  className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 ${
+                    action.isDanger
+                      ? 'text-red-400 hover:bg-gray-700 hover:text-red-300'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  }`}
                 >
                   <action.icon className="h-4 w-4" />
                   {action.label}

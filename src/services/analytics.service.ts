@@ -1,4 +1,4 @@
-// Analytics data service for fetching and managing analytics metrics
+import apiClient from '@/lib/axios'
 
 export interface SystemActivityData {
   month: string
@@ -15,48 +15,47 @@ export interface AnalyticsMetrics {
   activeUsers: number
 }
 
-// Mock API service - replace with actual API calls
-export class AnalyticsService {
-  static async getSystemActivityTrend(): Promise<SystemActivityData[]> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+export const analyticsService = {
+  getSystemActivityTrend: async (): Promise<SystemActivityData[]> => {
+    const response = await apiClient.get('/referrals/')
+    const referrals = response.data
     
-    // Mock data - in production, this would come from your backend API
+    const patientsResponse = await apiClient.get('/patients/')
+    const patients = patientsResponse.data
+    
+    const documentsResponse = await apiClient.get('/documents/')
+    const documents = documentsResponse.data
+    
+    const usersResponse = await apiClient.get('/users/')
+    const users = usersResponse.data
+    
     return [
-      { month: '0', patients: 120, referrals: 80, documents: 200 },
-      { month: '1', patients: 150, referrals: 95, documents: 220 },
-      { month: '2', patients: 180, referrals: 110, documents: 250 },
-      { month: '3', patients: 220, referrals: 130, documents: 280 },
-      { month: '4', patients: 260, referrals: 155, documents: 320 },
-      { month: '5', patients: 310, referrals: 185, documents: 380 },
-      { month: '6', patients: 380, referrals: 220, documents: 450 }
+      { month: '0', patients: patients.length, referrals: referrals.length, documents: documents.length },
+      { month: '1', patients: patients.length, referrals: referrals.length, documents: documents.length },
+      { month: '2', patients: patients.length, referrals: referrals.length, documents: documents.length },
+      { month: '3', patients: patients.length, referrals: referrals.length, documents: documents.length },
+      { month: '4', patients: patients.length, referrals: referrals.length, documents: documents.length },
+      { month: '5', patients: patients.length, referrals: referrals.length, documents: documents.length },
+      { month: '6', patients: patients.length, referrals: referrals.length, documents: documents.length }
     ]
-  }
+  },
 
-  static async getAnalyticsMetrics(): Promise<AnalyticsMetrics> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800))
+  getAnalyticsMetrics: async (): Promise<AnalyticsMetrics> => {
+    const patientsResponse = await apiClient.get('/patients/')
+    const patients = patientsResponse.data
     
-    // Mock metrics - in production, this would come from your backend API
+    const referralsResponse = await apiClient.get('/referrals/')
+    const referrals = referralsResponse.data
+    
+    const usersResponse = await apiClient.get('/users/')
+    const users = usersResponse.data
+    
     return {
-      totalPatients: 1520,
-      totalReferrals: 875,
-      totalDocuments: 2100,
-      growthRate: 23.5,
-      activeUsers: 342
+      totalPatients: patients.length,
+      totalReferrals: referrals.length,
+      totalDocuments: 0,
+      growthRate: 0,
+      activeUsers: users.filter((u: any) => u.is_active).length
     }
-  }
-
-  // Future methods for other analytics data
-  static async getPatientDemographics() {
-    // Implementation for patient demographics
-  }
-
-  static async getReferralSources() {
-    // Implementation for referral sources
-  }
-
-  static async getDocumentTypes() {
-    // Implementation for document type analytics
-  }
+  },
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { ChevronDown } from 'lucide-react'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 
 interface PatientData {
   id: string
@@ -126,7 +127,7 @@ export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPa
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
 
   // Update form data when patient changes
@@ -196,9 +197,7 @@ export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPa
       return
     }
 
-    setIsSubmitting(true)
-
-    try {
+    await execute(async () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500))
       
@@ -235,12 +234,7 @@ export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPa
         medications: updatedPatient.medications.join('\n'),
         chronic_conditions: updatedPatient.chronicConditions.join(', ')
       })
-      
-    } catch (error) {
-      console.error('Error updating patient:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   const handleClose = () => {

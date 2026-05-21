@@ -4,21 +4,24 @@ import { useState, useCallback } from 'react'
 import { Upload, FileText, ImageIcon, File, X } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface UploadedFile {
   id: string
   file: File
   progress: number
   status: 'uploading' | 'complete' | 'error'
+  documentType?: 'lab_result' | 'imaging' | 'prescription' | 'referral_letter' | 'consent_form' | 'other'
 }
 
 interface DocumentUploadProps {
-  onUploadComplete?: (files: File[]) => void
+  onUploadComplete?: (files: UploadedFile[]) => void
 }
 
 export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isDragActive, setIsDragActive] = useState(false)
+  const [selectedDocumentType, setSelectedDocumentType] = useState<'lab_result' | 'imaging' | 'prescription' | 'referral_letter' | 'consent_form' | 'other'>('other')
   const maxFileSize = 10 * 1024 * 1024 // 10MB
 
   const formatFileSize = (bytes: number) => {
@@ -67,7 +70,8 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
       id: Math.random().toString(36).substring(7),
       file,
       progress: 0,
-      status: 'uploading'
+      status: 'uploading',
+      documentType: selectedDocumentType
     }))
 
     setUploadedFiles(prev => [...prev, ...newFiles])
@@ -112,6 +116,24 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 
   return (
     <div className="flex flex-col space-y-4">
+      {/* Document Type Selector */}
+      <div className="flex items-center gap-3">
+        <label className="text-sm font-medium text-foreground">Document Type: <span className="text-red-400">*</span></label>
+        <Select value={selectedDocumentType} onValueChange={(value: 'lab_result' | 'imaging' | 'prescription' | 'referral_letter' | 'consent_form' | 'other') => setSelectedDocumentType(value)}>
+          <SelectTrigger className="w-[200px] h-10 bg-gray-900 border-gray-700 text-foreground">
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-900 border-gray-700 text-foreground">
+            <SelectItem value="lab_result">Lab Result</SelectItem>
+            <SelectItem value="imaging">Imaging</SelectItem>
+            <SelectItem value="prescription">Prescription</SelectItem>
+            <SelectItem value="referral_letter">Referral Letter</SelectItem>
+            <SelectItem value="consent_form">Consent Form</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Drag & Drop Zone */}
       <div
         onDragEnter={handleDrag}
@@ -122,7 +144,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
           flex flex-col items-center justify-center p-8 rounded-lg border-2 border-dashed cursor-pointer transition-colors
           ${isDragActive 
             ? 'border-primary bg-primary/5' 
-            : 'border-border hover:border-primary/50 hover:border-primary'
+            : 'border-border hover:border-primary/50 hover:bg-primary/10'
           }
         `}
       >
@@ -196,8 +218,33 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
               </CardContent>
             </Card>
           ))}
+
+          {/* Submit Button */}
+          <Button
+            className="w-full mt-4 bg-primary/90 hover:bg-primary/80"
+            onClick={() => {
+              const completedFiles = uploadedFiles.filter(f => f.status === 'complete')
+              if (completedFiles.length > 0) {
+                onUploadComplete?.(completedFiles)
+                setUploadedFiles([])
+              }
+            }}
+            disabled={uploadedFiles.some(f => f.status === 'uploading')}
+          >
+            {uploadedFiles.some(f => f.status === 'uploading') ? 'Uploading...' : 'Upload Documents'}
+          </Button>
+
+          {/* Warning if type not selected */}
+          {selectedDocumentType === 'other' && uploadedFiles.length > 0 && (
+            <p className="text-xs text-yellow-400 mt-2">
+              ⚠️ Please select the correct document type before uploading
+            </p>
+          )}
         </div>
       )}
     </div>
   )
 }
+
+
+

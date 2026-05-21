@@ -1,9 +1,7 @@
-import { SettingsPage as SettingsPageComponent } from '@/components/shared'
+'use client'
 
-export default function SettingsPage() {
-  return (
-    <div className="p-6">
-      <SettingsPageComponent />
-    </div>
-  )
+import { SettingsPage } from '@/components/shared/settings-page'
+
+export default function SuperAdminSettingsPage() {
+  return <SettingsPage />
 }

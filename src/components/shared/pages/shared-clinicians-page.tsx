@@ -10,10 +10,10 @@ import { StaffFilters } from '@/components/shared/forms/filters'
 import { StaffTable } from '@/components/tables/staff-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
-import { mockStaffData } from '@/services/staff.service'
+import { staffService } from '@/services/staff.service'
 import { useRouter } from 'next/navigation'
 import { ClinicianCreationModal } from '@/components/modals/clinician-creation-modal'
-import { getCurrentFacilityAdminFacilityId } from '@/services/auth.service'
+import { useAuthStore } from '@/store/auth-store'
 import { ROLES, UserRole } from '@/constants/roles'
 
 interface SharedCliniciansPageProps {
@@ -22,6 +22,7 @@ interface SharedCliniciansPageProps {
 
 export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
   const router = useRouter()
+  const { user } = useAuthStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedSpecialty, setSelectedSpecialty] = useState('all')
@@ -29,12 +30,34 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [isClinicianModalOpen, setIsClinicianModalOpen] = useState(false)
+  const [staffData, setStaffData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
+    fetchStaffData()
   }, [])
 
-  const filteredClinicians = mockStaffData.filter(clinician => {
+  const fetchStaffData = async () => {
+    try {
+      const data = await staffService.getStaff()
+      // Transform data to match component expectations
+      const transformedData = data.map((staff: any) => ({
+        ...staff,
+        name: `${staff.first_name} ${staff.last_name}`,
+        status: staff.is_active ? 'active' : 'inactive',
+        joinDate: staff.created_at,
+      }))
+      setStaffData(transformedData)
+    } catch (error) {
+      console.error('Failed to fetch staff data:', error)
+      setStaffData([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const filteredClinicians = staffData.filter(clinician => {
     // Exclude super admin role
     if (clinician.role === 'super_admin') return false
 
@@ -64,7 +87,6 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
 
   const handleClinicianCreated = (newClinician: any) => {
     // In a real app, this would add to the database
-    console.log('Clinician created:', newClinician)
     // For now, just log it - in production this would refresh data or add to state
     // Note: Don't close modal here - let the modal show success screen first
   }
@@ -90,19 +112,19 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
   const cliniciansOverviewData: KPICardData[] = [
     {
       title: 'Total Clinicians',
-      value: mockStaffData.filter(c => c.role !== 'super_admin').length,
+      value: staffData.filter(c => c.role !== 'super_admin').length,
       trend: { value: '+8', isPositive: true },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'Active Clinicians',
-      value: mockStaffData.filter(c => c.status === 'active' && c.role !== 'super_admin').length,
+      value: staffData.filter(c => c.status === 'active' && c.role !== 'super_admin').length,
       trend: { value: '+3', isPositive: true },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'New This Month',
-      value: mockStaffData.filter(c => {
+      value: staffData.filter(c => {
         const registrationDate = new Date(c.joinDate)
         const currentMonth = new Date().getMonth()
         const currentYear = new Date().getFullYear()
@@ -113,13 +135,13 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
     },
     {
       title: 'Referral Volume',
-      value: mockStaffData.filter(c => c.role !== 'super_admin').reduce((sum, c) => sum + c.referrals, 0),
+      value: staffData.filter(c => c.role !== 'super_admin').reduce((sum, c) => sum + c.referrals, 0),
       trend: { value: '+15', isPositive: true },
       icon: <TrendingUp className="h-5 w-5" />
     }
   ]
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return null
   }
 
@@ -201,7 +223,7 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
           isOpen={isClinicianModalOpen}
           onClose={() => setIsClinicianModalOpen(false)}
           onSuccess={handleClinicianCreated}
-          preSelectedFacilityId={userRole === ROLES.FACILITY_ADMIN ? getCurrentFacilityAdminFacilityId() : undefined}
+          preSelectedFacilityId={userRole === ROLES.FACILITY_ADMIN ? user?.facility_id?.toString() : undefined}
         />
       )}
     </div>

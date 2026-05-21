@@ -4,9 +4,8 @@ import { useState, useEffect, useRef, FormEvent } from 'react'
 import { ChevronDown, Eye, EyeOff } from 'lucide-react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { counties } from '@/services/facility.service'
-import { facilities } from '@/services/facilities.service'
-import { getFacilityNameById, debugFacilityData } from '@/services/auth.service'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
+import { userService } from '@/services/user.service'
 
 // AutocompleteInput component for long lists like counties and facilities
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {
@@ -20,12 +19,8 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
 
   // Initialize with selected option if value exists
   useEffect(() => {
-    console.log('AutocompleteInput - value:', value)
-    console.log('AutocompleteInput - options:', options)
-    console.log('AutocompleteInput - options.length:', options.length)
     if (value) {
       const selectedOption = options.find(option => option.value === value)
-      console.log('AutocompleteInput - selectedOption:', selectedOption)
       setInputValue(selectedOption?.label || '')
     }
   }, [value, options])
@@ -199,12 +194,11 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
   const [createdUserName, setCreatedUserName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [filteredFacilities, setFilteredFacilities] = useState(facilities)
 
   // User roles - only clinician option for this modal
   const userRoles = [
@@ -214,8 +208,6 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      console.log('ClinicianCreationModal - preSelectedFacilityId:', preSelectedFacilityId)
-      console.log('ClinicianCreationModal - debugFacilityData():', debugFacilityData())
       setFormData({
         first_name: '',
         last_name: '',
@@ -295,7 +287,7 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       // Scroll to first error
       const firstErrorField = Object.keys(errors)[0]
@@ -308,24 +300,23 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
       return
     }
 
-    setIsSubmitting(true)
+    await execute(async () => {
+      // Call the backend API to create the clinician
+      const newClinician = await userService.createUser({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        role: 'clinician',
+        facility_id: formData.facility_id ? parseInt(formData.facility_id) : undefined,
+        is_active: formData.is_active
+      })
 
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      const newClinician = {
-        ...formData,
-        id: `clinician_${Date.now()}`,
-        created_at: new Date().toISOString()
-      }
-
-      // Store the user's name before resetting the form
       setCreatedUserName(`${formData.first_name} ${formData.last_name}`)
-      
       onSuccess(newClinician)
       setShowSuccess(true)
-      
+
       // Reset form
       setFormData({
         first_name: '',
@@ -338,12 +329,7 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
         facility_id: preSelectedFacilityId || '',
         is_active: true
       })
-      
-    } catch (error) {
-      console.error('Error creating clinician:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   const handleClose = () => {

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { counties } from '@/constants/counties'
 
 interface FilterDropdownProps {
   value: string
@@ -78,25 +79,12 @@ interface FacilityFiltersProps {
   onFilterChange: (filters: {
     county: string
     level: string
-    performance: string
   }) => void
 }
 
 export function FacilityFilters({ onFilterChange }: FacilityFiltersProps) {
   const [selectedCounty, setSelectedCounty] = useState<string>('all')
   const [selectedLevel, setSelectedLevel] = useState<string>('all')
-  const [performanceRange, setPerformanceRange] = useState<string>('all')
-
-  // Mock counties - in real app this would come from API
-  const counties = [
-    'Nairobi', 'Uasin Gishu', 'Nakuru', 'Kisumu', 'Machakos', 'Nyeri',
-    'Kakamega', 'Garissa', 'Trans Nzoia', 'Kilifi', 'Mombasa', 'Kiambu',
-    'Meru', 'Kericho', 'Bungoma', 'Kisii', 'Busia', 'Vihiga', 'Turkana',
-    'West Pokot', 'Samburu', 'Marsabit', 'Isiolo', 'Mandera', 'Wajir',
-    'Lamu', 'Tana River', 'Taita Taveta', 'Kwale', 'Migori', 'Homa Bay',
-    'Siaya', 'Nyamira', 'Narok', 'Kajiado', 'Embu', 'Tharaka Nithi',
-    'Laikipia', 'Elgeyo Marakwet', 'Bomet', 'Nandi'
-  ].sort()
 
   const countyOptions = [
     { value: 'all', label: 'All Counties' },
@@ -105,32 +93,22 @@ export function FacilityFilters({ onFilterChange }: FacilityFiltersProps) {
 
   const levelOptions = [
     { value: 'all', label: 'All Levels' },
-    { value: '6', label: 'Level 6' },
-    { value: '5', label: 'Level 5' },
-    { value: '4', label: 'Level 4' },
-    { value: '3', label: 'Level 3' }
-  ]
-
-  const performanceOptions = [
-    { value: 'all', label: 'All Performance' },
-    { value: 'high', label: 'High (71-100)' },
-    { value: 'medium', label: 'Medium (41-70)' },
-    { value: 'low', label: 'Low (0-40)' }
+    { value: 'level_6', label: 'Level 6' },
+    { value: 'level_5', label: 'Level 5' },
+    { value: 'level_4', label: 'Level 4' },
+    { value: 'level_3', label: 'Level 3' },
+    { value: 'level_2', label: 'Level 2' },
+    { value: 'level_1', label: 'Level 1' }
   ]
 
   const handleCountyChange = (county: string) => {
     setSelectedCounty(county)
-    onFilterChange({ county, level: selectedLevel, performance: performanceRange })
+    onFilterChange({ county, level: selectedLevel })
   }
 
   const handleLevelChange = (level: string) => {
     setSelectedLevel(level)
-    onFilterChange({ county: selectedCounty, level, performance: performanceRange })
-  }
-
-  const handlePerformanceChange = (performance: string) => {
-    setPerformanceRange(performance)
-    onFilterChange({ county: selectedCounty, level: selectedLevel, performance })
+    onFilterChange({ county: selectedCounty, level })
   }
 
   return (
@@ -147,13 +125,6 @@ export function FacilityFilters({ onFilterChange }: FacilityFiltersProps) {
         onChange={handleLevelChange}
         options={levelOptions}
         placeholder="Level"
-      />
-
-      <FilterDropdown
-        value={performanceRange}
-        onChange={handlePerformanceChange}
-        options={performanceOptions}
-        placeholder="Performance"
       />
     </div>
   )

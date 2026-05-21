@@ -17,7 +17,6 @@ export function useAuth() {
       const defaultRoute = getDefaultRoute(user?.role || 'clinician')
       router.push(defaultRoute)
     } catch (error) {
-      console.error('Login failed:', error)
       throw error
     }
   }
@@ -27,7 +26,6 @@ export function useAuth() {
       await logout()
       router.push('/login')
     } catch (error) {
-      console.error('Logout failed:', error)
     }
   }
 

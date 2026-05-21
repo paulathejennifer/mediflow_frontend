@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { Building } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { facilities, getHeatColor, type Facility } from '@/services/facilities.service'
+import { facilitiesService } from '@/services/facilities.service'
 import { FacilityTooltip } from '@/components/dashboard/facility-tooltip'
 import { FacilityFilters } from '@/components/dashboard/facility-filters'
+import { Facility } from '@/services/facility.service'
 
 export function FacilityPerformance() {
   const [hoveredFacility, setHoveredFacility] = useState<Facility | null>(null)
@@ -13,25 +14,28 @@ export function FacilityPerformance() {
   const [filters, setFilters] = useState({
     county: 'all',
     level: 'all',
-    performance: 'all'
   })
+  const [facilities, setFacilities] = useState<Facility[]>([])
+
+  useEffect(() => {
+    facilitiesService.getFacilities().then(setFacilities)
+  }, [])
 
   // Apply filters
-  const filteredFacilities = useMemo(() => {
-    return facilities.filter(facility => {
-      if (filters.county !== 'all' && facility.county !== filters.county) return false
-      if (filters.level !== 'all' && facility.level.toString() !== filters.level) return false
-      if (filters.performance !== 'all') {
-        if (filters.performance === 'high' && facility.performance < 71) return false
-        if (filters.performance === 'medium' && (facility.performance < 41 || facility.performance > 70)) return false
-        if (filters.performance === 'low' && facility.performance > 40) return false
-      }
-      return true
-    })
-  }, [filters])
+  const filteredFacilities = facilities.filter(facility => {
+    if (filters.county !== 'all' && facility.county !== filters.county) return false
+    if (filters.level !== 'all' && facility.level !== filters.level) return false
+    return true
+  })
 
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters)
+  }
+
+  // Generate a consistent color based on facility ID
+  const getFacilityColor = (id: number) => {
+    const colors = ['#67E8F9', '#38BDF8', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A']
+    return colors[id % colors.length]
   }
 
   return (
@@ -39,10 +43,10 @@ export function FacilityPerformance() {
       <CardHeader>
         <CardTitle className="text-foreground flex items-center gap-2">
           <Building className="h-5 w-5" />
-          Facility Performance
+          Facility Overview
         </CardTitle>
         <p className="text-muted-foreground text-sm">
-          Performance heatmap across facilities
+          Healthcare facilities in the system
         </p>
       </CardHeader>
 
@@ -51,7 +55,7 @@ export function FacilityPerformance() {
         {/* Filters */}
         <FacilityFilters onFilterChange={handleFilterChange} />
 
-        {/* Heatmap */}
+        {/* Facility Grid */}
         <div className="flex justify-center">
           <div className="grid grid-cols-12 sm:grid-cols-14 md:grid-cols-15 lg:grid-cols-20 gap-[3px]">
 
@@ -60,11 +64,11 @@ export function FacilityPerformance() {
                 key={facility.id}
                 className="w-4.5 h-4.5 sm:w-7 sm:h-6 md:w-4.5 md:h-4.5 rounded-[2px] cursor-pointer transition-all duration-150 ease-out hover:scale-110"
                 style={{
-                  backgroundColor: getHeatColor(facility.performance),
-                  boxShadow:
-                    facility.performance > 75
-                      ? '0 0 8px rgba(59,130,246,0.5)'
-                      : 'none'
+                  backgroundColor: getFacilityColor(facility.id),
+                  boxShadow: facility.is_active
+                    ? '0 0 8px rgba(59,130,246,0.5)'
+                    : 'none',
+                  opacity: facility.is_active ? 1 : 0.5
                 }}
                 onMouseEnter={(e) => {
                   setHoveredFacility(facility)
@@ -82,7 +86,7 @@ export function FacilityPerformance() {
 
         {/* Legend */}
         <div className="flex items-center justify-center gap-3 mt-6 text-xs text-muted-foreground">
-          <span>Low</span>
+          <span>Inactive</span>
           <div className="w-40 h-2 rounded-full overflow-hidden border border-white/10">
             <div
               className="w-full h-full"
@@ -92,7 +96,7 @@ export function FacilityPerformance() {
               }}
             />
           </div>
-          <span>High</span>
+          <span>Active</span>
         </div>
 
         {/* Tooltip */}

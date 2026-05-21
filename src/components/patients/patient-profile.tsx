@@ -205,7 +205,6 @@ export function PatientProfile({ patientId }: PatientProfileProps) {
   const handlePatientUpdate = (updatedPatient: any) => {
     // Update the patient data in state
     // In a real app, this would update the backend
-    console.log('Patient updated:', updatedPatient)
     setPatient(updatedPatient)
     setIsEditModalOpen(false)
   }

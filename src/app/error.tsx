@@ -13,7 +13,6 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error('Application error:', error)
   }, [error])
 
   const handleGoBack = () => {
@@ -43,7 +42,7 @@ export default function Error({
             <Button
               onClick={handleGoBack}
               variant="outline"
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 px-6 py-2"
+              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white px-6 py-2"
             >
               Go Back
             </Button>

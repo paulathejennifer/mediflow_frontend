@@ -11,7 +11,7 @@ import { FacilityTable } from '@/components/tables/facility-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { FacilityCreationModal } from '@/components/modals/facility-creation-modal'
-import { mockFacilitiesData } from '@/services/facility.service'
+import { facilityService } from '@/services/facility.service'
 
 export default function FacilitiesPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -23,12 +23,35 @@ export default function FacilitiesPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [isFacilityModalOpen, setIsFacilityModalOpen] = useState(false)
+  const [facilitiesData, setFacilitiesData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
+    fetchFacilitiesData()
   }, [])
 
-  const filteredFacilities = mockFacilitiesData.filter(facility => {
+  const fetchFacilitiesData = async () => {
+    try {
+      const data = await facilityService.getFacilities()
+      // Transform data to match component expectations
+      const transformedData = data.map((facility: any) => ({
+        ...facility,
+        facilityCode: facility.facility_code,
+        status: facility.is_active ? 'active' : 'inactive',
+        joined: facility.created_at,
+        performance: 75 // Default performance since API doesn't provide this
+      }))
+      setFacilitiesData(transformedData)
+    } catch (error) {
+      console.error('Failed to fetch facilities data:', error)
+      setFacilitiesData([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const filteredFacilities = facilitiesData.filter(facility => {
     const matchesSearch =
       facility.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       facility.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -61,26 +84,25 @@ export default function FacilitiesPage() {
 
   const handleFacilityCreated = (newFacility: any) => {
     // In a real app, this would add to the database
-    console.log('Facility created:', newFacility)
     // For now, just log it - in production this would refresh data or add to state
   }
 
   const facilitiesOverviewData: KPICardData[] = [
     {
       title: 'Total Facilities',
-      value: mockFacilitiesData.length,
+      value: facilitiesData.length,
       trend: { value: '+8', isPositive: true },
       icon: <Building className="h-5 w-5" />
     },
     {
       title: 'Active Facilities',
-      value: mockFacilitiesData.filter(f => f.status === 'active').length,
+      value: facilitiesData.filter(f => f.status === 'active').length,
       trend: { value: '+5', isPositive: true },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'New Facilities',
-      value: mockFacilitiesData.filter(f => {
+      value: facilitiesData.filter(f => {
         const joinedDate = new Date(f.joined)
         const currentMonth = new Date().getMonth()
         const currentYear = new Date().getFullYear()
@@ -91,13 +113,13 @@ export default function FacilitiesPage() {
     },
     {
       title: 'Average Performance',
-      value: Math.round(mockFacilitiesData.reduce((sum, f) => sum + f.performance, 0) / mockFacilitiesData.length) + '%',
+      value: Math.round(facilitiesData.reduce((sum, f) => sum + f.performance, 0) / facilitiesData.length) + '%',
       trend: { value: '+12%', isPositive: true },
       icon: <TrendingUp className="h-5 w-5" />
     }
   ]
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return null
   }
 

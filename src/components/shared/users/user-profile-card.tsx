@@ -24,7 +24,6 @@ export function UserProfileCard() {
       // Redirect to login page
       router.push('/login')
     } catch (error) {
-      console.error('Logout error:', error)
     }
   }
 

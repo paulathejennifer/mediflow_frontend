@@ -31,21 +31,6 @@ export function SystemActivityTrend({ data, isLoading = false }: SystemActivityT
     return monthNames; // This should already be exactly 6 months
   };
 
-  // Generate mock data with exactly 6 months
-  const generateMockData = () => {
-    const monthNames = generateMonthNames();
-    return [
-      { month: monthNames[0], patients: 120, referrals: 80, documents: 200 },
-      { month: monthNames[1], patients: 150, referrals: 95, documents: 220 },
-      { month: monthNames[2], patients: 180, referrals: 110, documents: 250 },
-      { month: monthNames[3], patients: 220, referrals: 130, documents: 280 },
-      { month: monthNames[4], patients: 260, referrals: 155, documents: 320 },
-      { month: monthNames[5], patients: 310, referrals: 185, documents: 380 }
-    ];
-  };
-
-  const mockData = generateMockData();
-
   // Transform any incoming data to use month names (limit to 6 months)
   const transformData = (incomingData: SystemActivityData[]) => {
     const monthNames = generateMonthNames();
@@ -55,7 +40,7 @@ export function SystemActivityTrend({ data, isLoading = false }: SystemActivityT
     }));
   };
 
-  const chartData = data ? transformData(data) : mockData
+  const chartData = data ? transformData(data) : []
 
   if (isLoading) {
     return (

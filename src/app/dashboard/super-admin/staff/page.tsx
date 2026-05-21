@@ -11,7 +11,7 @@ import { StaffTable } from '@/components/tables/staff-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { UserCreationModal } from '@/components/modals/user-creation-modal'
-import { mockStaffData } from '@/services/staff.service'
+import { staffService, StaffMember } from '@/services/staff.service'
 
 export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -21,27 +21,46 @@ export default function StaffPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
+  const [staff, setStaff] = useState<StaffMember[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
+    fetchStaff()
   }, [])
 
-  const filteredStaff = mockStaffData.filter(staff => {
-    const matchesSearch =
-      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.phone.includes(searchTerm) ||
-      staff.facility.toLowerCase().includes(searchTerm.toLowerCase())
+  const fetchStaff = async () => {
+    try {
+      const data = await staffService.getStaff()
+      setStaff(data)
+    } catch (error) {
+      console.error('Failed to fetch staff:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-    const matchesRole = selectedRole === 'all' || staff.role === selectedRole
-    const matchesStatus = selectedStatus === 'all' || staff.status === selectedStatus
+  const filteredStaff = staff.filter(staffMember => {
+    const name = staffMember.name || `${staffMember.first_name} ${staffMember.last_name}`
+    const status = staffMember.is_active ? 'active' : 'inactive'
+    
+    const matchesSearch =
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      staffMember.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      staffMember.phone.includes(searchTerm) ||
+      staffMember.facility.toLowerCase().includes(searchTerm.toLowerCase())
+
+    const matchesRole = selectedRole === 'all' || staffMember.role === selectedRole
+    const matchesStatus = selectedStatus === 'all' || status === selectedStatus
 
     return matchesSearch && matchesRole && matchesStatus
   }).sort((a, b) => {
     if (selectedSort === 'referrals') {
-      return b.referrals - a.referrals
+      return b.referralCount - a.referralCount
     } else if (selectedSort === 'lastLogin') {
-      return new Date(b.lastLogin).getTime() - new Date(a.lastLogin).getTime()
+      const aDate = a.lastLogin ? new Date(a.lastLogin).getTime() : 0
+      const bDate = b.lastLogin ? new Date(b.lastLogin).getTime() : 0
+      return bDate - aDate
     }
     return 0
   })
@@ -54,39 +73,37 @@ export default function StaffPage() {
   const paginatedStaff = pagination.paginatedItems(filteredStaff)
 
   const handleUserCreated = (newUser: any) => {
-    // In a real app, this would add to the database
-    console.log('User created:', newUser)
-    // For now, just log it - in production this would refresh data or add to state
+    fetchStaff()
   }
 
   const staffOverviewData: KPICardData[] = [
     {
       title: 'Total Staff',
-      value: mockStaffData.length,
+      value: staff.length,
       trend: { value: '+2', isPositive: true },
       icon: <User className="h-5 w-5" />
     },
     {
       title: 'Active Staff',
-      value: mockStaffData.filter(s => s.status === 'active').length,
+      value: staff.filter(s => s.is_active).length,
       trend: { value: '+1', isPositive: true },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'Facility Admins',
-      value: mockStaffData.filter(s => s.role === 'facility_admin').length,
+      value: staff.filter(s => s.role === 'facility_admin').length,
       trend: { value: '0', isPositive: true },
       icon: <Building2 className="h-5 w-5" />
     },
     {
       title: 'Clinicians',
-      value: mockStaffData.filter(s => s.role === 'clinician').length,
+      value: staff.filter(s => s.role === 'clinician').length,
       trend: { value: '+3', isPositive: true },
       icon: <Users className="h-5 w-5" />
     }
   ]
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
   return null
 }
 

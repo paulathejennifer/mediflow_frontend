@@ -1,173 +1,122 @@
+import apiClient from '@/lib/axios'
+import { AIProcessingStatus } from '@/types/ai'
+
 export interface Referral {
-  id: string
-  patientId: string
-  patient: string
-  condition: string
-  priority: 'high' | 'medium' | 'low'
-  status: 'pending' | 'accepted' | 'completed' | 'in_progress' | 'rejected' | 'cancelled' | 'draft'
-  receivingFacility: string
-  date: string
-  reason?: string
-  clinicalNotes?: string
-  referringClinician?: {
+  id: number
+  patient_id: number
+  from_facility_id: number
+  to_facility_id: number
+  created_by: number
+  priority: 'low' | 'medium' | 'high' | 'emergency'
+  status: 'draft' | 'submitted' | 'accepted' | 'in_transit' | 'received' | 'completed' | 'rejected'
+  reason_for_referral: string
+  clinical_notes: string
+  ai_summary: string | null
+  ai_status: AIProcessingStatus
+  notes: string | null
+  created_at: string
+  updated_at: string
+  patient?: {
+    id: number
+    first_name: string
+    last_name: string
+    date_of_birth: string
+    gender: string
+  }
+  from_facility?: {
+    id: number
     name: string
-    department: string
-    facility: string
+    facility_code: string
   }
-  attachments?: {
-    documents: Document[]
-    voiceNotes: VoiceNote[]
+  to_facility?: {
+    id: number
+    name: string
+    facility_code: string
   }
-  timeline?: TimelineEvent[]
-  aiAnalysis?: AIAnalysis
+  creator?: {
+    id: number
+    first_name: string
+    last_name: string
+  }
+  documents?: ReferralDocument[]
+  voice_notes?: VoiceNote[]
 }
 
-export interface Document {
-  id: string
-  name: string
-  size: number
-  uploader: string
-  aiStatus: 'completed' | 'pending'
-  type: string
+export interface ReferralDocument {
+  id: number
+  file_name: string
+  file_type: string
+  file_size: number
+  referral_id: number
+  created_at: string
 }
 
 export interface VoiceNote {
-  id: string
-  name: string
-  duration: string
-  uploader: string
-  aiStatus: 'completed' | 'pending'
-  createdAt: string
+  id: number
+  audio_file_name: string
+  duration_seconds: number
+  transcript: string
+  status: string
+  referral_id: number
+  created_at: string
 }
 
-export interface TimelineEvent {
-  id: string
-  action: 'created' | 'submitted' | 'accepted' | 'in_progress' | 'completed' | 'rejected' | 'updated'
-  description: string
-  timestamp: string
-  user: string
+export interface CreateReferralRequest {
+  patient_id: number
+  to_facility_id: number
+  priority: 'low' | 'medium' | 'high' | 'emergency'
+  reason_for_referral: string
+  clinical_notes: string
 }
 
-export interface AIAnalysis {
-  summary: string
-  key_findings: string[]
-  risks: string[]
-  missing_info: string[]
-  recommendations: string[]
-  completeness_score: number
-  urgency_level: 'High' | 'Medium' | 'Low'
+export interface UpdateReferralRequest {
+  priority?: 'low' | 'medium' | 'high' | 'emergency'
+  clinical_notes?: string
+  notes?: string
 }
 
-export const mockReferralsData: Referral[] = [
-  {
-    id: 'REF-001',
-    patientId: '1',
-    patient: 'John Doe',
-    condition: 'Suspected cardiac arrhythmia',
-    priority: 'high',
-    status: 'pending',
-    receivingFacility: 'National Cardiology Center',
-    date: '2026-05-11T22:59:00',
-    reason: 'Suspected cardiac arrhythmia requiring specialist evaluation',
-    clinicalNotes: `Patient presents with recurring palpitations over the past 3 months, increasing in frequency. 
-
-Episodes occur at rest and during exertion. Associated symptoms include shortness of breath and occasional chest discomfort.
-
-Physical examination reveals irregular pulse. ECG shows intermittent atrial fibrillation.
-
-Current medications include Metformin 500mg BD for diabetes management.
-
-Requesting cardiology evaluation for further assessment and management recommendations.`,
-    referringClinician: {
-      name: 'Dr. Sarah Johnson',
-      department: 'Internal Medicine',
-      facility: 'Central Hospital Lagos'
-    },
-    attachments: {
-      documents: [
-        {
-          id: 'doc1',
-          name: 'ECG_Report.pdf',
-          size: 239.3,
-          uploader: 'Dr. Sarah Johnson',
-          aiStatus: 'completed',
-          type: 'pdf'
-        },
-        {
-          id: 'doc2',
-          name: 'Lab_Results.pdf',
-          size: 175.8,
-          uploader: 'Dr. Sarah Johnson',
-          aiStatus: 'completed',
-          type: 'pdf'
-        }
-      ],
-      voiceNotes: []
-    },
-    timeline: [
-      {
-        id: 'event1',
-        action: 'created',
-        description: 'Referral created and submitted for review',
-        timestamp: '2026-05-11T22:59:00',
-        user: 'Dr. Sarah Johnson'
-      },
-      {
-        id: 'event2',
-        action: 'submitted',
-        description: 'Referral sent to National Cardiology Center',
-        timestamp: '2026-05-11T23:04:00',
-        user: 'Dr. Sarah Johnson'
-      }
-    ],
-    aiAnalysis: {
-      summary: 'Male patient, 38 years old, with history of hypertension and Type 2 diabetes. Presenting with cardiac arrhythmia symptoms including palpitations, shortness of breath, and chest discomfort. ECG confirms intermittent atrial fibrillation. Current medications include Metformin for diabetes management.',
-      key_findings: [
-        'Recurring palpitations over 3 months',
-        'Episodes at rest and exertion',
-        'Shortness of breath and chest discomfort',
-        'Irregular pulse on examination',
-        'ECG shows intermittent atrial fibrillation',
-        'Metformin 500mg for diabetes'
-      ],
-      risks: [
-        'Diabetes',
-        'Hypertension',
-        'Family History of Heart Disease'
-      ],
-      missing_info: [
-        'Recent blood pressure readings',
-        'Complete lipid panel results',
-        'Weight and BMI data'
-      ],
-      recommendations: [
-        'Add recent vital signs including blood pressure and heart rate',
-        'Include echocardiogram results if available',
-        'Document smoking and alcohol history',
-        'Specify duration of diabetes and hypertension'
-      ],
-      completeness_score: 7,
-      urgency_level: 'High'
-    }
+export const referralService = {
+  createReferral: async (data: CreateReferralRequest): Promise<Referral> => {
+    const response = await apiClient.post('/referrals/', data)
+    return response.data
   },
-  {
-    id: 'REF-002',
-    patientId: '2',
-    patient: 'Jane Smith',
-    condition: 'Stroke Symptoms',
-    priority: 'high',
-    status: 'accepted',
-    receivingFacility: 'Regional Medical Center',
-    date: '2026-05-10T14:30:00'
+
+  getReferrals: async (params?: {
+    skip?: number
+    limit?: number
+    status?: string
+    priority?: string
+    patient_id?: number
+  }): Promise<Referral[]> => {
+    const response = await apiClient.get('/referrals/', { params })
+    return response.data
   },
-  {
-    id: 'REF-003',
-    patientId: '3',
-    patient: 'Michael Johnson',
-    condition: 'Pneumonia',
-    priority: 'medium',
-    status: 'completed',
-    receivingFacility: 'Community Health Clinic',
-    date: '2026-05-09T09:15:00'
-  }
-]
+
+  getReferralById: async (referralId: number): Promise<Referral> => {
+    const response = await apiClient.get(`/referrals/${referralId}`)
+    return response.data
+  },
+
+  updateReferral: async (
+    referralId: number,
+    data: UpdateReferralRequest
+  ): Promise<Referral> => {
+    const response = await apiClient.put(`/referrals/${referralId}`, data)
+    return response.data
+  },
+
+  submitReferral: async (referralId: number): Promise<{ message: string }> => {
+    const response = await apiClient.post(`/referrals/${referralId}/submit`)
+    return response.data
+  },
+
+  acceptReferral: async (referralId: number): Promise<Referral> => {
+    const response = await apiClient.post(`/referrals/${referralId}/accept`)
+    return response.data
+  },
+
+  rejectReferral: async (referralId: number): Promise<Referral> => {
+    const response = await apiClient.post(`/referrals/${referralId}/reject`)
+    return response.data
+  },
+}

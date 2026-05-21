@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { User, Lock, Eye, EyeOff, Save, Check } from 'lucide-react'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 
 interface UserProfile {
   firstName: string
@@ -47,11 +48,13 @@ export function SettingsPage() {
   const [profileSaveStatus, setProfileSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [passwordSaveStatus, setPasswordSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const { isLoading: isProfileSaving, execute: executeProfileSave } = useAsyncOperation()
+  const { isLoading: isPasswordSaving, execute: executePasswordSave } = useAsyncOperation()
 
   const handleProfileSave = async () => {
     setProfileSaveStatus('saving')
     
-    try {
+    await executeProfileSave(async () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500))
       setProfileSaveStatus('saved')
@@ -59,10 +62,10 @@ export function SettingsPage() {
       
       // Reset status after 2 seconds
       setTimeout(() => setProfileSaveStatus('idle'), 2000)
-    } catch (error) {
+    }, undefined, () => {
       setProfileSaveStatus('error')
       setTimeout(() => setProfileSaveStatus('idle'), 2000)
-    }
+    })
   }
 
   const getPasswordRequirements = (password: string) => {
@@ -137,7 +140,7 @@ export function SettingsPage() {
 
     setPasswordSaveStatus('saving')
     
-    try {
+    await executePasswordSave(async () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500))
       setPasswordSaveStatus('saved')
@@ -145,10 +148,10 @@ export function SettingsPage() {
       
       // Reset status after 2 seconds
       setTimeout(() => setPasswordSaveStatus('idle'), 2000)
-    } catch (error) {
+    }, undefined, () => {
       setPasswordSaveStatus('error')
       setTimeout(() => setPasswordSaveStatus('idle'), 2000)
-    }
+    })
   }
 
   const handleProfileChange = (field: keyof UserProfile, value: string) => {

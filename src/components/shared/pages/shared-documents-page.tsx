@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { DocumentUpload } from '@/components/documents/document-upload'
 import { DocumentList } from '@/components/documents/document-list'
+import { DocumentViewerModal } from '@/components/documents/document-viewer-modal'
 
 // Mock data for documents
 const mockDocuments = [
@@ -17,6 +18,7 @@ const mockDocuments = [
     uploaded_at: '2024-01-15T10:30:00Z',
     mime_type: 'application/pdf',
     document_type: 'lab_result' as const,
+    url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   },
   {
     id: '2',
@@ -25,6 +27,7 @@ const mockDocuments = [
     uploaded_at: '2024-01-14T14:20:00Z',
     mime_type: 'image/jpeg',
     document_type: 'imaging' as const,
+    url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800',
   },
   {
     id: '3',
@@ -33,6 +36,7 @@ const mockDocuments = [
     uploaded_at: '2024-01-13T09:15:00Z',
     mime_type: 'application/pdf',
     document_type: 'prescription' as const,
+    url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   },
   {
     id: '4',
@@ -41,6 +45,7 @@ const mockDocuments = [
     uploaded_at: '2024-01-12T16:45:00Z',
     mime_type: 'application/pdf',
     document_type: 'referral_letter' as const,
+    url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   },
   {
     id: '5',
@@ -49,6 +54,7 @@ const mockDocuments = [
     uploaded_at: '2024-01-11T11:00:00Z',
     mime_type: 'application/pdf',
     document_type: 'consent_form' as const,
+    url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   },
   {
     id: '6',
@@ -57,6 +63,7 @@ const mockDocuments = [
     uploaded_at: '2024-01-10T13:30:00Z',
     mime_type: 'image/jpeg',
     document_type: 'imaging' as const,
+    url: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=800',
   },
 ]
 
@@ -64,27 +71,39 @@ export function SharedDocumentsPage() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [documents, setDocuments] = useState(mockDocuments)
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState<any>(null)
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
 
   const handleView = (doc: any) => {
-    console.log('View document:', doc)
-    // Implement view functionality
+    setSelectedDocument(doc)
+    setIsViewerOpen(true)
   }
 
   const handleDownload = (doc: any) => {
-    console.log('Download document:', doc)
     // Implement download functionality
+    alert(`Downloading: ${doc.name}`)
   }
 
   const handleDelete = (doc: any) => {
-    console.log('Delete document:', doc)
     setDocuments(prev => prev.filter(d => d.id !== doc.id))
     // Implement delete functionality
   }
 
-  const handleUploadComplete = (files: File[]) => {
-    console.log('Upload complete:', files)
+  const handleUploadComplete = (uploadedFiles: any[]) => {
+    
+    // Convert uploaded files to document format and add to documents list
+    const newDocuments = uploadedFiles.map((uf: any) => ({
+      id: Math.random().toString(36).substring(7),
+      name: uf.file.name,
+      size: uf.file.size,
+      uploaded_at: new Date().toISOString(),
+      mime_type: uf.file.type,
+      document_type: uf.documentType || 'other' as const,
+      url: uf.url || URL.createObjectURL(uf.file),
+    }))
+    
+    setDocuments(prev => [...newDocuments, ...prev])
     setIsUploadDialogOpen(false)
-    // Implement upload completion logic
   }
 
   return (
@@ -162,6 +181,18 @@ export function SharedDocumentsPage() {
           />
         </TabsContent>
       </Tabs>
+
+      {/* Document Viewer Modal */}
+      {selectedDocument && (
+        <DocumentViewerModal
+          isOpen={isViewerOpen}
+          onClose={() => {
+            setIsViewerOpen(false)
+            setSelectedDocument(null)
+          }}
+          doc={selectedDocument}
+        />
+      )}
     </div>
   )
 }

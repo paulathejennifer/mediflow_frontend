@@ -56,7 +56,9 @@ const navigationItems = {
     { name: 'Documents', href: ROUTES.CLINICIAN.DOCUMENTS, icon: FileText },
     { name: 'Notifications', href: ROUTES.CLINICIAN.NOTIFICATIONS, icon: Bell },
     { name: 'Settings', href: ROUTES.CLINICIAN.SETTINGS, icon: Settings },
-  ]
+  ],
+
+  [ROLES.PATIENT]: []
 }
 
 export function Sidebar() {
@@ -67,11 +69,6 @@ export function Sidebar() {
   const navigation =
     userRole ? navigationItems[userRole] : []
   
-  // Debug: Log user role and navigation
-  console.log('Sidebar Debug - User:', user)
-  console.log('Sidebar Debug - User Role:', userRole)
-  console.log('Sidebar Debug - Navigation Items:', navigation)
-
   if (!user) {
   return null // Don't render sidebar for unauthenticated users
 }

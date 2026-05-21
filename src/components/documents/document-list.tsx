@@ -16,6 +16,7 @@ interface Document {
   uploaded_at: string
   mime_type: string
   document_type: 'lab_result' | 'imaging' | 'prescription' | 'referral_letter' | 'consent_form' | 'other'
+  url?: string
 }
 
 interface DocumentListProps {
@@ -174,11 +175,15 @@ export function DocumentList({
                     </div>
 
                     {/* Actions Dropdown */}
-                    <ActionDropdown
-                      type="referral"
-                      userRole={userRole}
-                      onViewDetails={() => onView?.(doc)}
-                    />
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ActionDropdown
+                        type="document"
+                        userRole={userRole}
+                        onViewDetails={() => onView?.(doc)}
+                        onDownload={() => onDownload?.(doc)}
+                        onDelete={() => onDelete?.(doc)}
+                      />
+                    </div>
                   </div>
 
                   {/* Type Badge */}

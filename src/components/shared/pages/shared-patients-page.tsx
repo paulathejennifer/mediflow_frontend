@@ -12,7 +12,7 @@ import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
 import { EditPatientModal } from '@/components/modals/edit-patient-modal'
-import { mockPatientsData } from '@/services/patient.service'
+import { patientService } from '@/services/patient.service'
 import { useRouter } from 'next/navigation'
 import { ROLES, UserRole } from '@/constants/roles'
 
@@ -32,12 +32,39 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
+  const [patientsData, setPatientsData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
+    fetchPatientsData()
   }, [])
 
-  const filteredPatients = mockPatientsData.filter(patient => {
+  const fetchPatientsData = async () => {
+    try {
+      const data = await patientService.getPatients()
+      // Transform data to match component expectations
+      const transformedData = data.map((patient: any) => {
+        const age = new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear()
+        return {
+          ...patient,
+          name: `${patient.first_name} ${patient.last_name}`,
+          status: 'active', // Default to active since Patient interface doesn't have status
+          registrationDate: patient.created_at,
+          age,
+          mrn: patient.identifiers?.[0]?.mrn || 'N/A'
+        }
+      })
+      setPatientsData(transformedData)
+    } catch (error) {
+      console.error('Failed to fetch patients data:', error)
+      setPatientsData([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const filteredPatients = patientsData.filter(patient => {
     const matchesSearch =
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,7 +98,6 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
 
   const handlePatientCreated = (newPatient: any) => {
     // In a real app, this would add to database
-    console.log('Patient created:', newPatient)
     // For now, just log it - in production this would refresh data or add to state
   }
 
@@ -82,7 +108,6 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
 
   const handlePatientUpdated = (updatedPatient: any) => {
     // In a real app, this would update database
-    console.log('Patient updated:', updatedPatient)
     // For now, just log it - in production this would refresh data
   }
 
@@ -116,19 +141,19 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
   const patientsOverviewData: KPICardData[] = [
     {
       title: 'Total Patients',
-      value: mockPatientsData.length,
+      value: patientsData.length,
       trend: { value: '+12', isPositive: true },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'Active Patients',
-      value: mockPatientsData.filter(p => p.status === 'active').length,
+      value: patientsData.filter(p => p.status === 'active').length,
       trend: { value: '+8', isPositive: true },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'New This Month',
-      value: mockPatientsData.filter(p => {
+      value: patientsData.filter(p => {
         const registrationDate = new Date(p.registrationDate)
         const currentMonth = new Date().getMonth()
         const currentYear = new Date().getFullYear()
@@ -139,13 +164,13 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
     },
     {
       title: 'Inactive Patients',
-      value: mockPatientsData.filter(p => p.status === 'inactive').length,
+      value: patientsData.filter(p => p.status === 'inactive').length,
       trend: { value: '+3', isPositive: true },
       icon: <UserPlus className="h-5 w-5" />
     }
   ]
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return null
   }
 

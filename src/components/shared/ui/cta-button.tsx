@@ -75,30 +75,25 @@ export function CTAButton({ userRole }: CTAButtonProps) {
         break
       case 'create-referral':
         // TODO: Implement referral creation modal
-        console.log('Create referral clicked')
         break
       default:
-        console.log(`Unknown action: ${action}`)
+        break
     }
   }
 
   const handleFacilityCreated = (newFacility: any) => {
-    console.log('Facility created:', newFacility)
     // In production, this would refresh data or show notification
   }
 
   const handleUserCreated = (newUser: any) => {
-    console.log('User created:', newUser)
     // In production, this would refresh data or show notification
   }
 
   const handlePatientCreated = (newPatient: any) => {
-    console.log('Patient created:', newPatient)
     // In production, this would refresh data or show notification
   }
 
   const handleCreateAdmin = (facility: any) => {
-    console.log('Creating admin for facility:', facility)
     setAdminFacility(facility)
     setIsAdminModalOpen(true)
   }

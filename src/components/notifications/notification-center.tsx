@@ -6,7 +6,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { useMockNotifications } from '@/hooks/useMockNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
 import { NotificationCard } from './notification-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +44,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
     refreshNotifications,
     filters,
     setFilters
-  } = useMockNotifications();
+  } = useNotifications();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedNotifications, setExpandedNotifications] = useState<Set<number>>(new Set());

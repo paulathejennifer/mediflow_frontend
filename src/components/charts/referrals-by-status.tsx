@@ -12,19 +12,50 @@ interface FunnelData {
   textColor?: string
 }
 
-export function ReferralsByStatus() {
-  // Mock data for referral funnel (excluding draft)
-  const funnelData: FunnelData[] = [
-    { stage: 'Submitted', count: 235, percentage: 100, color: COLORS.referralStatus.submitted },
-    { stage: 'Accepted', count: 198, percentage: 84, color: COLORS.referralStatus.accepted },
-    { stage: 'In Transit', count: 176, percentage: 75, color: COLORS.referralStatus.in_transit },
-    { stage: 'Received', count: 162, percentage: 69, color: COLORS.referralStatus.received, textColor: '#2563EB'  },
-    { stage: 'Completed', count: 145, percentage: 62, color: COLORS.referralStatus.completed, textColor: '#2563EB' }
-  ];
+interface ReferralsByStatusProps {
+  data?: FunnelData[]
+  isLoading?: boolean
+}
 
+export function ReferralsByStatus({ data, isLoading = false }: ReferralsByStatusProps) {
   // Calculate widths for funnel effect (percentage of max width)
   const maxWidth = 100;
   const getFunnelWidth = (percentage: number) => (percentage / 100) * maxWidth;
+
+  if (isLoading) {
+    return (
+      <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
+        <CardHeader>
+          <div className="h-6 bg-muted rounded animate-pulse"></div>
+          <div className="h-4 bg-muted rounded w-1/2 animate-pulse"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 bg-muted rounded animate-pulse"></div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
+        <CardHeader>
+          <CardTitle className="text-foreground flex items-center gap-2">
+            <PieChart className="h-5 w-5" />
+            Referrals by Status
+          </CardTitle>
+          <p className="text-muted-foreground text-sm">Referral flow and conversion rates</p>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 flex items-center justify-center">
+            <p className="text-muted-foreground">No referral data available</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const funnelData = data
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">

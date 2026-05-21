@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { mockFacilitiesData } from '@/services/facility.service'
+import { useFacilities } from '@/hooks/useFacilities'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 import { Eye, EyeOff, Check, ChevronDown } from 'lucide-react'
+import { userService } from '@/services/user.service'
 
 // AutocompleteInput component for long lists like counties and facilities
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {
@@ -224,10 +226,10 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [filteredFacilities, setFilteredFacilities] = useState(mockFacilitiesData)
+  const { facilities: facilitiesData } = useFacilities()
 
   // Reset form when modal opens
   useEffect(() => {
@@ -294,7 +296,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       // Scroll to first error
       const firstErrorField = Object.keys(errors)[0]
@@ -307,27 +309,33 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
       return
     }
 
-    setIsSubmitting(true)
+    await execute(async () => {
+      // Call the backend API to create the admin
+      const newAdmin = await userService.createUser({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone: '',
+        password: formData.password,
+        role: formData.role as 'facility_admin' | 'clinician',
+        facility_id: facilityData?.id ? parseInt(facilityData.id) : undefined,
+        is_active: formData.is_active
+      })
 
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      const newUser = {
-        ...formData,
-        id: `user_${Date.now()}`,
-        joined: new Date().toISOString().split('T')[0],
-        last_login: 'Never'
-      }
-
-      onSuccess(newUser)
+      onSuccess(newAdmin)
       setShowSuccess(true)
-      
-    } catch (error) {
-      console.error('Error creating admin:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
+
+      // Reset form
+      setFormData({
+        first_name: '',
+        last_name: '',
+        email: '',
+        password: '',
+        role: 'facility_admin',
+        facility_id: facilityData?.id || '',
+        is_active: true
+      })
+    })
   }
 
   const handleClose = () => {

@@ -9,8 +9,9 @@ import { SkeletonLoadingSection } from '@/components/shared'
 import { RecentReferralsTable } from '@/components/tables/recent-referrals-table'
 import { usePagination } from '@/hooks/usePagination'
 import { useDashboard } from '@/hooks/useDashboard'
-import { mockReferralsData } from '@/services/referral.service'
+import { referralService } from '@/services/referral.service'
 import { ROLES, UserRole } from '@/constants/roles'
+import { calculateTrend, getDateRange, getPreviousDateRange } from '@/utils/trend-calculator'
 
 interface SharedDashboardPageProps {
   userRole: UserRole
@@ -18,45 +19,78 @@ interface SharedDashboardPageProps {
 
 export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
   const [isMounted, setIsMounted] = useState(false)
+  const [referrals, setReferrals] = useState<any[]>([])
+  const [referralsLoading, setReferralsLoading] = useState(true)
+  const [previousReferrals, setPreviousReferrals] = useState<any[]>([])
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Calculate overview stats
-  const todayReferrals = mockReferralsData.filter(r => {
-    const today = new Date()
-    const referralDate = new Date(r.date)
+  useEffect(() => {
+    const fetchReferrals = async () => {
+      try {
+        const data = await referralService.getReferrals()
+        setReferrals(data)
+        
+        // Calculate previous period data for trend calculation
+        // In a real implementation, you'd fetch data for the previous 30 days
+        // For now, we'll estimate based on current data
+        const previousPeriodData = data.slice(0, Math.max(0, data.length - 5))
+        setPreviousReferrals(previousPeriodData)
+      } catch (err) {
+        console.error('Failed to fetch referrals:', err)
+      } finally {
+        setReferralsLoading(false)
+      }
+    }
+    fetchReferrals()
+  }, [])
+
+  // Calculate overview stats from real data
+  const today = new Date()
+  const todayReferrals = referrals.filter(r => {
+    const referralDate = new Date(r.created_at)
     return referralDate.toDateString() === today.toDateString()
   })
 
-  const pendingReferrals = mockReferralsData.filter(r => r.status === 'pending')
-  const acceptedReferrals = mockReferralsData.filter(r => r.status === 'accepted')
-  const completedReferrals = mockReferralsData.filter(r => r.status === 'completed')
+  const pendingReferrals = referrals.filter(r => r.status === 'submitted')
+  const acceptedReferrals = referrals.filter(r => r.status === 'accepted')
+  const completedReferrals = referrals.filter(r => r.status === 'completed')
+
+  // Calculate previous period stats for trends
+  const previousTodayReferrals = previousReferrals.filter(r => {
+    const referralDate = new Date(r.created_at)
+    return referralDate.toDateString() === today.toDateString()
+  })
+
+  const previousPendingReferrals = previousReferrals.filter(r => r.status === 'submitted')
+  const previousAcceptedReferrals = previousReferrals.filter(r => r.status === 'accepted')
+  const previousCompletedReferrals = previousReferrals.filter(r => r.status === 'completed')
 
   const overviewData: KPICardData[] = [
     {
       title: "Today's",
       value: todayReferrals.length,
-      trend: { value: '+5', isPositive: true },
+      trend: calculateTrend(todayReferrals.length, previousTodayReferrals.length),
       icon: <FileText className="h-5 w-5" />
     },
     {
       title: 'Pending',
       value: pendingReferrals.length,
-      trend: { value: '+3', isPositive: true },
+      trend: calculateTrend(pendingReferrals.length, previousPendingReferrals.length),
       icon: <Clock className="h-5 w-5" />
     },
     {
       title: 'Accepted',
       value: acceptedReferrals.length,
-      trend: { value: '+2', isPositive: true },
+      trend: calculateTrend(acceptedReferrals.length, previousAcceptedReferrals.length),
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'Completed',
       value: completedReferrals.length,
-      trend: { value: '+8', isPositive: true },
+      trend: calculateTrend(completedReferrals.length, previousCompletedReferrals.length),
       icon: <TrendingUp className="h-5 w-5" />
     }
   ]
@@ -77,6 +111,22 @@ export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
 
   if (!isMounted) {
     return null
+  }
+
+  if (referralsLoading) {
+    return (
+      <div className="flex-1 space-y-6 overflow-x-hidden">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">{config.title}</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              {config.description}
+            </p>
+          </div>
+        </div>
+        <SkeletonLoadingSection />
+      </div>
+    )
   }
 
   return (
@@ -112,11 +162,11 @@ export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <RecentReferralsTable 
-              referrals={mockReferralsData.slice(0, 5)} 
-              userRole={userRole === ROLES.SUPER_ADMIN ? 'facility-admin' : 
-                      userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' : 
-                      userRole === ROLES.CLINICIAN ? 'clinician' : 'clinician'} 
+            <RecentReferralsTable
+              referrals={referrals.slice(0, 5)}
+              userRole={userRole === ROLES.SUPER_ADMIN ? 'facility-admin' :
+                      userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' :
+                      userRole === ROLES.CLINICIAN ? 'clinician' : 'clinician'}
             />
           </CardContent>
         </Card>

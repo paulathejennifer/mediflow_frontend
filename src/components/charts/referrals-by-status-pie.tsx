@@ -71,13 +71,14 @@ export function ReferralsByStatusPie() {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
-                contentStyle={{ 
+              <Tooltip
+                contentStyle={{
                   backgroundColor: 'rgb(17, 24, 39)', // gray-900
                   border: '1px solid rgb(55, 65, 81)', // gray-700
                   borderRadius: '8px'
                 }}
-                labelStyle={{ color: 'rgb(156, 163, 175)' }} // gray-400
+                labelStyle={{ color: 'rgb(255, 255, 255)' }} // white (foreground)
+                itemStyle={{ color: 'rgb(255, 255, 255)' }} // white (foreground)
               />
               <Legend 
                 verticalAlign="bottom" 

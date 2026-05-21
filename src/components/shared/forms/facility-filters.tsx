@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { counties } from '@/services/facility.service'
+import { counties } from '@/constants/counties'
 
 interface FilterDropdownProps {
   value: string

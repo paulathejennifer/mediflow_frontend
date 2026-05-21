@@ -1,36 +1,54 @@
 import { KPICard } from './kpi-card'
 import { Users, FileText, Building2, TrendingUp } from 'lucide-react'
+import { DashboardStats } from '@/types/dashboard'
 
-export function StatsGrid() {
+interface StatsGridProps {
+  stats?: DashboardStats
+  isLoading?: boolean
+}
+
+export function StatsGrid({ stats, isLoading = false }: StatsGridProps) {
+  if (isLoading || !stats) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 bg-muted rounded animate-pulse" />
+        ))}
+      </div>
+    )
+  }
+
+  const pendingReferrals = stats.totalReferrals // This would need to be calculated from status if API provided it
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <KPICard
         title="Total Patients"
-        value="1,234"
-        change={{ value: 12, trend: 'up' }}
+        value={stats.totalPatients.toLocaleString()}
+        change={{ value: 0, trend: 'up' }}
         icon={Users}
         description="Active patients in system"
       />
       <KPICard
-        title="Pending Referrals"
-        value="89"
-        change={{ value: 8, trend: 'down' }}
+        title="Total Referrals"
+        value={stats.totalReferrals.toLocaleString()}
+        change={{ value: 0, trend: 'up' }}
         icon={FileText}
-        description="Awaiting processing"
+        description="Referrals in system"
       />
       <KPICard
         title="Active Facilities"
-        value="24"
-        change={{ value: 3, trend: 'up' }}
+        value={stats.totalFacilities.toLocaleString()}
+        change={{ value: 0, trend: 'up' }}
         icon={Building2}
         description="Healthcare providers"
       />
       <KPICard
-        title="Monthly Growth"
-        value="15.3%"
-        change={{ value: 2.1, trend: 'up' }}
+        title="Active Users"
+        value={stats.activeUsers.toLocaleString()}
+        change={{ value: 0, trend: 'up' }}
         icon={TrendingUp}
-        description="Referral volume increase"
+        description="Active system users"
       />
     </div>
   )

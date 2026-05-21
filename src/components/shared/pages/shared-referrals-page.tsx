@@ -10,7 +10,7 @@ import { ReferralFilters } from '@/components/shared/forms/referral-filters'
 import { RecentReferralsTable } from '@/components/tables/recent-referrals-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
-import { mockReferralsData } from '@/services/referral.service'
+// import { mockReferralsData } from '@/services/referral.service'
 import { ROLES, UserRole } from '@/constants/roles'
 
 interface SharedReferralsPageProps {
@@ -76,25 +76,25 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
   const referralsOverviewData: KPICardData[] = [
     {
       title: 'Total Referrals',
-      value: mockReferralsData.length,
+      value: 0, // TODO: Replace with mockReferralsData.length
       trend: { value: '+12', isPositive: true },
       icon: <FileText className="h-5 w-5" />
     },
     {
       title: 'Pending',
-      value: mockReferralsData.filter(r => r.status === 'pending').length,
+      value: 0, // TODO: Replace with mockReferralsData.filter(r => r.status === 'pending').length
       trend: { value: '+5', isPositive: true },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'Accepted',
-      value: mockReferralsData.filter(r => r.status === 'accepted').length,
+      value: 0, // TODO: Replace with mockReferralsData.filter(r => r.status === 'accepted').length
       trend: { value: '+8', isPositive: true },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'Completed',
-      value: mockReferralsData.filter(r => r.status === 'completed').length,
+      value: 0, // TODO: Replace with mockReferralsData.filter(r => r.status === 'completed').length
       trend: { value: '+3', isPositive: true },
       icon: <TrendingUp className="h-5 w-5" />
     }

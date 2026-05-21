@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,16 +21,28 @@ interface LoginFormProps {
   onSubmit: (data: LoginFormData) => Promise<void>
   isLoading?: boolean
   error?: string
+  rememberedEmail?: string
+  rememberMeChecked?: boolean
 }
 
-export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps) {
+export function LoginForm({ onSubmit, isLoading = false, error, rememberedEmail, rememberMeChecked }: LoginFormProps) {
   const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
+    email: rememberedEmail || '',
     password: '',
-    rememberMe: false
+    rememberMe: rememberMeChecked || false
   })
   const [showPassword, setShowPassword] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({})
+  const router = useRouter()
+
+  useEffect(() => {
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }))
+    }
+    if (rememberMeChecked) {
+      setFormData(prev => ({ ...prev, rememberMe: rememberMeChecked }))
+    }
+  }, [rememberedEmail, rememberMeChecked])
 
   const handleInputChange = (field: keyof LoginFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -58,6 +71,10 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
     return Object.keys(errors).length === 0
   }
 
+  const handleForgotPassword = () => {
+    router.push('/auth/forgot-password')
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -82,16 +99,15 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
         <h1 className="text-2xl font-bold text-white">MediFlow</h1>
       </div>
       
-      <Card className="bg-gray-800 border-gray-700 shadow-lg shadow-[hsl(var(--primary))]/20">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center text-white">
+      <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg shadow-[hsl(var(--primary))]/20 p-6">
+        <div className="space-y-1 mb-6">
+          <h2 className="text-2xl font-bold text-center text-white">
             Sign In
-          </CardTitle>
-          <CardDescription className="text-center text-gray-300">
+          </h2>
+          <p className="text-center text-gray-300">
             Enter your credentials to access your account
-          </CardDescription>
-        </CardHeader>
-      <CardContent>
+          </p>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <Alert variant="destructive">
@@ -137,7 +153,7 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-primary hover:bg-transparent"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={isLoading}
               >
@@ -171,6 +187,7 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
               variant="link"
               className="p-0 h-auto text-sm"
               disabled={isLoading}
+              onClick={handleForgotPassword}
             >
               Forgot password?
             </Button>
@@ -194,7 +211,7 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
         </form>
 
         {/* Sign Up Link */}
-        <div className="mt-6 text-center text-sm">
+        {/* <div className="mt-6 text-center text-sm">
           <span className="text-gray-400">Don't have an account? </span>
           <Button
             type="button"
@@ -204,9 +221,8 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
           >
             Sign up
           </Button>
-        </div>
-      </CardContent>
-    </Card>
+        </div> */}
+      </div>
     </div>
   )
 }

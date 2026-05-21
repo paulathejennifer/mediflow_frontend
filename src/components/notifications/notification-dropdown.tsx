@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Bell, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
-import { useMockNotifications } from '@/hooks/useMockNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +21,7 @@ export function NotificationDropdown() {
 
   const router = useRouter();
   const { user } = useAuthStore();
-  const { notifications, stats, markAsRead, markAllAsRead } = useMockNotifications();
+  const { notifications, stats, markAsRead, markAllAsRead } = useNotifications();
 
   // Handle opening/closing animations
   const handleToggle = () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AnalyticsService, SystemActivityData, AnalyticsMetrics } from '@/services/analytics.service'
+import { analyticsService, SystemActivityData, AnalyticsMetrics } from '@/services/analytics.service'
 
 export interface UseAnalyticsReturn {
   systemActivityTrend: SystemActivityData[]
@@ -22,8 +22,8 @@ export function useAnalytics(): UseAnalyticsReturn {
 
       // Fetch both datasets in parallel
       const [trendData, metricsData] = await Promise.all([
-        AnalyticsService.getSystemActivityTrend(),
-        AnalyticsService.getAnalyticsMetrics()
+        analyticsService.getSystemActivityTrend(),
+        analyticsService.getAnalyticsMetrics()
       ])
 
       setSystemActivityTrend(trendData)

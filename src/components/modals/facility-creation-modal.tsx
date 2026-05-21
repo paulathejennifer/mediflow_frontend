@@ -4,7 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { generateFacilityCode, validateFacilityCode } from '@/utils/facility-code-generator'
+import { counties } from '@/constants/counties'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
+import { facilityService, CreateFacilityRequest } from '@/services/facility.service'
 
 // AutocompleteInput component for long lists like counties and facilities
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {
@@ -213,7 +215,17 @@ interface FacilityCreationModalProps {
 }
 
 export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmin }: FacilityCreationModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string
+    facility_code: string
+    type: 'hospital' | 'clinic' | 'health_center' | 'dispensary' | 'referral_center' | ''
+    level: 'level_1' | 'level_2' | 'level_3' | 'level_4' | 'level_5' | 'level_6' | ''
+    county: string
+    address: string
+    phone: string
+    email: string
+    is_active: boolean
+  }>({
     name: '',
     facility_code: '',
     type: '',
@@ -226,7 +238,7 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showAdminCreation, setShowAdminCreation] = useState(false)
   const [createdFacility, setCreatedFacility] = useState<any>(null)
 
@@ -250,14 +262,6 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
     }
   }, [isOpen])
 
-  // Kenyan counties list
-  const counties = [
-    'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Kisii', 'Thika', 'Kitale',
-    'Garissa', 'Kakamega', 'Meru', 'Nyeri', 'Bungoma', 'Webuye', 'Naivasha', 'Lamu',
-    'Machakos', 'Kericho', 'Embu', 'Kitui', 'Kilifi', 'Malindi', 'Voi', 'Isiolo',
-    'Marsabit', 'Moyale', 'Wajir', 'Mandera', 'Lodwar', 'Kajiado', 'Namanga', 'Taveta'
-  ]
-
   const facilityTypes = [
     { value: 'hospital', label: 'Hospital' },
     { value: 'clinic', label: 'Clinic' },
@@ -267,45 +271,27 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
   ]
 
   const facilityLevels = [
-    { value: '1', label: 'Level 1' },
-    { value: '2', label: 'Level 2' },
-    { value: '3', label: 'Level 3' },
-    { value: '4', label: 'Level 4' },
-    { value: '5', label: 'Level 5' },
-    { value: '6', label: 'Level 6' }
+    { value: 'level_1', label: 'Level 1' },
+    { value: 'level_2', label: 'Level 2' },
+    { value: 'level_3', label: 'Level 3' },
+    { value: 'level_4', label: 'Level 4' },
+    { value: 'level_5', label: 'Level 5' },
+    { value: 'level_6', label: 'Level 6' }
   ]
-
-  // Auto-generate facility code when name or type changes
-  const handleNameOrTypeChange = (field: 'name' | 'type', value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    
-    // Auto-generate facility code when name or type changes
-    if (field === 'name' || field === 'type') {
-      const newCode = generateFacilityCode(formData.name, formData.type)
-      setFormData(prev => ({ ...prev, facility_code: newCode }))
-      
-      // Validate the new code
-      if (!validateFacilityCode(newCode)) {
-        setErrors(prev => ({ ...prev, facility_code: 'Invalid facility code format' }))
-      } else {
-        setErrors(prev => ({ ...prev, facility_code: '' }))
-      }
-    }
-  }
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
     // Required fields validation
     if (!formData.name.trim()) newErrors.name = 'Facility name is required'
-    if (!formData.facility_code.trim()) newErrors.facility_code = 'Facility code is required'
     if (!formData.type) newErrors.type = 'Facility type is required'
     if (!formData.level) newErrors.level = 'Facility level is required'
     if (!formData.county) newErrors.county = 'County is required'
 
-    // Facility code validation
-    if (formData.facility_code && !validateFacilityCode(formData.facility_code)) {
-      newErrors.facility_code = 'Facility code must be 3-4 uppercase letters'
+    // Facility code is optional - backend will generate if not provided
+    // If provided, basic validation
+    if (formData.facility_code.trim() && !/^[A-Z0-9-]{3,10}$/.test(formData.facility_code)) {
+      newErrors.facility_code = 'Facility code must be 3-10 characters (letters, numbers, hyphens)'
     }
 
     // Email validation
@@ -324,7 +310,7 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       // Scroll to first error
       const firstErrorField = Object.keys(errors)[0]
@@ -337,24 +323,14 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
       return
     }
 
-    setIsSubmitting(true)
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      const newFacility = {
-        ...formData,
-        id: `facility_${Date.now()}`,
-        joined: new Date().toISOString().split('T')[0],
-        performance: Math.floor(Math.random() * 100),
-        referrals: 0
-      }
+    await execute(async () => {
+      // Call the backend API to create the facility
+      const newFacility = await facilityService.createFacility(formData as CreateFacilityRequest)
 
       onSuccess(newFacility)
       setCreatedFacility(newFacility)
       setShowAdminCreation(true)
-      
+
       // Reset form
       setFormData({
         name: '',
@@ -367,12 +343,7 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
         email: '',
         is_active: true
       })
-      
-    } catch (error) {
-      console.error('Error creating facility:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   const handleClose = () => {
@@ -400,7 +371,7 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => handleNameOrTypeChange('name', e.target.value)}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="e.g., Kenyatta National Hospital"
               data-field="name"
@@ -411,18 +382,18 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
           {/* Facility Code */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Facility Code <span className="text-red-500">*</span>
+              Facility Code <span className="text-gray-500">(Optional)</span>
             </label>
             <input
               type="text"
               value={formData.facility_code}
               onChange={(e) => setFormData(prev => ({ ...prev, facility_code: e.target.value.toUpperCase() }))}
               className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="e.g., KNH"
-              maxLength={4}
+              placeholder="e.g., KNH (leave blank for auto-generation)"
+              maxLength={10}
             />
             {errors.facility_code && <p className="mt-1 text-sm text-red-500" data-field="facility_code">{errors.facility_code}</p>}
-            <p className="mt-1 text-xs text-gray-400">Auto-generated from facility name</p>
+            <p className="mt-1 text-xs text-gray-400">Leave blank for automatic generation</p>
           </div>
 
           {/* Facility Type */}
@@ -432,7 +403,7 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
             </label>
             <FilterDropdown
               value={formData.type}
-              onChange={(value) => handleNameOrTypeChange('type', value)}
+              onChange={(value) => setFormData(prev => ({ ...prev, type: value as any }))}
               options={facilityTypes}
               placeholder="Select Facility Type"
             />
@@ -446,7 +417,7 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
             </label>
             <FilterDropdown
               value={formData.level}
-              onChange={(value) => setFormData(prev => ({ ...prev, level: value }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, level: value as 'level_1' | 'level_2' | 'level_3' | 'level_4' | 'level_5' | 'level_6' | '' }))}
               options={facilityLevels}
               placeholder="Select Facility Level"
             />
@@ -461,7 +432,7 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
             <AutocompleteInput
               value={formData.county}
               onChange={(value) => setFormData(prev => ({ ...prev, county: value }))}
-              options={counties.map(county => ({ value: county, label: county }))}
+              options={counties.map((county: string) => ({ value: county, label: county }))}
               placeholder="Type to search county..."
             />
             {errors.county && <p className="mt-1 text-sm text-red-500" data-field="county">{errors.county}</p>}
@@ -579,6 +550,21 @@ export function FacilityCreationModal({ isOpen, onClose, onSuccess, onCreateAdmi
         <p className="text-gray-400 mb-6">
           {createdFacility?.name || formData.name} has been added to the system. Would you like to create a facility administrator for this facility?
         </p>
+        <div className="flex justify-center gap-3">
+          <Button
+            onClick={handleClose}
+            variant="outline"
+            className="px-6 py-2 border-none bg-transparent text-gray-300 hover:text-foreground hover:bg-transparent"
+          >
+            Skip
+          </Button>
+          <Button
+            onClick={() => onCreateAdmin && onCreateAdmin(createdFacility)}
+            className="px-6 py-2 bg-primary/90 text-primary-foreground hover:bg-primary/80"
+          >
+            Create Admin
+          </Button>
+        </div>
       </div>
     )}
   </Modal>

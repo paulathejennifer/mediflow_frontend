@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { dashboardService } from '@/services/dashboard.service'
-import { DashboardData } from '@/types/dashboard'
+import { DashboardStats } from '@/types/dashboard'
 
 export function useDashboard() {
-  const [data, setData] = useState<DashboardData | null>(null)
+  const [data, setData] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -11,10 +11,9 @@ export function useDashboard() {
     try {
       setIsLoading(true)
       setError(null)
-      const dashboardData = await dashboardService.getDashboardData()
+      const dashboardData = await dashboardService.getDashboardStats()
       setData(dashboardData)
     } catch (error) {
-      console.error('Failed to load dashboard data:', error)
       setError('Failed to load dashboard data')
     } finally {
       setIsLoading(false)

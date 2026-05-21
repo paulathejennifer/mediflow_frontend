@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown } from 'lucide-react'
 export interface KPICardData {
   title: string
   value: string | number
-  trend: {
+  trend?: {
     value: string
     isPositive: boolean
   }
@@ -34,14 +34,16 @@ function KPICard({ data }: KPICardProps) {
           </div>
         </div>
         <div className="text-3xl font-bold text-foreground mb-2">{data.value}</div>
-        <div className={`flex items-center text-xs ${data.trend.isPositive ? 'text-primary' : 'text-red-400'}`}>
-          {data.trend.isPositive ? (
-            <TrendingUp className="h-4 w-4 mr-1" />
-          ) : (
-            <TrendingDown className="h-4 w-4 mr-1" />
-          )}
-          <span>{data.trend.value} vs last month</span>
-        </div>
+        {data.trend && (
+          <div className={`flex items-center text-xs ${data.trend.isPositive ? 'text-primary' : 'text-red-400'}`}>
+            {data.trend.isPositive ? (
+              <TrendingUp className="h-4 w-4 mr-1" />
+            ) : (
+              <TrendingDown className="h-4 w-4 mr-1" />
+            )}
+            <span>{data.trend.value} vs last month</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

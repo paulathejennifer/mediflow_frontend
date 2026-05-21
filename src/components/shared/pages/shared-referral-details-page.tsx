@@ -44,8 +44,10 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
   useEffect(() => {
     setIsMounted(true)
-    const foundReferral = mockReferralsData.find(r => r.id === referralId)
-    setReferral(foundReferral || null)
+    // TODO: Uncomment when mockReferralsData is created
+    // const foundReferral = mockReferralsData.find(r => r.id === referralId)
+    // setReferral(foundReferral || null)
+    setReferral(null)
   }, [referralId])
 
   const handleGoBack = () => {

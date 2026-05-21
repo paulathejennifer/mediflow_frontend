@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { OverviewCards, KPICardData } from '@/components/shared'
 import { SkeletonLoadingSection } from '@/components/shared'
 import { RecentAlerts } from '@/components/dashboard/recent-alerts'
@@ -7,50 +8,64 @@ import { QuickInsights } from '@/components/dashboard/quick-insights'
 import { useDashboard } from '@/hooks/useDashboard'
 import { Button } from '@/components/ui/button'
 import { BarChart3, FileText, Clock, Activity, CheckCircle } from 'lucide-react'
+import { dashboardService } from '@/services/dashboard.service'
+import { calculateTrend } from '@/utils/trend-calculator'
 
 export default function SuperAdminDashboard() {
   const { isLoading, error } = useDashboard()
+  const [dashboardStats, setDashboardStats] = useState<any>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await dashboardService.getDashboardStatsWithTrends()
+        setDashboardStats(stats)
+      } catch (err) {
+        console.error('Failed to fetch dashboard stats:', err)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
 
   const dashboardOverviewData: KPICardData[] = [
     {
       title: 'Total Referrals',
-      value: '1,284',
-      trend: {
-        value: '+12.5%',
-        isPositive: true
-      },
+      value: dashboardStats?.totalReferrals?.toLocaleString() || '0',
+      trend: dashboardStats?.trends?.totalReferrals 
+        ? calculateTrend(dashboardStats.trends.totalReferrals.current, dashboardStats.trends.totalReferrals.previous)
+        : undefined,
       icon: <FileText className="h-5 w-5" />
     },
     {
-      title: 'Avg Turnaround',
-      value: '2.4 days',
-      trend: {
-        value: '-18.2%',
-        isPositive: false
-      },
-      icon: <Clock className="h-5 w-5" />
-    },
-    {
-      title: 'System Health',
-      value: '99.7%',
-      trend: {
-        value: '+3.1%',
-        isPositive: true
-      },
+      title: 'Total Facilities',
+      value: dashboardStats?.totalFacilities?.toLocaleString() || '0',
+      trend: dashboardStats?.trends?.totalFacilities
+        ? calculateTrend(dashboardStats.trends.totalFacilities.current, dashboardStats.trends.totalFacilities.previous)
+        : undefined,
       icon: <Activity className="h-5 w-5" />
     },
     {
-      title: 'AI Documents Processed',
-      value: '45,892',
-      trend: {
-        value: '+8%',
-        isPositive: true
-      },
+      title: 'Total Users',
+      value: dashboardStats?.totalUsers?.toLocaleString() || '0',
+      trend: dashboardStats?.trends?.totalUsers
+        ? calculateTrend(dashboardStats.trends.totalUsers.current, dashboardStats.trends.totalUsers.previous)
+        : undefined,
+      icon: <BarChart3 className="h-5 w-5" />
+    },
+    {
+      title: 'Total Patients',
+      value: dashboardStats?.totalPatients?.toLocaleString() || '0',
+      trend: dashboardStats?.trends?.totalPatients
+        ? calculateTrend(dashboardStats.trends.totalPatients.current, dashboardStats.trends.totalPatients.previous)
+        : undefined,
       icon: <CheckCircle className="h-5 w-5" />
     }
   ]
 
-  if (isLoading) {
+  if (isLoading || statsLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6">

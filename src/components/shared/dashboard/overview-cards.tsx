@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, Activity, Clock, CheckCircle, FileText, Build
 interface KPICardProps {
   title: string
   value: string | number
-  trend: {
+  trend?: {
     value: string
     isPositive: boolean
   }
@@ -30,14 +30,16 @@ hover:-translate-y-1
           </div>
         </div>
         <div className="text-3xl font-bold text-foreground mb-2">{value}</div>
-        <div className={`flex items-center text-xs ${trend.isPositive ? 'text-primary' : 'text-red-400'}`}>
-          {trend.isPositive ? (
-            <TrendingUp className="h-4 w-4 mr-1" />
-          ) : (
-            <TrendingDown className="h-4 w-4 mr-1" />
-          )}
-          <span>{trend.value} vs last month</span>
-        </div>
+        {trend && (
+          <div className={`flex items-center text-xs ${trend.isPositive ? 'text-primary' : 'text-red-400'}`}>
+            {trend.isPositive ? (
+              <TrendingUp className="h-4 w-4 mr-1" />
+            ) : (
+              <TrendingDown className="h-4 w-4 mr-1" />
+            )}
+            <span>{trend.value} vs last month</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

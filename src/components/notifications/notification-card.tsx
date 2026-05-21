@@ -147,7 +147,6 @@ export function NotificationCard({
         await onMarkAsRead(notification.id);
       }
     } catch (error) {
-      console.error('Action failed:', error);
     } finally {
       setIsActionLoading(null);
     }
@@ -161,8 +160,6 @@ export function NotificationCard({
 
   return (
     <>
-      {/* Debug: Check notification type */}
-      {console.log('Notification type:', notification.type)}
       <style jsx global>{`
   @keyframes neon-flicker {
     0%, 100% {
@@ -227,8 +224,6 @@ export function NotificationCard({
         } ${isExpired ? 'opacity-50' : ''} ${
           notification.type === 'critical' ? 'critical-bar' : ''
         }`;
-        console.log('Generated className:', className);
-        console.log('Is critical?', notification.type === 'critical');
         return null;
       })()}
       <Card

@@ -162,7 +162,6 @@ export function useNotifications(): UseNotificationsReturn {
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
-        console.log('WebSocket connected');
         setIsConnected(true);
         setError(null);
         reconnectAttempts.current = 0;
@@ -211,12 +210,10 @@ export function useNotifications(): UseNotificationsReturn {
           // Update stats
           calculateStats([notification, ...notifications]);
         } catch (err) {
-          console.error('Error parsing WebSocket message:', err);
         }
       };
 
       wsRef.current.onclose = (event) => {
-        console.log('WebSocket disconnected:', event.code, event.reason);
         setIsConnected(false);
         
         // Attempt reconnection if not a normal closure
@@ -234,7 +231,6 @@ export function useNotifications(): UseNotificationsReturn {
       };
 
       wsRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
         setError('WebSocket connection error');
       };
 

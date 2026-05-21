@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -16,6 +16,12 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem('access_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+    } else {
+      console.warn('No access token found in localStorage')
+      // Redirect to login if trying to access protected routes
+      if (typeof window !== 'undefined' && !config.url?.includes('/auth/')) {
+        window.location.href = '/login'
+      }
     }
     return config
   },
@@ -30,13 +36,22 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
+    // Log 403 errors for debugging
+    if (error.response?.status === 403) {
+      console.error('403 Forbidden error:', {
+        url: error.config?.url,
+        method: error.config?.method,
+        hasToken: !!localStorage.getItem('access_token')
+      })
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
       try {
         const refreshToken = localStorage.getItem('refresh_token')
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh-token`, {
+          const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
             refresh_token: refreshToken,
           })
 
