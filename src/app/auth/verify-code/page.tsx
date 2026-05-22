@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { VerifyCodeForm } from '@/components/forms/verify-code-form'
 import { authService } from '@/services/auth.service'
 
-export default function VerifyCodePage() {
+function VerifyCodeContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
   const router = useRouter()
@@ -15,15 +15,14 @@ export default function VerifyCodePage() {
   const handleVerifyCode = async (data: { code: string }) => {
     setIsLoading(true)
     setError(undefined)
-    
+
     try {
-      const response = await authService.verifyCode({ 
+      const response = await authService.verifyCode({
         email: email,
-        code: data.code 
+        code: data.code
       })
-      
+
       if (response.valid) {
-        // Code is valid, redirect to reset password page with email and code
         router.push(`/auth/reset-password?email=${email}&code=${data.code}`)
       } else {
         setError('Invalid verification code. Please try again.')
@@ -38,7 +37,7 @@ export default function VerifyCodePage() {
   const handleResendCode = async () => {
     setIsLoading(true)
     setError(undefined)
-    
+
     try {
       await authService.forgotPassword({ email })
     } catch (err) {
@@ -50,7 +49,7 @@ export default function VerifyCodePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <VerifyCodeForm 
+      <VerifyCodeForm
         onSubmit={handleVerifyCode}
         onResendCode={handleResendCode}
         isLoading={isLoading}
@@ -58,5 +57,13 @@ export default function VerifyCodePage() {
         email={email}
       />
     </div>
+  )
+}
+
+export default function VerifyCodePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-4">Loading...</div>}>
+      <VerifyCodeContent />
+    </Suspense>
   )
 }

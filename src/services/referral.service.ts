@@ -1,6 +1,16 @@
 import apiClient from '@/lib/axios'
 import { AIProcessingStatus } from '@/types/ai'
 
+export interface ReferralSummary {
+  id: number
+  patient_name: string
+  from_facility_name: string
+  to_facility_name: string
+  status: string
+  priority: string
+  created_at: string
+}
+
 export interface Referral {
   id: number
   patient_id: number
@@ -87,7 +97,7 @@ export const referralService = {
     status?: string
     priority?: string
     patient_id?: number
-  }): Promise<Referral[]> => {
+  }): Promise<ReferralSummary[]> => {
     const response = await apiClient.get('/referrals/', { params })
     return response.data
   },

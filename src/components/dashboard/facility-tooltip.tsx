@@ -52,7 +52,7 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
       </p>
 
       <span className="text-xs text-gray-400">
-        {facility.code}
+        {facility.facilityCode}
       </span>
 
       <p className="text-gray-400 text-xs">

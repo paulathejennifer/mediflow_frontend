@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Building } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { facilitiesService } from '@/services/facilities.service'
 import { FacilityTooltip } from '@/components/dashboard/facility-tooltip'
 import { FacilityFilters } from '@/components/dashboard/facility-filters'
-import { Facility } from '@/services/facility.service'
+import { Facility, facilityService } from '@/services/facility.service'
 
 export function FacilityPerformance() {
   const [hoveredFacility, setHoveredFacility] = useState<Facility | null>(null)
@@ -18,13 +17,13 @@ export function FacilityPerformance() {
   const [facilities, setFacilities] = useState<Facility[]>([])
 
   useEffect(() => {
-    facilitiesService.getFacilities().then(setFacilities)
+    facilityService.getFacilities().then(setFacilities)
   }, [])
 
   // Apply filters
   const filteredFacilities = facilities.filter(facility => {
     if (filters.county !== 'all' && facility.county !== filters.county) return false
-    if (filters.level !== 'all' && facility.level !== filters.level) return false
+    if (filters.level !== 'all' && String(facility.level) !== filters.level) return false
     return true
   })
 
@@ -33,9 +32,10 @@ export function FacilityPerformance() {
   }
 
   // Generate a consistent color based on facility ID
-  const getFacilityColor = (id: number) => {
+  const getFacilityColor = (id: string) => {
     const colors = ['#67E8F9', '#38BDF8', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A']
-    return colors[id % colors.length]
+    const numericId = parseInt(id, 10) || 0
+    return colors[numericId % colors.length]
   }
 
   return (
@@ -65,10 +65,10 @@ export function FacilityPerformance() {
                 className="w-4.5 h-4.5 sm:w-7 sm:h-6 md:w-4.5 md:h-4.5 rounded-[2px] cursor-pointer transition-all duration-150 ease-out hover:scale-110"
                 style={{
                   backgroundColor: getFacilityColor(facility.id),
-                  boxShadow: facility.is_active
+                  boxShadow: facility.status === 'active'
                     ? '0 0 8px rgba(59,130,246,0.5)'
                     : 'none',
-                  opacity: facility.is_active ? 1 : 0.5
+                  opacity: facility.status === 'active' ? 1 : 0.5
                 }}
                 onMouseEnter={(e) => {
                   setHoveredFacility(facility)

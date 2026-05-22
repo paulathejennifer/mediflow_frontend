@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuthStore } from '@/store/auth';
+import { useAuthStore } from '@/store/auth-store';
 import { toast } from '@/lib/toast';
 
 // Types for notification system
@@ -53,11 +53,29 @@ export interface UseNotificationsReturn {
   setFilters: (filters: Partial<{ type: 'all' | 'critical' | 'warning' | 'info'; unreadOnly: boolean }>) => void;
 }
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/api/v1/websocket/notifications';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
+function getWebSocketUrl(): string {
+  if (process.env.NEXT_PUBLIC_WS_URL) {
+    return process.env.NEXT_PUBLIC_WS_URL;
+  }
+  if (API_BASE.startsWith('https://')) {
+    return API_BASE.replace('https://', 'wss://').replace(/\/api\/v1\/?$/, '') + '/api/v1/websocket/notifications';
+  }
+  return API_BASE.replace('http://', 'ws://').replace(/\/api\/v1\/?$/, '') + '/api/v1/websocket/notifications';
+}
+
+/** REST routes live under /websocket/notifications on the deployed API */
+const NOTIFICATIONS_API = `${API_BASE}/websocket/notifications`;
+
+function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('access_token')
+}
+
 export function useNotifications(): UseNotificationsReturn {
-  const { token, user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
+  const token = getAccessToken();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [stats, setStats] = useState<NotificationStats>({
     total: 0,
@@ -129,7 +147,7 @@ export function useNotifications(): UseNotificationsReturn {
       
       params.append('limit', '50');
 
-      const response = await fetch(`${API_BASE}/notifications?${params}`, {
+      const response = await fetch(`${NOTIFICATIONS_API}?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -158,7 +176,7 @@ export function useNotifications(): UseNotificationsReturn {
     if (!token || !user) return;
 
     try {
-      const wsUrl = `${WS_URL}?token=${token}`;
+      const wsUrl = `${getWebSocketUrl()}?token=${token}`;
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
@@ -246,7 +264,7 @@ export function useNotifications(): UseNotificationsReturn {
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE}/notifications/${notificationId}/read`, {
+      const response = await fetch(`${NOTIFICATIONS_API}/${notificationId}/read`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -286,7 +304,7 @@ export function useNotifications(): UseNotificationsReturn {
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE}/notifications/mark-all-read`, {
+      const response = await fetch(`${NOTIFICATIONS_API}/mark-all-read`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -319,7 +337,7 @@ export function useNotifications(): UseNotificationsReturn {
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE}/notifications/${notificationId}/actions/${action}`, {
+      const response = await fetch(`${API_BASE}/notifications/notifications/${notificationId}/actions/${action}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -363,7 +381,7 @@ export function useNotifications(): UseNotificationsReturn {
 
   // Initialize connection and fetch data
   useEffect(() => {
-    if (token && user) {
+    if (token && user && isAuthenticated) {
       fetchNotifications();
       connectWebSocket();
     }
@@ -379,7 +397,7 @@ export function useNotifications(): UseNotificationsReturn {
         wsRef.current = null;
       }
     };
-  }, [token, user]);
+  }, [token, user, isAuthenticated]);
 
   // Reconnect when filters change
   useEffect(() => {

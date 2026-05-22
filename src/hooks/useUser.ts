@@ -13,7 +13,7 @@ export function useUser(userId?: string) {
     refetch
   } = useQuery({
     queryKey: ['user', targetUserId],
-    queryFn: () => userService.getUserById(targetUserId!),
+    queryFn: () => userService.getUserById(Number(targetUserId)),
     enabled: !!targetUserId
   })
 
@@ -33,7 +33,7 @@ export function useUsers() {
     refetch
   } = useQuery({
     queryKey: ['users'],
-    queryFn: userService.getUsers
+    queryFn: () => userService.getUsers()
   })
 
   return {

@@ -41,7 +41,7 @@ export default function StaffPage() {
   }
 
   const filteredStaff = staff.filter(staffMember => {
-    const name = staffMember.name || `${staffMember.first_name} ${staffMember.last_name}`
+    const name = `${staffMember.first_name} ${staffMember.last_name}`
     const status = staffMember.is_active ? 'active' : 'inactive'
     
     const matchesSearch =

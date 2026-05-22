@@ -7,8 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Upload, Mic, FileText, AlertCircle, Clock, Zap, Shield } from 'lucide-react'
 import { patientService } from '@/services/patient.service'
 import { facilityService } from '@/services/facility.service'
+import { referralService } from '@/services/referral.service'
+import { documentService } from '@/services/document.service'
+import { voiceNoteService } from '@/services/voice-note.service'
 import { formatTableDate } from '@/utils/date-utils'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
+import { toast } from '@/lib/toast'
 
 // AutocompleteInput component for patient and facility search
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {
@@ -270,46 +274,36 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Create new referral object
-      const newReferral = {
-        id: `REF-${Date.now()}`,
-        patientId: formData.patientId,
-        patient: patientOptions.find(p => p.value === formData.patientId)?.label.split(' (MRN:')[0] || '',
-        condition: formData.reason,
-        priority: formData.urgency as 'high' | 'medium' | 'low',
-        status: 'pending' as const,
-        receivingFacility: facilityOptions.find(f => f.value === formData.receivingFacilityId)?.label.split(' (')[0] || '',
-        date: new Date().toISOString(),
-        reason: formData.reason,
-        clinicalNotes: formData.clinicalNotes,
-        attachments: {
-          documents: formData.attachments.map((file, index) => ({
-            id: `doc_${index}`,
-            name: file.name,
-            size: Math.round(file.size / 1024),
-            uploader: 'Current User',
-            uploadDate: new Date().toISOString(),
-            aiStatus: 'Processing'
-          })),
-          voiceNotes: formData.voiceNotes.map((file, index) => ({
-            id: `voice_${index}`,
-            name: file.name,
-            duration: '0:45',
-            uploader: 'Current User',
-            uploadDate: new Date().toISOString(),
-            transcript: 'Processing...'
-          }))
-        }
-      }
+      const referral = await referralService.createReferral({
+        patient_id: Number(formData.patientId),
+        to_facility_id: Number(formData.receivingFacilityId),
+        priority: formData.urgency as 'low' | 'medium' | 'high' | 'emergency',
+        reason_for_referral: formData.reason,
+        clinical_notes: formData.clinicalNotes || formData.reason,
+      })
 
-      
-      // Navigate back to referrals page
-      router.push(`/dashboard/${userRole}/referrals`)
-      
+      await Promise.all([
+        ...formData.attachments.map((file) =>
+          documentService.uploadDocument({
+            file,
+            referral_id: referral.id,
+            document_type: 'lab_report',
+          })
+        ),
+        ...formData.voiceNotes.map((file) =>
+          voiceNoteService.uploadVoiceNote({
+            audio_file: file,
+            referral_id: referral.id,
+          })
+        ),
+      ])
+
+      await referralService.submitReferral(referral.id)
+      toast.success('Referral created and submitted successfully')
+      router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)
     } catch (error) {
+      console.error('Failed to create referral:', error)
+      toast.error('Failed to create referral. Please try again.')
     } finally {
       setIsSubmitting(false)
     }

@@ -1,20 +1,35 @@
 import apiClient from '@/lib/axios'
 import { Document, UploadDocumentRequest } from '@/types/document'
 
+export interface DocumentSummary {
+  id: number
+  file_name: string
+  file_type: string
+  file_size: number
+  created_at: string
+  uploader_name: string
+}
+
 export const documentService = {
   uploadDocument: async (data: UploadDocumentRequest): Promise<Document> => {
     const formData = new FormData()
     formData.append('file', data.file)
-    formData.append('referral_id', data.referral_id.toString())
-    if (data.document_type) {
-      formData.append('document_type', data.document_type)
-    }
 
-    const response = await apiClient.post('/documents/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const fileType = data.document_type || 'lab_report'
+    const response = await apiClient.post(
+      `/documents/upload?referral_id=${data.referral_id}&file_type=${fileType}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
+    return response.data
+  },
+
+  getFacilityDocuments: async (): Promise<DocumentSummary[]> => {
+    const response = await apiClient.get('/documents/facility')
     return response.data
   },
 

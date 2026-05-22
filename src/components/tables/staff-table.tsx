@@ -42,7 +42,7 @@ export function StaffTable({ staff, userRole, onViewProfile, onEdit, onActivate,
                     <User className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <div className="font-medium text-foreground text-sm">{staffMember.name}</div>
+                    <div className="font-medium text-foreground text-sm">{staffMember.first_name} {staffMember.last_name}</div>
                     <div className="text-xs text-muted-foreground">{staffMember.email}</div>
                   </div>
                 </div>
@@ -70,21 +70,21 @@ export function StaffTable({ staff, userRole, onViewProfile, onEdit, onActivate,
               </td>
               <td className="px-4 py-3">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                  staffMember.status === 'active' 
+                  staffMember.is_active
                     ? 'bg-green-600/10 text-green-600 border-green-600/20'
                     : 'bg-gray-600/10 text-gray-600 border-gray-600/20'
                 }`}>
-                  {staffMember.status}
+                  {staffMember.is_active ? 'active' : 'inactive'}
                 </span>
               </td>
-              <td className="px-4 py-3 text-xs text-muted-foreground">{formatTableDate(staffMember.lastLogin)}</td>
-              <td className="px-4 py-3 text-xs text-muted-foreground">{staffMember.referrals}</td>
+              <td className="px-4 py-3 text-xs text-muted-foreground">{formatTableDate(staffMember.lastLogin ?? staffMember.created_at)}</td>
+              <td className="px-4 py-3 text-xs text-muted-foreground">{staffMember.referralCount}</td>
               {userRole !== 'clinician' && (
               <td className="px-4 py-3 text-right">
                 <ActionDropdown
                   type="staff"
                   userRole={userRole}
-                  isActive={staffMember.status === 'active'}
+                  isActive={staffMember.is_active}
                   onViewProfile={() => onViewProfile?.(staffMember)}
                   onEdit={() => onEdit?.(staffMember)}
                   onActivate={() => onActivate?.(staffMember)}

@@ -20,7 +20,7 @@ apiClient.interceptors.request.use(
       console.warn('No access token found in localStorage')
       // Redirect to login if trying to access protected routes
       if (typeof window !== 'undefined' && !config.url?.includes('/auth/')) {
-        window.location.href = '/login'
+        window.location.href = '/auth/login'
       }
     }
     return config
@@ -66,7 +66,7 @@ apiClient.interceptors.response.use(
         // Refresh token failed, redirect to login
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
-        window.location.href = '/login'
+        window.location.href = '/auth/login'
         return Promise.reject(refreshError)
       }
     }

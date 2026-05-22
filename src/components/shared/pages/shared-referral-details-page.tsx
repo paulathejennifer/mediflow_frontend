@@ -21,14 +21,9 @@ import {
   Clock,
   Send
 } from 'lucide-react'
-import { 
-  mockReferralsData, 
-  Referral, 
-  Document, 
-  VoiceNote, 
-  TimelineEvent, 
-  AIAnalysis 
-} from '@/services/referral.service'
+import { referralService } from '@/services/referral.service'
+import { mapApiReferralToDetailView, ReferralDetailView } from '@/utils/referral-mappers'
+import { toast } from '@/lib/toast'
 import { ROLES, UserRole } from '@/constants/roles'
 
 interface SharedReferralDetailsPageProps {
@@ -39,22 +34,41 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const params = useParams()
   const router = useRouter()
   const referralId = params.id as string
-  const [referral, setReferral] = useState<Referral | null>(null)
+  const [referral, setReferral] = useState<ReferralDetailView | null>(null)
   const [isMounted, setIsMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
-    // TODO: Uncomment when mockReferralsData is created
-    // const foundReferral = mockReferralsData.find(r => r.id === referralId)
-    // setReferral(foundReferral || null)
-    setReferral(null)
+    const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
+    if (!numericId) {
+      setReferral(null)
+      setIsLoading(false)
+      return
+    }
+
+    const loadReferral = async () => {
+      try {
+        setIsLoading(true)
+        const data = await referralService.getReferralById(numericId)
+        setReferral(mapApiReferralToDetailView(data))
+      } catch (error) {
+        console.error('Failed to load referral:', error)
+        toast.error('Failed to load referral details')
+        setReferral(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadReferral()
   }, [referralId])
 
   const handleGoBack = () => {
     router.back()
   }
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return null
   }
 

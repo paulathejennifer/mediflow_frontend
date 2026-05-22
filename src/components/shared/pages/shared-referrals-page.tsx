@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,8 +10,10 @@ import { ReferralFilters } from '@/components/shared/forms/referral-filters'
 import { RecentReferralsTable } from '@/components/tables/recent-referrals-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
-// import { mockReferralsData } from '@/services/referral.service'
+import { referralService } from '@/services/referral.service'
+import { mapReferralSummaryToTableRow, ReferralTableRow } from '@/utils/referral-mappers'
 import { ROLES, UserRole } from '@/constants/roles'
+import { toast } from '@/lib/toast'
 
 interface SharedReferralsPageProps {
   userRole: UserRole
@@ -24,12 +26,29 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
   const [selectedPriority, setSelectedPriority] = useState('all')
   const [selectedSort, setSelectedSort] = useState('all')
   const [isMounted, setIsMounted] = useState(false)
+  const [referrals, setReferrals] = useState<ReferralTableRow[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const fetchReferrals = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const data = await referralService.getReferrals({ limit: 200 })
+      setReferrals(data.map(mapReferralSummaryToTableRow))
+    } catch (error) {
+      console.error('Failed to fetch referrals:', error)
+      toast.error('Failed to load referrals')
+      setReferrals([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     setIsMounted(true)
-  }, [])
+    fetchReferrals()
+  }, [fetchReferrals])
 
-  const filteredReferrals = mockReferralsData.filter(referral => {
+  const filteredReferrals = referrals.filter(referral => {
     const matchesSearch =
       referral.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
       referral.condition.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,7 +76,6 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
 
   const paginatedReferrals = pagination.paginatedItems(filteredReferrals)
 
-  // Role-specific configurations
   const pageConfig: Record<string, { title: string; description: string; placeholder: string }> = {
     [ROLES.CLINICIAN]: {
       title: 'Referrals',
@@ -76,37 +94,38 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
   const referralsOverviewData: KPICardData[] = [
     {
       title: 'Total Referrals',
-      value: 0, // TODO: Replace with mockReferralsData.length
+      value: referrals.length,
       trend: { value: '+12', isPositive: true },
       icon: <FileText className="h-5 w-5" />
     },
     {
       title: 'Pending',
-      value: 0, // TODO: Replace with mockReferralsData.filter(r => r.status === 'pending').length
+      value: referrals.filter(r => r.status === 'pending').length,
       trend: { value: '+5', isPositive: true },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'Accepted',
-      value: 0, // TODO: Replace with mockReferralsData.filter(r => r.status === 'accepted').length
+      value: referrals.filter(r => r.status === 'accepted').length,
       trend: { value: '+8', isPositive: true },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'Completed',
-      value: 0, // TODO: Replace with mockReferralsData.filter(r => r.status === 'completed').length
+      value: referrals.filter(r => r.status === 'completed').length,
       trend: { value: '+3', isPositive: true },
       icon: <TrendingUp className="h-5 w-5" />
     }
   ]
 
-  if (!isMounted) {
+  const rolePath = userRole.replace('_', '-')
+
+  if (!isMounted || isLoading) {
     return null
   }
 
   return (
     <div className="flex-1 space-y-6 overflow-x-hidden">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{config.title}</h1>
@@ -117,17 +136,15 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
 
         <Button 
           className="h-8 px-3 text-sm bg-primary/90 hover:bg-primary/80"
-          onClick={() => router.push(`/dashboard/${userRole.replace('_', '-')}/referrals/create`)}
+          onClick={() => router.push(`/dashboard/${rolePath}/referrals/create`)}
         >
           <Plus className="h-4 w-4 mr-1" />
           Create Referral
         </Button>
       </div>
 
-      {/* Overview */}
       <OverviewCards data={referralsOverviewData} />
 
-      {/* Search and Filters Card */}
       <Card className="bg-gray-900/60 border-border/50">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -152,7 +169,6 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
         </CardContent>
       </Card>
 
-      {/* Referrals Table */}
       <Card className="bg-gray-900/60 backdrop-blur-md border border-border/50">
         <CardHeader>
           <CardTitle className="text-white flex items-center">
@@ -170,7 +186,6 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
         </CardContent>
       </Card>
 
-      {/* Pagination */}
       <Pagination
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}

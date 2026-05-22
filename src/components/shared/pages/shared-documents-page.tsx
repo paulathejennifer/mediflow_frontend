@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus, FileText, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -8,8 +8,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { DocumentUpload } from '@/components/documents/document-upload'
 import { DocumentList } from '@/components/documents/document-list'
 import { DocumentViewerModal } from '@/components/documents/document-viewer-modal'
+import { documentService } from '@/services/document.service'
+import { toast } from '@/lib/toast'
 
-// Mock data for documents
+// Fallback mock data when API returns empty (dev only)
 const mockDocuments = [
   {
     id: '1',
@@ -69,10 +71,38 @@ const mockDocuments = [
 
 export function SharedDocumentsPage() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
-  const [documents, setDocuments] = useState(mockDocuments)
-  const [isLoading, setIsLoading] = useState(false)
+  const [documents, setDocuments] = useState<typeof mockDocuments>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [selectedDocument, setSelectedDocument] = useState<any>(null)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
+
+  const fetchDocuments = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const data = await documentService.getFacilityDocuments()
+      setDocuments(
+        data.map((doc) => ({
+          id: String(doc.id),
+          name: doc.file_name,
+          size: doc.file_size,
+          uploaded_at: doc.created_at,
+          mime_type: doc.file_type.includes('image') ? 'image/jpeg' : 'application/pdf',
+          document_type: doc.file_type as typeof mockDocuments[0]['document_type'],
+          url: '',
+        }))
+      )
+    } catch (error) {
+      console.error('Failed to fetch documents:', error)
+      toast.error('Failed to load documents')
+      setDocuments([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchDocuments()
+  }, [fetchDocuments])
 
   const handleView = (doc: any) => {
     setSelectedDocument(doc)
@@ -89,20 +119,8 @@ export function SharedDocumentsPage() {
     // Implement delete functionality
   }
 
-  const handleUploadComplete = (uploadedFiles: any[]) => {
-    
-    // Convert uploaded files to document format and add to documents list
-    const newDocuments = uploadedFiles.map((uf: any) => ({
-      id: Math.random().toString(36).substring(7),
-      name: uf.file.name,
-      size: uf.file.size,
-      uploaded_at: new Date().toISOString(),
-      mime_type: uf.file.type,
-      document_type: uf.documentType || 'other' as const,
-      url: uf.url || URL.createObjectURL(uf.file),
-    }))
-    
-    setDocuments(prev => [...newDocuments, ...prev])
+  const handleUploadComplete = () => {
+    toast.info('Upload documents from a referral (Create Referral or Referral Details).')
     setIsUploadDialogOpen(false)
   }
 

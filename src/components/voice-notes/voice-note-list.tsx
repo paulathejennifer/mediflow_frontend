@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -24,6 +24,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { voiceNoteService } from '@/services/voice-note.service'
+import { toast } from '@/lib/toast'
 
 interface VoiceNote {
   id: string
@@ -66,9 +68,40 @@ const mockVoiceNotes: VoiceNote[] = [
 
 export function VoiceNoteList() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [playingId, setPlayingId] = useState<string | null>(null)
-  const [notes, setNotes] = useState<VoiceNote[]>(mockVoiceNotes)
+  const [notes, setNotes] = useState<VoiceNote[]>([])
+
+  const fetchVoiceNotes = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const data = await voiceNoteService.getFacilityVoiceNotes()
+      setNotes(
+        data.map((vn) => ({
+          id: String(vn.id),
+          title: vn.audio_file_name,
+          duration: vn.duration_seconds,
+          recorded_at: vn.created_at,
+          transcription_status:
+            vn.status === 'transcribed'
+              ? 'completed'
+              : vn.status === 'processing'
+                ? 'processing'
+                : 'pending',
+        }))
+      )
+    } catch (error) {
+      console.error('Failed to fetch voice notes:', error)
+      toast.error('Failed to load voice notes')
+      setNotes([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchVoiceNotes()
+  }, [fetchVoiceNotes])
 
   // Filter notes based on search query
   const filteredNotes = notes.filter(note => {

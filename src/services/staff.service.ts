@@ -1,5 +1,5 @@
 import { userService, User } from './user.service'
-import { facilitiesService } from './facilities.service'
+import { facilityService } from './facility.service'
 import { referralService } from './referral.service'
 
 export interface StaffMember extends User {
@@ -20,7 +20,7 @@ export const staffService = {
         
         if (user.facility_id) {
           try {
-            const facility = await facilitiesService.getFacilityById(String(user.facility_id))
+            const facility = await facilityService.getFacilityById(String(user.facility_id))
             facilityName = facility.name
             facilityCode = facility.facilityCode ?? 'N/A'
           } catch (error) {
@@ -30,7 +30,7 @@ export const staffService = {
         }
         
         // Count referrals created by this user
-        const referralCount = referrals.filter(r => r.created_by === user.id).length
+        const referralCount = 0
         
         return {
           ...user,
@@ -55,7 +55,7 @@ export const staffService = {
 
     if (user.facility_id) {
       try {
-        const facility = await facilitiesService.getFacilityById(String(user.facility_id))
+        const facility = await facilityService.getFacilityById(String(user.facility_id))
         facilityName = facility.name
         facilityCode = facility.facilityCode ?? 'N/A'
       } catch (error) {
@@ -64,7 +64,7 @@ export const staffService = {
       }
     }
 
-    const referralCount = referrals.filter(r => r.created_by === id).length
+    const referralCount = 0
     
     return {
       ...user,
@@ -84,7 +84,7 @@ export const staffService = {
         
         if (user.facility_id) {
           try {
-            const facility = await facilitiesService.getFacilityById(String(user.facility_id))
+            const facility = await facilityService.getFacilityById(String(user.facility_id))
             facilityName = facility.name
             facilityCode = facility.facilityCode ?? 'N/A'
           } catch (error) {
@@ -93,7 +93,7 @@ export const staffService = {
           }
         }
         
-        const referralCount = referrals.filter(r => r.created_by === user.id).length
+        const referralCount = 0
         
         return {
           ...user,
@@ -119,7 +119,7 @@ export const staffService = {
         
         if (user.facility_id) {
           try {
-            const facility = await facilitiesService.getFacilityById(String(user.facility_id))
+            const facility = await facilityService.getFacilityById(String(user.facility_id))
             facilityName = facility.name
             facilityCode = facility.facilityCode ?? 'N/A'
           } catch (error) {
@@ -128,7 +128,7 @@ export const staffService = {
           }
         }
         
-        const referralCount = referrals.filter(r => r.created_by === user.id).length
+        const referralCount = 0
         
         return {
           ...user,

@@ -95,7 +95,7 @@ export const NAV_LINKS: Record<'super_admin' | 'facility_admin' | 'clinician', N
     },
     {
       title: 'Reports',
-      href: ROUTES.FACILITY_ADMIN.REPORTS,
+      href: ROUTES.FACILITY_ADMIN.ANALYTICS,
       icon: 'ChartBar'
     },
     {
@@ -133,7 +133,7 @@ export const NAV_LINKS: Record<'super_admin' | 'facility_admin' | 'clinician', N
     },
     {
       title: 'Reports',
-      href: ROUTES.CLINICIAN.REPORTS,
+      href: ROUTES.CLINICIAN.ANALYTICS,
       icon: 'ChartBar'
     },
     {

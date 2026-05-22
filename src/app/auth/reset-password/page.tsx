@@ -1,22 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ResetPasswordForm } from '@/components/forms/reset-password-form'
 import { authService } from '@/services/auth.service'
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
   const [success, setSuccess] = useState(false)
-  const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token') || ''
 
   const handleResetPassword = async (data: { newPassword: string; confirmPassword: string }) => {
     setIsLoading(true)
     setError(undefined)
-    
+
     try {
       await authService.resetPassword({
         token: token,
@@ -32,12 +31,20 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <ResetPasswordForm 
+      <ResetPasswordForm
         onSubmit={handleResetPassword}
         isLoading={isLoading}
         error={error}
         success={success}
       />
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-4">Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   )
 }

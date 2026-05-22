@@ -160,7 +160,7 @@ export function ProfileDropdown() {
                 {/* Role */}
                 <div className="px-4 py-2 flex items-center gap-2">
                   <Tag className="h-4 w-4 text-gray-300" />
-                  <Badge variant={user?.role || 'clinician'}>
+                  <Badge variant={(user?.role === 'patient' ? 'outline' : user?.role) || 'clinician'}>
                     {user?.role === 'super_admin' ? 'Super Admin' : 
                      user?.role === 'facility_admin' ? 'Facility Admin' :
                      user?.role === 'clinician' ? 'Clinician' : 'User'}

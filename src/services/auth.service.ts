@@ -1,4 +1,13 @@
-import { LoginRequest, LoginResponse, RegisterRequest, ChangePasswordRequest, User } from '@/types/auth'
+import {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  ChangePasswordRequest,
+  ForgotPasswordRequest,
+  VerifyCodeRequest,
+  ResetPasswordRequest,
+  User,
+} from '@/types/auth'
 import apiClient from '@/lib/axios'
 
 // API Service Functions
