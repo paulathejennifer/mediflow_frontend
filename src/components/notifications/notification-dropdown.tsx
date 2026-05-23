@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Bell, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

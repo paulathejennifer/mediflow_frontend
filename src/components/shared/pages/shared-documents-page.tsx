@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { DocumentUpload } from '@/components/documents/document-upload'
 import { DocumentList } from '@/components/documents/document-list'
 import { DocumentViewerModal } from '@/components/documents/document-viewer-modal'
-import { documentService } from '@/services/document.service'
+import { documentService } from '@/features/documents/services/document.service'
 import { toast } from '@/lib/toast'
 
 // Fallback mock data when API returns empty (dev only)

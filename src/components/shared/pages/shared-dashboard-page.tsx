@@ -8,8 +8,9 @@ import { OverviewCards, KPICardData } from '@/components/shared'
 import { SkeletonLoadingSection } from '@/components/shared'
 import { RecentReferralsTable } from '@/components/tables/recent-referrals-table'
 import { usePagination } from '@/hooks/usePagination'
-import { useDashboard } from '@/hooks/useDashboard'
-import { referralService } from '@/services/referral.service'
+import { useDashboard } from '@/features/analytics/hooks/useDashboard'
+import { referralService } from '@/features/referrals/services/referral.service'
+import { mapReferralSummaryToTableRow } from '@/utils/referral-mappers'
 import { ROLES, UserRole } from '@/constants/roles'
 import { calculateTrend, getDateRange, getPreviousDateRange } from '@/utils/trend-calculator'
 
@@ -31,13 +32,9 @@ export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
     const fetchReferrals = async () => {
       try {
         const data = await referralService.getReferrals()
-        setReferrals(data)
-        
-        // Calculate previous period data for trend calculation
-        // In a real implementation, you'd fetch data for the previous 30 days
-        // For now, we'll estimate based on current data
-        const previousPeriodData = data.slice(0, Math.max(0, data.length - 5))
-        setPreviousReferrals(previousPeriodData)
+        const mapped = data.map(mapReferralSummaryToTableRow)
+        setReferrals(mapped)
+        setPreviousReferrals(mapped.slice(0, Math.max(0, mapped.length - 5)))
       } catch (err) {
         console.error('Failed to fetch referrals:', err)
       } finally {
@@ -50,21 +47,20 @@ export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
   // Calculate overview stats from real data
   const today = new Date()
   const todayReferrals = referrals.filter(r => {
-    const referralDate = new Date(r.created_at)
+    const referralDate = new Date(r.date)
     return referralDate.toDateString() === today.toDateString()
   })
 
-  const pendingReferrals = referrals.filter(r => r.status === 'submitted')
+  const pendingReferrals = referrals.filter(r => r.status === 'pending')
   const acceptedReferrals = referrals.filter(r => r.status === 'accepted')
   const completedReferrals = referrals.filter(r => r.status === 'completed')
 
-  // Calculate previous period stats for trends
   const previousTodayReferrals = previousReferrals.filter(r => {
-    const referralDate = new Date(r.created_at)
+    const referralDate = new Date(r.date)
     return referralDate.toDateString() === today.toDateString()
   })
 
-  const previousPendingReferrals = previousReferrals.filter(r => r.status === 'submitted')
+  const previousPendingReferrals = previousReferrals.filter(r => r.status === 'pending')
   const previousAcceptedReferrals = previousReferrals.filter(r => r.status === 'accepted')
   const previousCompletedReferrals = previousReferrals.filter(r => r.status === 'completed')
 

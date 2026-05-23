@@ -1,7 +1,7 @@
 import { Badge } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Building, Phone, MapPin, Calendar, TrendingUp } from 'lucide-react'
-import { Facility, getPerformanceVariant, getLevelVariant } from '@/services/facility.service'
+import { Facility, getPerformanceVariant, getLevelVariant } from '@/features/facilities/services/facility.service'
 import { ActionDropdown } from '@/components/shared'
 import { formatTableDate } from '@/utils/date-utils'
 

@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Notification } from '@/hooks/useNotifications';
+import { Notification } from '@/features/notifications/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';

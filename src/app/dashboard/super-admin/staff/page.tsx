@@ -11,7 +11,7 @@ import { StaffTable } from '@/components/tables/staff-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { UserCreationModal } from '@/components/modals/user-creation-modal'
-import { staffService, StaffMember } from '@/services/staff.service'
+import { staffService, StaffMember } from '@/features/users/services/staff.service'
 
 export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState('')

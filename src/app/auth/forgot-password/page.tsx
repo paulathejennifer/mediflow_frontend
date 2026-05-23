@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ForgotPasswordForm } from '@/components/forms/forgot-password-form'
-import { authService } from '@/services/auth.service'
+import { authService } from '@/features/auth/services/auth.service'
 
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)

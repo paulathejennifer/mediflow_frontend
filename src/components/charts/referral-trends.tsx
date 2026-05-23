@@ -52,7 +52,7 @@ export function ReferralTrends({ data }: ReferralTrendsProps) {
       <CardContent>
         <div className="relative w-full max-w-md mx-auto -ml-4">
           <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={data}>
+          <AreaChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             
             <XAxis 

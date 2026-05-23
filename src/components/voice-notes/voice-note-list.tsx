@@ -24,7 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { voiceNoteService } from '@/services/voice-note.service'
+import { voiceNoteService } from '@/features/voice-notes/services/voice-note.service'
 import { toast } from '@/lib/toast'
 
 interface VoiceNote {

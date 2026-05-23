@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { patientService } from '@/services/patient.service'
+import { patientService } from '@/features/patients/services/patient.service'
 
 export interface UIPatient {
   id: number

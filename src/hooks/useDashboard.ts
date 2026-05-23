@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { dashboardService } from '@/services/dashboard.service'
+import { dashboardService } from '@/features/analytics/services/dashboard.service'
 import { DashboardStats } from '@/types/dashboard'
 
 export function useDashboard() {

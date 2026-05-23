@@ -9,14 +9,20 @@ interface TurnaroundData {
   days: number
 }
 
-export function TurnaroundTimeTrend() {
-  // Mock data for turnaround time trend (last 4 weeks)
-  const data: TurnaroundData[] = [
+interface TurnaroundTimeTrendProps {
+  data?: TurnaroundData[]
+}
+
+export function TurnaroundTimeTrend({ data }: TurnaroundTimeTrendProps) {
+  // Default mock data if no data provided
+  const defaultData: TurnaroundData[] = [
     { week: 'Week 1', days: 4.2 },
     { week: 'Week 2', days: 3.8 },
     { week: 'Week 3', days: 4.5 },
     { week: 'Week 4', days: 3.5 }
-  ];
+  ]
+
+  const chartData = data && data.length > 0 ? data : defaultData
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
@@ -30,7 +36,7 @@ export function TurnaroundTimeTrend() {
       <CardContent>
         <div className="relative w-full max-w-md mx-auto -ml-4">
           <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={data}>
+            <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               
               <XAxis 

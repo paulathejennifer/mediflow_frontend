@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '../store/auth-store'
-import { getDefaultRoute } from '../constants/routes'
+import { useAuthStore } from '@/store/auth-store'
+import { getDefaultRoute } from '@/constants/routes'
 
 export function useAuth() {
   const router = useRouter()

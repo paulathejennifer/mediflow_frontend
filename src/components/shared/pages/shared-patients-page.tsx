@@ -12,7 +12,7 @@ import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
 import { EditPatientModal } from '@/components/modals/edit-patient-modal'
-import { patientService } from '@/services/patient.service'
+import { patientService } from '@/features/patients/services/patient.service'
 import { useRouter } from 'next/navigation'
 import { ROLES, UserRole } from '@/constants/roles'
 

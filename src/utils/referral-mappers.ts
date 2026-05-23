@@ -1,4 +1,4 @@
-import { Referral as ApiReferral } from '@/services/referral.service'
+import { Referral as ApiReferral } from '@/features/referrals/services/referral.service'
 
 export interface ReferralTableRow {
   id: string

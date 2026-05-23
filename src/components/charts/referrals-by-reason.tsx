@@ -9,18 +9,39 @@ interface ReferralReasonData {
   percentage: number
 }
 
-export function ReferralReasons() {
-  // Mock data for referral reasons based on the enum
-  const data: ReferralReasonData[] = [
+interface ReasonData {
+  name: string
+  value: number
+}
+
+interface ReferralReasonsProps {
+  data?: ReasonData[]
+}
+
+export function ReferralReasons({ data }: ReferralReasonsProps) {
+  // Transform incoming data or use default mock data
+  const defaultData: ReferralReasonData[] = [
     { reason: 'Consultation', count: 85, percentage: 36 },
     { reason: 'Diagnosis', count: 62, percentage: 26 },
     { reason: 'Emergency', count: 38, percentage: 16 },
     { reason: 'Follow up', count: 28, percentage: 12 },
     { reason: 'Surgery', count: 15, percentage: 6 },
     { reason: '2nd opinion', count: 9, percentage: 4 }
-  ];
+  ]
 
-  const maxCount = Math.max(...data.map(item => item.count));
+  let chartData: ReferralReasonData[]
+  if (data && data.length > 0) {
+    const total = data.reduce((sum, item) => sum + item.value, 0)
+    chartData = data.map(item => ({
+      reason: item.name,
+      count: item.value,
+      percentage: total > 0 ? (item.value / total) * 100 : 0
+    }))
+  } else {
+    chartData = defaultData
+  }
+
+  const maxCount = Math.max(...chartData.map(item => item.count))
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
@@ -33,7 +54,7 @@ export function ReferralReasons() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {data.map((item, index) => (
+          {chartData.map((item, index) => (
             <div key={item.reason} className="flex items-center gap-3">
               {/* Label */}
               <div className="w-20 text-[14px] text-gray-400 text-right">

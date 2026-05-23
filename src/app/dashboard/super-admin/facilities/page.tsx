@@ -11,7 +11,7 @@ import { FacilityTable } from '@/components/tables/facility-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { FacilityCreationModal } from '@/components/modals/facility-creation-modal'
-import { facilityService } from '@/services/facility.service'
+import { facilityService } from '@/features/facilities/services/facility.service'
 
 export default function FacilitiesPage() {
   const [searchTerm, setSearchTerm] = useState('')

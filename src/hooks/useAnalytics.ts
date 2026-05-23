@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { analyticsService, SystemActivityData, AnalyticsMetrics } from '@/services/analytics.service'
+import { analyticsService, SystemActivityData, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
 
 export interface UseAnalyticsReturn {
   systemActivityTrend: SystemActivityData[]

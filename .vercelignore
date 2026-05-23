@@ -1,0 +1,8 @@
+node_modules
+.git
+.github
+README_DEPLOY.md
+*.log
+/.idea
+/.vscode
+dist

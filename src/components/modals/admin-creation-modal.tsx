@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { useFacilities } from '@/hooks/useFacilities'
+import { useFacilities } from '@/features/facilities/hooks/useFacilities'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 import { Eye, EyeOff, Check, ChevronDown } from 'lucide-react'
-import { userService } from '@/services/user.service'
+import { userService } from '@/features/users/services/user.service'
 
 // AutocompleteInput component for long lists like counties and facilities
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {

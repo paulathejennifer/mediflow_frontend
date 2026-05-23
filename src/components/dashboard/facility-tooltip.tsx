@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Facility } from '@/services/facilities.service'
+import { Facility } from '@/features/facilities/services/facility.service'
 
 interface FacilityTooltipProps {
   facility: Facility | null

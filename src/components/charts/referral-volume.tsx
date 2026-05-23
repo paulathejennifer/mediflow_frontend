@@ -67,7 +67,7 @@ export function ReferralVolume({ data, isLoading = false }: ReferralVolumeProps)
       <CardContent>
         <div className="relative w-full max-w-md mx-auto -ml-4">
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={data}>
+            <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               
               <XAxis 

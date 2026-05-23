@@ -1,7 +1,7 @@
 import { Badge } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, User, Phone } from 'lucide-react'
-import { StaffMember } from '@/services/staff.service'
+import { StaffMember } from '@/features/users/services/staff.service'
 import { ActionDropdown } from '@/components/shared'
 import { formatTableDate } from '@/utils/date-utils'
 

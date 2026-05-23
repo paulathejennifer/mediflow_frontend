@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, FormEvent } from 'react'
 import { ChevronDown, Eye, EyeOff } from 'lucide-react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { useFacilities } from '@/hooks/useFacilities'
+import { useFacilities } from '@/features/facilities/hooks/useFacilities'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 
 // AutocompleteInput component for long lists like counties and facilities

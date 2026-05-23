@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LoginForm } from '@/components/forms/login-form'
 import { useAuthStore } from '@/store/auth-store'
-import { authService } from '../../../services/auth.service'
+import { authService } from '@/features/auth/services/auth.service'
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)

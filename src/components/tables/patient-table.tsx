@@ -1,7 +1,7 @@
 import { Badge } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, User, Phone, Calendar } from 'lucide-react'
-import { UIPatient } from '@/hooks/usePatients'
+import { UIPatient } from '@/features/patients/hooks/usePatients'
 import { ActionDropdown } from '@/components/shared'
 import { formatTableDate } from '@/utils/date-utils'
 

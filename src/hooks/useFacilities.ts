@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { facilitiesService } from '@/services/facilities.service'
+import { facilityService } from '@/features/facilities/services/facility.service'
 import { Facility } from '@/types/facility'
 
 export const useFacilities = () => {
@@ -11,7 +11,7 @@ export const useFacilities = () => {
     try {
       setIsLoading(true)
       setError(null)
-      const data = await facilitiesService.getFacilities()
+      const data = await facilityService.getFacilities()
       const transformedData = data.map((facility: any) => ({
         ...facility,
         facilityCode: facility.facility_code

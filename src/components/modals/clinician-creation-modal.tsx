@@ -5,7 +5,7 @@ import { ChevronDown, Eye, EyeOff } from 'lucide-react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
-import { userService } from '@/services/user.service'
+import { userService } from '@/features/users/services/user.service'
 
 // AutocompleteInput component for long lists like counties and facilities
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {

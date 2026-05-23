@@ -121,3 +121,6 @@ export const facilityService = {
     return mapResponseToFacility(response.data)
   },
 }
+
+// Re-export for backward compatibility
+export const facilitiesService = facilityService

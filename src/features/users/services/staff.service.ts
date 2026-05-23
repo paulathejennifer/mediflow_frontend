@@ -1,6 +1,7 @@
-import { userService, User } from './user.service'
-import { facilityService } from './facility.service'
-import { referralService } from './referral.service'
+import { userService } from './user.service'
+import { facilityService } from '@/features/facilities/services/facility.service'
+import { referralService } from '@/features/referrals/services/referral.service'
+import { User } from './user.service'
 
 export interface StaffMember extends User {
   facility: string

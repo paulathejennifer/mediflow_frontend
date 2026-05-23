@@ -12,9 +12,32 @@ interface FunnelData {
   textColor?: string
 }
 
+interface SimpleStatusData {
+  name: string
+  value: number
+}
+
 interface ReferralsByStatusProps {
-  data?: FunnelData[]
+  data?: FunnelData[] | SimpleStatusData[]
   isLoading?: boolean
+}
+
+// Map status names to colors (only key workflow statuses are displayed)
+const statusColorMap: Record<string, string> = {
+  'submitted': COLORS.referralStatus.submitted,
+  'accepted': COLORS.referralStatus.accepted,
+  'in_transit': COLORS.referralStatus.in_transit,
+  'in_progress': COLORS.referralStatus.in_transit,
+  'completed': COLORS.referralStatus.completed,
+}
+
+function getColorForStatus(name: string): string {
+  const lowerName = name.toLowerCase()
+  return statusColorMap[lowerName] || '#6B7280'
+}
+
+function isFunnelData(data: FunnelData[] | SimpleStatusData[]): data is FunnelData[] {
+  return data.length > 0 && 'stage' in data[0]
 }
 
 export function ReferralsByStatus({ data, isLoading = false }: ReferralsByStatusProps) {
@@ -36,6 +59,23 @@ export function ReferralsByStatus({ data, isLoading = false }: ReferralsByStatus
     )
   }
 
+  // Transform simple status data to funnel data if needed
+  let funnelData: FunnelData[] = []
+  if (data && data.length > 0) {
+    if (isFunnelData(data)) {
+      funnelData = data
+    } else {
+      // Transform SimpleStatusData to FunnelData
+      const total = (data as SimpleStatusData[]).reduce((sum, item) => sum + item.value, 0)
+      funnelData = (data as SimpleStatusData[]).map(item => ({
+        stage: item.name,
+        count: item.value,
+        percentage: total > 0 ? (item.value / total) * 100 : 0,
+        color: getColorForStatus(item.name),
+      }))
+    }
+  }
+
   if (!data || data.length === 0) {
     return (
       <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
@@ -54,8 +94,6 @@ export function ReferralsByStatus({ data, isLoading = false }: ReferralsByStatus
       </Card>
     )
   }
-
-  const funnelData = data
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">

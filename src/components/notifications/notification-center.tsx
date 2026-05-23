@@ -6,7 +6,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 import { NotificationCard } from './notification-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { UserRole } from '../constants/roles'
-import { authService } from '../services/auth.service'
+import { authService } from '../features/auth/services/auth.service'
 import { User } from '../types/auth'
 
 interface AuthState {

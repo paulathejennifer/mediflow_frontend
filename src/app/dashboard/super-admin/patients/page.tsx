@@ -13,7 +13,7 @@ import { usePagination } from '@/hooks/usePagination'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
 import { EditPatientModal } from '@/components/modals/edit-patient-modal'
 import { useRouter } from 'next/navigation'
-import { usePatients, UIPatient } from '@/hooks/usePatients'
+import { usePatients, UIPatient } from '@/features/patients/hooks/usePatients'
 
 export default function PatientsPage() {
   const router = useRouter()

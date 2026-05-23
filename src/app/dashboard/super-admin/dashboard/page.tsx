@@ -5,10 +5,10 @@ import { OverviewCards, KPICardData } from '@/components/shared'
 import { SkeletonLoadingSection } from '@/components/shared'
 import { RecentAlerts } from '@/components/dashboard/recent-alerts'
 import { QuickInsights } from '@/components/dashboard/quick-insights'
-import { useDashboard } from '@/hooks/useDashboard'
+import { useDashboard } from '@/features/analytics/hooks/useDashboard'
 import { Button } from '@/components/ui/button'
 import { BarChart3, FileText, Clock, Activity, CheckCircle } from 'lucide-react'
-import { dashboardService } from '@/services/dashboard.service'
+import { dashboardService } from '@/features/analytics/services/dashboard.service'
 import { calculateTrend } from '@/utils/trend-calculator'
 
 export default function SuperAdminDashboard() {

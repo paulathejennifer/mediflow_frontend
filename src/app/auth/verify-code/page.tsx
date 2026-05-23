@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { VerifyCodeForm } from '@/components/forms/verify-code-form'
-import { authService } from '@/services/auth.service'
+import { authService } from '@/features/auth/services/auth.service'
 
 function VerifyCodeContent() {
   const [isLoading, setIsLoading] = useState(false)

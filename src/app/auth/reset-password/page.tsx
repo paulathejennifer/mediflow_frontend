@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ResetPasswordForm } from '@/components/forms/reset-password-form'
-import { authService } from '@/services/auth.service'
+import { authService } from '@/features/auth/services/auth.service'
 
 function ResetPasswordContent() {
   const [isLoading, setIsLoading] = useState(false)

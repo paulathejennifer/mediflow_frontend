@@ -6,7 +6,7 @@ import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { counties } from '@/constants/counties'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
-import { facilityService, CreateFacilityRequest } from '@/services/facility.service'
+import { facilityService, CreateFacilityRequest } from '@/features/facilities/services/facility.service'
 
 // AutocompleteInput component for long lists like counties and facilities
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {

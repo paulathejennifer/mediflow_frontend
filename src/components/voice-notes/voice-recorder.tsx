@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Mic, Pause, Play, Square, Trash2, Save, Loader2 } from 'lucide-react'
-import { useVoiceRecorder } from '@/hooks/useVoiceRecorder'
+import { useVoiceRecorder } from '@/features/voice-notes/hooks/useVoiceRecorder'
 
 export function VoiceRecorder() {
   const [editedTranscription, setEditedTranscription] = useState<string>('')

@@ -21,7 +21,7 @@ import {
   Clock,
   Send
 } from 'lucide-react'
-import { referralService } from '@/services/referral.service'
+import { referralService } from '@/features/referrals/services/referral.service'
 import { mapApiReferralToDetailView, ReferralDetailView } from '@/utils/referral-mappers'
 import { toast } from '@/lib/toast'
 import { ROLES, UserRole } from '@/constants/roles'

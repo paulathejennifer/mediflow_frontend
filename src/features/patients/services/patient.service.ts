@@ -92,4 +92,3 @@ export const patientService = {
     return response.data
   },
 }
-

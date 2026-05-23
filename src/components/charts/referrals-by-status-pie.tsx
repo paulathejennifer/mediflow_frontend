@@ -8,18 +8,36 @@ import { COLORS } from '@/constants/colors'
 interface StatusData {
   name: string
   value: number
-  color: string
 }
 
-export function ReferralsByStatusPie() {
-  // Mock data for referral by status
-  const data: StatusData[] = [
-    { name: 'Pending', value: 45, color: COLORS.referralStatus.submitted },
-    { name: 'Accepted', value: 62, color: COLORS.referralStatus.accepted },
-    { name: 'In Progress', value: 38, color: COLORS.referralStatus.in_transit },
-    { name: 'Completed', value: 145, color: COLORS.referralStatus.completed },
-    { name: 'Rejected', value: 12, color: '#EF4444' }
-  ];
+interface ReferralsByStatusPieProps {
+  data?: StatusData[]
+}
+
+// Map status names to colors (only key workflow statuses are displayed)
+const statusColorMap: Record<string, string> = {
+  'submitted': COLORS.referralStatus.submitted,
+  'accepted': COLORS.referralStatus.accepted,
+  'in_transit': COLORS.referralStatus.in_transit,
+  'in_progress': COLORS.referralStatus.in_transit,
+  'completed': COLORS.referralStatus.completed,
+}
+
+function getColorForStatus(name: string): string {
+  const lowerName = name.toLowerCase()
+  return statusColorMap[lowerName] || '#6B7280'
+}
+
+export function ReferralsByStatusPie({ data }: ReferralsByStatusPieProps) {
+  // Default mock data if no data provided (only key workflow statuses)
+  const defaultData: StatusData[] = [
+    { name: 'Submitted', value: 45 },
+    { name: 'Accepted', value: 62 },
+    { name: 'In Progress', value: 38 },
+    { name: 'Completed', value: 145 }
+  ]
+
+  const chartData = data && data.length > 0 ? data : defaultData
 
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = ({
@@ -58,7 +76,7 @@ export function ReferralsByStatusPie() {
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -67,8 +85,8 @@ export function ReferralsByStatusPie() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getColorForStatus(entry.name)} />
                 ))}
               </Pie>
               <Tooltip
