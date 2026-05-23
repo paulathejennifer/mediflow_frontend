@@ -15,12 +15,14 @@ How to get IDs:
 Add the three values as GitHub repository secrets (Settings → Secrets & variables → Actions).
 
 Notes:
-- The GitHub Actions workflow runs `npm ci` and `npm run build` before deployment.
-- If you prefer Vercel's native Git integration (recommended), you can omit the deploy job and let Vercel build; the workflow will still ensure the project builds on CI.
+- The GitHub Actions workflow runs `npm ci --legacy-peer-deps` and `npm run build` before deployment.
+- For Vercel native deployment, set the Vercel Install Command to `npm ci --legacy-peer-deps`.
+- Root Directory should remain the repo root (where `package.json` lives), not `src/` or `public/`.
+- If you leave Vercel install command blank, it may default to `npm install` and fail because this repo currently has an `eslint` peer dependency conflict.
 
 Local build verification (recommended before pushing):
 ```
-# if you hit peer dependency errors, try:
+# use legacy peer deps because this repo currently contains a peer dependency conflict
 npm ci --legacy-peer-deps
 npm run build
 ```
