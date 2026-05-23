@@ -39,6 +39,7 @@ export default function LoginPage() {
       // Store tokens
       if (typeof window !== 'undefined') {
         localStorage.setItem('access_token', response.access_token)
+        localStorage.setItem('refresh_token', response.refresh_token)
         
         if (data.rememberMe) {
           localStorage.setItem('remember_me', 'true')
@@ -72,7 +73,21 @@ export default function LoginPage() {
       }
       
     } catch (err) {
-      setError('Invalid email or password')
+      const errorMessage =
+        (err as any)?.response?.data?.detail ||
+        (err as any)?.message ||
+        'Login failed. Please check your credentials and try again.'
+
+      // If auth succeeded but user fetch failed, clear bad tokens.
+      if (
+        errorMessage !== 'Invalid email or password' &&
+        typeof window !== 'undefined'
+      ) {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+      }
+
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
