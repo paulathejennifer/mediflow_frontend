@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { useAuth } from '../../auth/hooks/useAuth';
 
-export interface Notification {
+export interface AppNotification {
   id: number;
   type: 'critical' | 'warning' | 'info';
   title: string;
@@ -26,7 +26,7 @@ export const useNotifications = () => {
   const { isAuthenticated } = useAuth();
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const wsRef = useRef<WebSocket | null>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,7 +69,7 @@ export const useNotifications = () => {
 
       ws.onmessage = (event) => {
         try {
-          const notification: Notification = JSON.parse(event.data);
+          const notification: AppNotification = JSON.parse(event.data);
           setNotifications(prev => [notification, ...prev].slice(0, 100));
           if (!notification.is_read) {
             setUnreadCount(prev => prev + 1);
@@ -184,9 +184,9 @@ export const useNotifications = () => {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (response.ok) {
-        const data: Notification[] = await response.json();
+        const data: AppNotification[] = await response.json();
         setNotifications(data);
-        setUnreadCount(data.filter((n: Notification) => !n.is_read).length);
+        setUnreadCount(data.filter((n: AppNotification) => !n.is_read).length);
       }
     } catch (error) {
       console.error('Error loading notifications:', error);

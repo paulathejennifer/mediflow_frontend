@@ -6,8 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Notification as AppNotification } from '@/features/notifications/hooks/useNotifications';
-// import { AppNotification } from '@/features/notifications/hooks/useNotifications';
+import { AppNotification } from '@/features/notifications/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -232,7 +231,7 @@ export function NotificationCard({
           notification.is_read ? 'opacity-75' : ''
         } ${isExpired ? 'opacity-50' : ''} ${
           notification.type === 'critical' ? 'critical-bar' : ''
-        } ${notification.type === 'critical' ? 'critical-bar' : ''}`}
+        }`}
       >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
