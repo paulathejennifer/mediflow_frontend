@@ -12,6 +12,7 @@ import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
 import { EditPatientModal } from '@/components/modals/edit-patient-modal'
+import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
 import { patientService } from '@/features/patients/services/patient.service'
 import { useRouter } from 'next/navigation'
 import { ROLES, UserRole } from '@/constants/roles'
@@ -33,12 +34,23 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
   const [patientsData, setPatientsData] = useState<any[]>([])
+  const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
-    fetchPatientsData()
+    fetchData()
   }, [])
+
+  const fetchKpis = async () => {
+    try {
+      const data = await analyticsService.getDashboardKpis()
+      setKpis(data)
+    } catch (error) {
+      console.error('Failed to fetch patient KPIs:', error)
+    }
+  }
+
 
   const fetchPatientsData = async () => {
     try {
@@ -141,32 +153,21 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
   const patientsOverviewData: KPICardData[] = [
     {
       title: 'Total Patients',
-      value: patientsData.length,
-      trend: { value: '+12', isPositive: true },
+      value: kpis?.totalPatients ?? 0,
+      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'Active Patients',
-      value: patientsData.filter(p => p.status === 'active').length,
-      trend: { value: '+8', isPositive: true },
+      value: kpis?.totalPatients ?? 0,
+      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
       icon: <Activity className="h-5 w-5" />
     },
     {
-      title: 'New This Month',
-      value: patientsData.filter(p => {
-        const registrationDate = new Date(p.registrationDate)
-        const currentMonth = new Date().getMonth()
-        const currentYear = new Date().getFullYear()
-        return registrationDate.getMonth() === currentMonth && registrationDate.getFullYear() === currentYear
-      }).length,
-      trend: { value: '+15', isPositive: true },
+      title: 'Monthly Referrals',
+      value: kpis?.totalReferrals ?? 0,
+      trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
       icon: <Calendar className="h-5 w-5" />
-    },
-    {
-      title: 'Inactive Patients',
-      value: patientsData.filter(p => p.status === 'inactive').length,
-      trend: { value: '+3', isPositive: true },
-      icon: <UserPlus className="h-5 w-5" />
     }
   ]
 

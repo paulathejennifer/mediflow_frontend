@@ -100,26 +100,26 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
   const referralsOverviewData: KPICardData[] = [
     {
       title: 'Total Referrals',
-      value: referrals.length,
-      trend: { value: '+12', isPositive: true },
+      value: kpis?.totalReferrals ?? 0,
+      trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
       icon: <FileText className="h-5 w-5" />
     },
     {
-      title: 'Pending',
-      value: referrals.filter(r => r.status === 'pending').length,
-      trend: { value: '+5', isPositive: true },
+      title: 'Pending Action',
+      value: kpis?.pendingReferrals ?? 0,
+      trend: { value: '0%', isPositive: true }, // Backend doesn't provide trend for pending count
       icon: <Activity className="h-5 w-5" />
     },
     {
-      title: 'Accepted',
-      value: referrals.filter(r => r.status === 'accepted').length,
-      trend: { value: '+8', isPositive: true },
+      title: 'Total Patients',
+      value: kpis?.totalPatients ?? 0,
+      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
       icon: <Users className="h-5 w-5" />
     },
     {
-      title: 'Completed',
-      value: referrals.filter(r => r.status === 'completed').length,
-      trend: { value: '+3', isPositive: true },
+      title: 'Monthly Documents',
+      value: kpis?.totalDocuments ?? 0,
+      trend: { value: `${(kpis?.totalDocumentsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalDocumentsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalDocumentsTrend ?? 0) >= 0 },
       icon: <TrendingUp className="h-5 w-5" />
     }
   ]

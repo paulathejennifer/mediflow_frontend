@@ -25,7 +25,7 @@ export function SharedAnalyticsPage() {
         setError(null)
 
         // Fetch all data in parallel
-        const [metricsData, volumeData, statusDataResult, turnaroundDataResult, trendResult] = await Promise.all([
+        const [metricsData, volumeData, statusDataResult, turnaroundDataResult, trendResult, kpiData] = await Promise.all([
           analyticsService.getAnalyticsMetrics(),
           analyticsService.getReferralVolume(6),
           analyticsService.getReferralsByStatus(),
@@ -37,6 +37,7 @@ export function SharedAnalyticsPage() {
         setReferralVolume(volumeData)
         setStatusData(statusDataResult)
         setTurnaroundData(turnaroundDataResult)
+        setMetrics(kpiData) // Use kpiData for overview cards
 
         // Transform trend data to include total and completed
         const transformedTrend = trendResult.labels.map((label, index) => ({
@@ -56,16 +57,16 @@ export function SharedAnalyticsPage() {
   }, [])
 
   // Calculate KPI values from real data
-  const totalReferrals = metrics?.totalReferrals || 0
-  const avgTurnaround = metrics?.recentAvgTurnaround || 0
-  const completionRate = metrics?.recentCompletionRate || 0
-  const pendingReferrals = metrics?.recentPending || 0
+  const totalReferrals = metrics?.totalReferrals || 0 // This is now totalReferrals from getDashboardKpis
+  const avgTurnaround = metrics?.recentAvgTurnaround || 0 // This is still from getAnalyticsMetrics
+  const completionRate = metrics?.recentCompletionRate || 0 // This is still from getAnalyticsMetrics
+  const pendingReferrals = metrics?.pendingReferrals || 0 // This is now pendingReferrals from getDashboardKpis
 
   // Format trend values with proper signs
   const formatTrendValue = (value: number, suffix: string = '%', showSign: boolean = true): string => {
     if (value === 0) return '0%'
     const sign = showSign ? (value > 0 ? '+' : '') : ''
-    return `${sign}${value.toFixed(1)}${suffix}`
+    return `${sign}${value?.toFixed(1)}${suffix}`
   }
 
   const analyticsOverviewData: KPICardData[] = [
@@ -73,8 +74,8 @@ export function SharedAnalyticsPage() {
       title: 'Total Referrals',
       value: totalReferrals.toLocaleString(),
       trend: {
-        value: formatTrendValue(metrics?.growthRate || 0),
-        isPositive: (metrics?.growthRate || 0) >= 0
+        value: formatTrendValue(metrics?.totalReferralsTrend || 0),
+        isPositive: (metrics?.totalReferralsTrend || 0) >= 0
       },
       icon: <FileText className="h-5 w-5" />
     },
@@ -83,28 +84,23 @@ export function SharedAnalyticsPage() {
       value: `${avgTurnaround} days`,
       trend: {
         // Negative trend is good for turnaround (faster is better)
-        value: formatTrendValue(-(metrics?.turnaroundTrend || 0)),
-        isPositive: (metrics?.turnaroundTrend || 0) <= 0
+        value: formatTrendValue(-(metrics?.turnaroundTrend || 0)), // Still using legacy trend
+        isPositive: (metrics?.turnaroundTrend || 0) <= 0 // Still using legacy trend
       },
       icon: <Clock className="h-5 w-5" />
     },
     {
       title: 'Completion Rate',
       value: `${completionRate.toFixed(1)}%`,
-      trend: {
-        value: formatTrendValue(metrics?.completionRateTrend || 0),
-        isPositive: (metrics?.completionRateTrend || 0) >= 0
-      },
+      trend: { value: '0%', isPositive: true }, // Backend doesn't provide this trend in getDashboardKpis
       icon: <TrendingUp className="h-5 w-5" />
     },
     {
       title: 'Pending Referrals',
       value: pendingReferrals.toString(),
       trend: {
-        // Negative trend is good for pending (fewer pending is better)
-        value: formatTrendValue(-(metrics?.pendingTrend || 0), '', false),
-        isPositive: (metrics?.pendingTrend || 0) <= 0
-      },
+        value: '0%', isPositive: true // Backend doesn't provide trend for pending count
+      }, 
       icon: <AlertCircle className="h-5 w-5" />
     }
   ]

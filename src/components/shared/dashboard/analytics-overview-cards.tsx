@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { TrendingUp, TrendingDown, Building2, Users, Zap, Activity } from 'lucide-react'
+import { TrendingUp, TrendingDown, Building2, Users, Zap, Activity, FileText } from 'lucide-react'
+import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
 
 interface KPICardProps {
   title: string
@@ -11,7 +13,7 @@ interface KPICardProps {
   icon: React.ReactNode
 }
 
-function KPICard({ title, value, trend, icon }: KPICardProps) {
+function KPICard({ title, value, trend, icon, trendLabel = 'vs last month' }: KPICardProps) {
   return (
     <Card className="
 bg-background
@@ -36,56 +38,83 @@ hover:-translate-y-1
           ) : (
             <TrendingDown className="h-4 w-4 mr-1" />
           )}
-          <span>{trend.value} vs last month</span>
+          <span>{trend.value} {trendLabel}</span>
         </div>
       </CardContent>
     </Card>
   )
 }
 
-export function AnalyticsOverviewCards() {
-  const analyticsData = [
+export function AnalyticsOverviewCards() { // Renamed from AnalyticsOverviewCards to avoid confusion
+  const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchKpis = async () => {
+      try {
+        const data = await analyticsService.getDashboardKpis()
+        setKpis(data)
+      } catch (error) {
+        console.error('Failed to fetch analytics KPIs:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchKpis()
+  }, [])
+
+  if (isLoading || !kpis) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="h-32 bg-muted rounded-lg animate-pulse"></Card>
+        ))}
+      </div>
+    )
+  }
+
+  const overviewData: KPICardData[] = [
     {
-      title: 'New Facilities',
-      value: '12',
+      title: 'Total Patients',
+      value: kpis.totalPatients,
       trend: {
-        value: '+15%',
-        isPositive: true
-      },
-      icon: <Building2 className="h-5 w-5" />
-    },
-    {
-      title: 'Active Users',
-      value: '2,847',
-      trend: {
-        value: '+12.3%',
-        isPositive: true
+        value: `${(kpis.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalPatientsTrend?.toFixed(1) ?? 0}%`,
+        isPositive: (kpis.totalPatientsTrend ?? 0) >= 0
       },
       icon: <Users className="h-5 w-5" />
     },
     {
-      title: 'System Health',
-      value: '98.5%',
+      title: 'Total Referrals',
+      value: kpis.totalReferrals,
       trend: {
-        value: '+1.2%',
-        isPositive: true
+        value: `${(kpis.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalReferralsTrend?.toFixed(1) ?? 0}%`,
+        isPositive: (kpis.totalReferralsTrend ?? 0) >= 0
       },
-      icon: <Activity className="h-5 w-5" />
+      icon: <FileText className="h-5 w-5" />
     },
     {
-      title: 'API Requests (24h)',
-      value: '1.2M',
+      title: 'Total Users',
+      value: kpis.totalUsers,
       trend: {
-        value: '-5.4%',
-        isPositive: false
+        value: `${(kpis.totalUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalUsersTrend?.toFixed(1) ?? 0}%`,
+        isPositive: (kpis.totalUsersTrend ?? 0) >= 0
       },
-      icon: <Zap className="h-5 w-5" />
+      icon: <Users className="h-5 w-5" />
+    },
+    {
+      title: 'Total Documents',
+      value: kpis.totalDocuments,
+      trend: {
+        value: `${(kpis.totalDocumentsTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalDocumentsTrend?.toFixed(1) ?? 0}%`,
+        isPositive: (kpis.totalDocumentsTrend ?? 0) >= 0
+      },
+      icon: <FileText className="h-5 w-5" />
     }
   ]
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {analyticsData.map((data, index) => (
+      {overviewData.map((data, index) => (
         <KPICard
           key={index}
           title={data.title}

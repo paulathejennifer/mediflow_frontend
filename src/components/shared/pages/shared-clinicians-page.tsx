@@ -11,6 +11,7 @@ import { StaffTable } from '@/components/tables/staff-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { staffService } from '@/features/users/services/staff.service'
+import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
 import { useRouter } from 'next/navigation'
 import { ClinicianCreationModal } from '@/components/modals/clinician-creation-modal'
 import { useAuthStore } from '@/store/auth-store'
@@ -31,16 +32,21 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [isClinicianModalOpen, setIsClinicianModalOpen] = useState(false)
   const [staffData, setStaffData] = useState<any[]>([])
+  const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
-    fetchStaffData()
+    fetchData()
   }, [])
 
-  const fetchStaffData = async () => {
+  const fetchData = async () => {
     try {
-      const data = await staffService.getStaff()
+      const [data, kpiData] = await Promise.all([
+        staffService.getStaff(),
+        analyticsService.getDashboardKpis()
+      ])
+      setKpis(kpiData)
       // Transform data to match component expectations
       const transformedData = data.map((staff: any) => ({
         ...staff,
@@ -112,31 +118,20 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
   const cliniciansOverviewData: KPICardData[] = [
     {
       title: 'Total Clinicians',
-      value: staffData.filter(c => c.role !== 'super_admin').length,
-      trend: { value: '+8', isPositive: true },
+      value: kpis?.cliniciansCount ?? 0,
+      trend: { value: `${(kpis?.cliniciansTrend ?? 0) >= 0 ? '+' : ''}${kpis?.cliniciansTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.cliniciansTrend ?? 0) >= 0 },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'Active Clinicians',
-      value: staffData.filter(c => c.status === 'active' && c.role !== 'super_admin').length,
-      trend: { value: '+3', isPositive: true },
+      value: kpis?.activeUsers ?? 0, // This is total active users, not just clinicians
+      trend: { value: `${(kpis?.activeUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.activeUsersTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.activeUsersTrend ?? 0) >= 0 },
       icon: <Activity className="h-5 w-5" />
     },
     {
-      title: 'New This Month',
-      value: staffData.filter(c => {
-        const registrationDate = new Date(c.joinDate)
-        const currentMonth = new Date().getMonth()
-        const currentYear = new Date().getFullYear()
-        return registrationDate.getMonth() === currentMonth && registrationDate.getFullYear() === currentYear && c.role !== 'super_admin'
-      }).length,
-      trend: { value: '+5', isPositive: true },
-      icon: <Calendar className="h-5 w-5" />
-    },
-    {
       title: 'Referral Volume',
-      value: staffData.filter(c => c.role !== 'super_admin').reduce((sum, c) => sum + c.referrals, 0),
-      trend: { value: '+15', isPositive: true },
+      value: kpis?.totalReferrals ?? 0,
+      trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
       icon: <TrendingUp className="h-5 w-5" />
     }
   ]

@@ -10,6 +10,8 @@ export interface SystemActivityData {
 export interface AnalyticsMetrics {
   totalPatients: number
   totalPatientsTrend: number
+  newPatientsThisMonth: number
+  newPatientsThisMonthTrend: number
   totalReferrals: number
   totalReferralsTrend: number
   totalDocuments: number
@@ -23,6 +25,8 @@ export interface AnalyticsMetrics {
   cliniciansTrend: number
   facilityAdminsCount: number
   facilityAdminsTrend: number
+  activeReferrals: number
+  pendingReferrals: number
   total_facilities?: number
   // Trend data for overview cards (Legacy support)
   turnaroundTrend?: number
@@ -101,6 +105,8 @@ export const analyticsService = {
     return {
       totalPatients: data.total_patients || 0,
       totalPatientsTrend: data.total_patients_trend || 0,
+      newPatientsThisMonth: data.new_patients_this_month || 0,
+      newPatientsThisMonthTrend: data.new_patients_this_month_trend || 0,
       totalReferrals: data.total_referrals_30d || 0,
       totalReferralsTrend: data.total_referrals_trend || 0,
       totalDocuments: data.total_documents || 0,
@@ -113,6 +119,8 @@ export const analyticsService = {
       cliniciansTrend: data.clinicians_trend || 0,
       facilityAdminsCount: data.facility_admins_count || 0,
       facilityAdminsTrend: data.facility_admins_trend || 0,
+      activeReferrals: data.active_referrals || 0,
+      pendingReferrals: data.pending_referrals || 0,
       total_facilities: data.total_facilities,
       growthRate: data.total_patients_trend || 0, // Fallback for components using growthRate
     } as AnalyticsMetrics
