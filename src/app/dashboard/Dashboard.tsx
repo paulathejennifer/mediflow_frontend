@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { OverviewCard } from '../../components/shared/pages/OverviewCard';
+import { OverviewCard } from '@/components/shared/OverviewCard';
 import { Users, FileText, Building2 } from 'lucide-react';
 import { analyticsService, AnalyticsMetrics } from '../../features/analytics/services/analytics.service'; // Fixed import path
 
@@ -14,6 +14,7 @@ export const Dashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         const data = await analyticsService.getDashboardKpis();
+        console.log("📊 Dashboard KPI Data Received:", data);
         setKpis(data);
       } catch (err: any) {
         console.error("Dashboard Load Error:", err.response?.status, err.response?.data);

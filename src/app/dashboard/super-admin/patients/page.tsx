@@ -110,19 +110,19 @@ export default function PatientsPage() {
     {
       title: 'Total Patients',
       value: kpis?.totalPatients ?? patients.length,
-      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
+      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'Active Patients',
       value: kpis?.totalPatients ?? 0, // In production, backend provides 'active' status
-      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
+      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'Referral Volume',
       value: kpis?.totalReferrals ?? 0,
-      trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
+      trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
       icon: <Calendar className="h-5 w-5" />
     }
   ]

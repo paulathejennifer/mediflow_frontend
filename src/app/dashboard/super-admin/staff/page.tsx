@@ -86,25 +86,25 @@ export default function StaffPage() {
     {
       title: 'Total Staff',
       value: kpis?.totalUsers ?? 0,
-      trend: { value: `${(kpis?.totalUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalUsersTrend ?? 0}%`, isPositive: (kpis?.totalUsersTrend ?? 0) >= 0 },
+      trend: { value: `${(kpis?.totalUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalUsersTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalUsersTrend ?? 0) >= 0 },
       icon: <User className="h-5 w-5" />
     },
     {
       title: 'Active Staff',
       value: kpis?.activeUsers ?? 0,
-      trend: { value: `${(kpis?.activeUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.activeUsersTrend ?? 0}%`, isPositive: (kpis?.activeUsersTrend ?? 0) >= 0 },
+      trend: { value: `${(kpis?.activeUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.activeUsersTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.activeUsersTrend ?? 0) >= 0 },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'Facility Admins',
       value: kpis?.facilityAdminsCount ?? 0,
-      trend: { value: `${(kpis?.facilityAdminsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.facilityAdminsTrend ?? 0}%`, isPositive: (kpis?.facilityAdminsTrend ?? 0) >= 0 },
+      trend: { value: `${(kpis?.facilityAdminsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.facilityAdminsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.facilityAdminsTrend ?? 0) >= 0 },
       icon: <Building2 className="h-5 w-5" />
     },
     {
       title: 'Clinicians',
       value: kpis?.cliniciansCount ?? 0,
-      trend: { value: `${(kpis?.cliniciansTrend ?? 0) >= 0 ? '+' : ''}${kpis?.cliniciansTrend ?? 0}%`, isPositive: (kpis?.cliniciansTrend ?? 0) >= 0 },
+      trend: { value: `${(kpis?.cliniciansTrend ?? 0) >= 0 ? '+' : ''}${kpis?.cliniciansTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.cliniciansTrend ?? 0) >= 0 },
       icon: <Users className="h-5 w-5" />
     }
   ]
