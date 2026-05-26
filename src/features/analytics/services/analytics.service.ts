@@ -9,21 +9,16 @@ export interface SystemActivityData {
 
 export interface AnalyticsMetrics {
   totalPatients: number
+  totalPatientsTrend: number
   totalReferrals: number
+  totalReferralsTrend: number
   totalDocuments: number
+  totalDocumentsTrend: number
   growthRate: number
   activeUsers: number
-  total_patients: number
-  total_patients_trend: number
-  total_referrals_30d: number
-  total_referrals_trend: number
-  total_documents: number
-  total_documents_trend: number
-  total_users: number
-  total_users_trend: number
+  totalUsers: number
+  totalUsersTrend: number
   total_facilities?: number
-  growth_rate?: number
-  active_users?: number
   // Trend data for overview cards (Legacy support)
   turnaroundTrend?: number
   completionRateTrend?: number
@@ -95,7 +90,22 @@ export const analyticsService = {
    */
   getDashboardKpis: async (): Promise<AnalyticsMetrics> => {
     const response = await apiClient.get('/analytics/dashboard')
-    return response.data
+    const data = response.data
+    
+    // Map backend snake_case to frontend camelCase for consistency across all pages
+    return {
+      totalPatients: data.total_patients || 0,
+      totalPatientsTrend: data.total_patients_trend || 0,
+      totalReferrals: data.total_referrals_30d || 0,
+      totalReferralsTrend: data.total_referrals_trend || 0,
+      totalDocuments: data.total_documents || 0,
+      totalDocumentsTrend: data.total_documents_trend || 0,
+      totalUsers: data.total_users || 0,
+      totalUsersTrend: data.total_users_trend || 0,
+      total_facilities: data.total_facilities,
+      activeUsers: data.active_users || data.total_users || 0,
+      growthRate: data.total_patients_trend || 0, // Fallback for components using growthRate
+    } as AnalyticsMetrics
   },
 
   // Get system activity trend (patients, referrals, documents over months)

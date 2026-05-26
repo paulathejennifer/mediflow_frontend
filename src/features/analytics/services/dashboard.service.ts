@@ -8,11 +8,11 @@ export const dashboardService = {
 
     return {
       totalFacilities: data.total_facilities || 0,
-      totalUsers: data.total_users || 0,
-      totalPatients: data.total_patients || 0,
-      totalReferrals: data.total_referrals_30d || 0,
-      totalDocuments: data.total_documents || 0,
-      activeUsers: data.active_users || data.total_users || 0,
+      totalUsers: data.totalUsers,
+      totalPatients: data.totalPatients,
+      totalReferrals: data.totalReferrals,
+      totalDocuments: data.totalDocuments,
+      activeUsers: data.activeUsers,
     }
   },
 
@@ -21,11 +21,11 @@ export const dashboardService = {
 
     const stats = {
       totalFacilities: data.total_facilities || 0,
-      totalUsers: data.total_users || 0,
-      totalPatients: data.total_patients || 0,
-      totalReferrals: data.total_referrals_30d || 0,
-      totalDocuments: data.total_documents || 0,
-      activeUsers: data.active_users || data.total_users || 0,
+      totalUsers: data.totalUsers,
+      totalPatients: data.totalPatients,
+      totalReferrals: data.totalReferrals,
+      totalDocuments: data.totalDocuments,
+      activeUsers: data.activeUsers,
     }
 
     const trends = {
@@ -35,19 +35,19 @@ export const dashboardService = {
       },
       totalUsers: { 
         current: stats.totalUsers, 
-        percentage: data.total_users_trend 
+        percentage: data.totalUsersTrend 
       },
       totalPatients: { 
         current: stats.totalPatients, 
-        percentage: data.total_patients_trend 
+        percentage: data.totalPatientsTrend 
       },
       totalReferrals: { 
         current: stats.totalReferrals, 
-        percentage: data.total_referrals_trend 
+        percentage: data.totalReferralsTrend 
       },
       totalDocuments: {
         current: stats.totalDocuments,
-        percentage: data.total_documents_trend
+        percentage: data.totalDocumentsTrend
       }
     }
 
