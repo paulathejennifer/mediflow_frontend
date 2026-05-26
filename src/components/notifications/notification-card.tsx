@@ -217,15 +217,6 @@ export function NotificationCard({
   }
 `}</style>
 
-      {/* Debug: Check className */}
-      {(() => {
-        const className = `mb-4 w-full transition-all duration-200 ${getNotificationColor(notification.type)} ${
-          notification.is_read ? 'opacity-75' : ''
-        } ${isExpired ? 'opacity-50' : ''} ${
-          notification.type === 'critical' ? 'critical-bar' : ''
-        }`;
-        return null;
-      })()}
       <Card
         className={`mb-4 w-full transition-all duration-200 ${getNotificationColor(notification.type)} ${
           notification.is_read ? 'opacity-75' : ''

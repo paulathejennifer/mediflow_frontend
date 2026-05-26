@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Notification Center Component
  * 
@@ -6,7 +8,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { useNotifications } from '@/features/notifications/hooks/useNotifications';
+import { useNotificationContext } from '@/features/notifications/hooks/NotificationProvider';
 import { NotificationCard } from './notification-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +46,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
     refreshNotifications,
     filters,
     setFilters
-  } = useNotifications();
+  } = useNotificationContext();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedNotifications, setExpandedNotifications] = useState<Set<number>>(new Set());

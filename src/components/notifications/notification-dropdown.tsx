@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Bell, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
-// import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 import { useNotificationContext } from '@/features/notifications/hooks/NotificationProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +21,6 @@ export function NotificationDropdown() {
 
   const router = useRouter();
   const { user } = useAuthStore();
-  // const { notifications, stats, markAsRead, markAllAsRead } = useNotifications();
   const { notifications, stats, markAsRead, markAllAsRead } = useNotificationContext();
 
   // Handle opening/closing animations

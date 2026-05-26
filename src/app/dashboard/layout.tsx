@@ -1,4 +1,5 @@
 import { Sidebar, Header } from '@/components/shared'
+import { NotificationProvider } from '@/features/notifications/hooks/NotificationProvider'
 
 export default function DashboardLayout({
   children,
@@ -6,6 +7,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
+    <NotificationProvider>
     <div className="min-h-screen bg-background">
       <div className="flex">
         {/* Sidebar - Fixed position */}
@@ -26,5 +28,6 @@ export default function DashboardLayout({
         </div>
       </div>
     </div>
+    </NotificationProvider>
   )
 }
