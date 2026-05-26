@@ -2,6 +2,10 @@ import axios from 'axios'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
+if (!API_BASE_URL && typeof window !== 'undefined') {
+  console.error('CRITICAL: NEXT_PUBLIC_API_URL is not defined. API requests will fail or route to the wrong origin.');
+}
+
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,

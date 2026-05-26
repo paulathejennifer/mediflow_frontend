@@ -77,6 +77,10 @@ export const useNotifications = () => {
 
       ws.onmessage = (event) => {
         try {
+          const message = event.data;
+          if (message === 'ping' || message === 'pong') {
+            return; // Ignore WebSocket keep-alive messages
+          }
           const notification: AppNotification = JSON.parse(event.data);
           setNotifications(prev => [notification, ...prev].slice(0, 100));
           if (!notification.is_read) {
@@ -210,7 +214,6 @@ export const useNotifications = () => {
 
   useEffect(() => {
     if (isAuthenticated && token) {
-      loadNotifications();
       connect();
     } else if (!isAuthenticated) {
       wsRef.current?.close(1000, 'Logout');
@@ -219,7 +222,13 @@ export const useNotifications = () => {
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       wsRef.current?.close();
     };
-  }, [token, isAuthenticated, connect, loadNotifications]);
+  }, [token, isAuthenticated, connect]);
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      loadNotifications();
+    }
+  }, [token, isAuthenticated, loadNotifications]);
 
   const updateFilters = useCallback((newFilters: Partial<NotificationFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
