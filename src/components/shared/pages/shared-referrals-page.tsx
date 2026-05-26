@@ -51,8 +51,8 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
 
   useEffect(() => {
     setIsMounted(true)
-    fetchReferrals()
-  }, [fetchReferrals])
+    fetchData()
+  }, [fetchData])
 
   const filteredReferrals = referrals.filter(referral => {
     const matchesSearch =

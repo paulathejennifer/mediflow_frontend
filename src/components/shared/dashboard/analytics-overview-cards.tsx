@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown, Building2, Users, Zap, Activity, FileText } from 'lucide-react'
@@ -10,7 +12,19 @@ interface KPICardProps {
     value: string
     isPositive: boolean
   }
+  trendLabel?: string
   icon: React.ReactNode
+}
+
+export interface KPICardData {
+  title: string
+  value: string | number
+  trend: {
+    value: string
+    isPositive: boolean
+  }
+  icon: React.ReactNode
+  trendLabel?: string
 }
 
 function KPICard({ title, value, trend, icon, trendLabel = 'vs last month' }: KPICardProps) {

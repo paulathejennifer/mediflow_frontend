@@ -1,6 +1,16 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown, Activity, Clock, CheckCircle, FileText, Building2, Users, Zap } from 'lucide-react'
 
+export interface KPICardData {
+  title: string
+  value: string | number
+  trend?: {
+    value: string
+    isPositive: boolean
+  }
+  icon: React.ReactNode
+}
+
 interface KPICardProps {
   title: string
   value: string | number
@@ -45,49 +55,10 @@ hover:-translate-y-1
   )
 }
 
-export function OverviewCards() {
-  const kpiData = [
-    {
-      title: 'Total Referrals',
-      value: '1,284',
-      trend: {
-        value: '+12.5%',
-        isPositive: true
-      },
-      icon: <FileText className="h-5 w-5" />
-    },
-    {
-      title: 'Avg Turnaround',
-      value: '2.4 days',
-      trend: {
-        value: '-18.2%',
-        isPositive: false
-      },
-      icon: <Clock className="h-5 w-5" />
-    },
-    {
-      title: 'System Health',
-      value: '99.7%',
-      trend: {
-        value: '+3.1%',
-        isPositive: true
-      },
-      icon: <Activity className="h-5 w-5" />
-    },
-    {
-      title: 'AI Documents Processed',
-      value: '45,892',
-      trend: {
-        value: '+8%',
-        isPositive: true
-      },
-      icon: <CheckCircle className="h-5 w-5" />
-    }
-  ]
-
+export function OverviewCards({ data }: { data: KPICardData[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {kpiData.map((kpi, index) => (
+      {data.map((kpi, index) => (
         <KPICard
           key={index}
           title={kpi.title}

@@ -42,6 +42,10 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
     fetchData()
   }, [])
 
+  const fetchData = async () => {
+    await Promise.all([fetchPatientsData(), fetchKpis()])
+  }
+
   const fetchKpis = async () => {
     try {
       const data = await analyticsService.getDashboardKpis()

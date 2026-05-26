@@ -30,7 +30,8 @@ export function SharedAnalyticsPage() {
           analyticsService.getReferralVolume(6),
           analyticsService.getReferralsByStatus(),
           analyticsService.getTurnaroundTimeTrend(4),
-          analyticsService.getReferralTrend(30)
+          analyticsService.getReferralTrend(30),
+          analyticsService.getDashboardKpis()
         ])
 
         setMetrics(metricsData)
