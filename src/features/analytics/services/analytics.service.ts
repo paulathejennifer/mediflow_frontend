@@ -18,6 +18,11 @@ export interface AnalyticsMetrics {
   activeUsers: number
   totalUsers: number
   totalUsersTrend: number
+  activeUsersTrend: number
+  cliniciansCount: number
+  cliniciansTrend: number
+  facilityAdminsCount: number
+  facilityAdminsTrend: number
   total_facilities?: number
   // Trend data for overview cards (Legacy support)
   turnaroundTrend?: number
@@ -102,8 +107,13 @@ export const analyticsService = {
       totalDocumentsTrend: data.total_documents_trend || 0,
       totalUsers: data.total_users || 0,
       totalUsersTrend: data.total_users_trend || 0,
-      total_facilities: data.total_facilities,
       activeUsers: data.active_users || data.total_users || 0,
+      activeUsersTrend: data.active_users_trend || 0,
+      cliniciansCount: data.clinicians_count || 0,
+      cliniciansTrend: data.clinicians_trend || 0,
+      facilityAdminsCount: data.facility_admins_count || 0,
+      facilityAdminsTrend: data.facility_admins_trend || 0,
+      total_facilities: data.total_facilities,
       growthRate: data.total_patients_trend || 0, // Fallback for components using growthRate
     } as AnalyticsMetrics
   },

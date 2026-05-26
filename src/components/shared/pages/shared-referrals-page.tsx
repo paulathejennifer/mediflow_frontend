@@ -11,6 +11,7 @@ import { RecentReferralsTable } from '@/components/tables/recent-referrals-table
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { referralService } from '@/features/referrals/services/referral.service'
+import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
 import { mapReferralSummaryToTableRow, ReferralTableRow } from '@/utils/referral-mappers'
 import { ROLES, UserRole } from '@/constants/roles'
 import { toast } from '@/lib/toast'
@@ -27,13 +28,18 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
   const [selectedSort, setSelectedSort] = useState('all')
   const [isMounted, setIsMounted] = useState(false)
   const [referrals, setReferrals] = useState<ReferralTableRow[]>([])
+  const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchReferrals = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true)
-      const data = await referralService.getReferrals({ limit: 200 })
-      setReferrals(data.map(mapReferralSummaryToTableRow))
+      const [refData, kpiData] = await Promise.all([
+        referralService.getReferrals({ limit: 200 }),
+        analyticsService.getDashboardKpis()
+      ])
+      setReferrals(refData.map(mapReferralSummaryToTableRow))
+      setKpis(kpiData)
     } catch (error) {
       console.error('Failed to fetch referrals:', error)
       toast.error('Failed to load referrals')

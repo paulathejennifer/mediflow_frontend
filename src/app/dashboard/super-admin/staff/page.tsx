@@ -12,6 +12,7 @@ import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { UserCreationModal } from '@/components/modals/user-creation-modal'
 import { staffService, StaffMember } from '@/features/users/services/staff.service'
+import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
 
 export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -22,17 +23,22 @@ export default function StaffPage() {
   const [isMounted, setIsMounted] = useState(false)
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [staff, setStaff] = useState<StaffMember[]>([])
+  const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
-    fetchStaff()
+    fetchData()
   }, [])
 
-  const fetchStaff = async () => {
+  const fetchData = async () => {
     try {
-      const data = await staffService.getStaff()
-      setStaff(data)
+      const [staffData, kpiData] = await Promise.all([
+        staffService.getStaff(),
+        analyticsService.getDashboardKpis()
+      ])
+      setStaff(staffData)
+      setKpis(kpiData)
     } catch (error) {
       console.error('Failed to fetch staff:', error)
     } finally {
@@ -73,32 +79,32 @@ export default function StaffPage() {
   const paginatedStaff = pagination.paginatedItems(filteredStaff)
 
   const handleUserCreated = (newUser: any) => {
-    fetchStaff()
+    fetchData()
   }
 
   const staffOverviewData: KPICardData[] = [
     {
       title: 'Total Staff',
-      value: staff.length,
-      trend: { value: '+2', isPositive: true },
+      value: kpis?.totalUsers ?? 0,
+      trend: { value: `${(kpis?.totalUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalUsersTrend ?? 0}%`, isPositive: (kpis?.totalUsersTrend ?? 0) >= 0 },
       icon: <User className="h-5 w-5" />
     },
     {
       title: 'Active Staff',
-      value: staff.filter(s => s.is_active).length,
-      trend: { value: '+1', isPositive: true },
+      value: kpis?.activeUsers ?? 0,
+      trend: { value: `${(kpis?.activeUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.activeUsersTrend ?? 0}%`, isPositive: (kpis?.activeUsersTrend ?? 0) >= 0 },
       icon: <Activity className="h-5 w-5" />
     },
     {
       title: 'Facility Admins',
-      value: staff.filter(s => s.role === 'facility_admin').length,
-      trend: { value: '0', isPositive: true },
+      value: kpis?.facilityAdminsCount ?? 0,
+      trend: { value: `${(kpis?.facilityAdminsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.facilityAdminsTrend ?? 0}%`, isPositive: (kpis?.facilityAdminsTrend ?? 0) >= 0 },
       icon: <Building2 className="h-5 w-5" />
     },
     {
       title: 'Clinicians',
-      value: staff.filter(s => s.role === 'clinician').length,
-      trend: { value: '+3', isPositive: true },
+      value: kpis?.cliniciansCount ?? 0,
+      trend: { value: `${(kpis?.cliniciansTrend ?? 0) >= 0 ? '+' : ''}${kpis?.cliniciansTrend ?? 0}%`, isPositive: (kpis?.cliniciansTrend ?? 0) >= 0 },
       icon: <Users className="h-5 w-5" />
     }
   ]
