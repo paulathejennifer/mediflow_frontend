@@ -1,15 +1,6 @@
-/**
- * WebSocket Hook for Real-Time Notifications
- * 
- * This hook manages WebSocket connections for real-time notifications,
- * including connection management, message handling, and reconnection logic.
- */
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
+import { useAuth } from '../../auth/hooks/useAuth';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { toast } from '@/lib/toast';
-
-// Types for notification system
 export interface Notification {
   id: number;
   type: 'critical' | 'warning' | 'info';
@@ -17,417 +8,222 @@ export interface Notification {
   message: string;
   details: Record<string, any>;
   actions: string[];
-  roles: string[];
+  created_at: string;
+  is_read: boolean;
   backend_source: string;
-  timestamp: string;
-  expires_at?: string;
-  is_read?: boolean;
-  read_at?: string;
-  action_taken?: string;
-  action_result?: Record<string, any>;
 }
 
-export interface NotificationStats {
-  total: number;
-  unread: number;
-  critical: number;
-  warning: number;
-  info: number;
-  expired: number;
+export interface NotificationFilters {
+  type: string;
+  isRead: string;
+  unreadOnly: boolean;
 }
 
-export interface UseNotificationsReturn {
-  notifications: Notification[];
-  stats: NotificationStats;
-  isConnected: boolean;
-  isLoading: boolean;
-  error: string | null;
-  markAsRead: (notificationId: number) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
-  handleAction: (notificationId: number, action: string) => Promise<any>;
-  refreshNotifications: () => Promise<void>;
-  filters: {
-    type: 'all' | 'critical' | 'warning' | 'info';
-    unreadOnly: boolean;
-  };
-  setFilters: (filters: Partial<{ type: 'all' | 'critical' | 'warning' | 'info'; unreadOnly: boolean }>) => void;
-}
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-
-function getWebSocketUrl(): string {
-  if (process.env.NEXT_PUBLIC_WS_URL) {
-    return process.env.NEXT_PUBLIC_WS_URL;
-  }
-  if (API_BASE.startsWith('https://')) {
-    return API_BASE.replace('https://', 'wss://').replace(/\/api\/v1\/?$/, '') + '/api/v1/websocket/notifications';
-  }
-  return API_BASE.replace('http://', 'ws://').replace(/\/api\/v1\/?$/, '') + '/api/v1/websocket/notifications';
-}
-
-/** REST routes live under /websocket/notifications on the deployed API */
-const NOTIFICATIONS_API = `${API_BASE}/websocket/notifications`;
-
-function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem('access_token')
-}
-
-export function useNotifications(): UseNotificationsReturn {
-  const { user, isAuthenticated } = useAuthStore();
-  const token = getAccessToken();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [stats, setStats] = useState<NotificationStats>({
-    total: 0,
-    unread: 0,
-    critical: 0,
-    warning: 0,
-    info: 0,
-    expired: 0
-  });
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFiltersState] = useState({
-    type: 'all' as 'all' | 'critical' | 'warning' | 'info',
-    unreadOnly: false
-  });
-
+export const useNotifications = () => {
+  const { isAuthenticated } = useAuth();
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<NotificationFilters>({ 
+    type: 'all', 
+    isRead: 'all',
+    unreadOnly: false 
+  });
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Calculate stats from notifications
-  const calculateStats = useCallback((notificationList: Notification[]) => {
-    const now = new Date();
-    const newStats = notificationList.reduce((acc, notification) => {
-      acc.total++;
-      
-      if (!notification.is_read) {
-        acc.unread++;
-      }
-      
-      if (notification.type === 'critical') acc.critical++;
-      if (notification.type === 'warning') acc.warning++;
-      if (notification.type === 'info') acc.info++;
-      
-      if (notification.expires_at && new Date(notification.expires_at) < now) {
-        acc.expired++;
-      }
-      
-      return acc;
-    }, {
-      total: 0,
-      unread: 0,
-      critical: 0,
-      warning: 0,
-      info: 0,
-      expired: 0
-    });
+  // Derived stats for the UI
+  const stats = useMemo(() => ({
+    total: notifications.length,
+    unread: unreadCount,
+    critical: notifications.filter(n => n.type === 'critical' && !n.is_read).length,
+    warning: notifications.filter(n => n.type === 'warning' && !n.is_read).length,
+    info: notifications.filter(n => n.type === 'info' && !n.is_read).length,
+  }), [notifications, unreadCount]);
 
-    setStats(newStats);
-  }, []);
+  const connect = useCallback(() => {
+    if (!token || wsRef.current?.readyState === WebSocket.OPEN) return;
 
-  // Fetch initial notifications
-  const fetchNotifications = useCallback(async () => {
-    if (!token) return;
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const apiHost = process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, '');
+    const wsUrl = `${protocol}//${apiHost}/websocket/notifications?token=${token}`;
 
     try {
-      setIsLoading(true);
-      const params = new URLSearchParams();
-      
-      if (filters.type !== 'all') {
-        params.append('notification_type', filters.type);
-      }
-      
-      if (filters.unreadOnly) {
-        params.append('unread_only', 'true');
-      }
-      
-      params.append('limit', '50');
+      const ws = new WebSocket(wsUrl);
 
-      const response = await fetch(`${NOTIFICATIONS_API}?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch notifications: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setNotifications(data.notifications || []);
-      calculateStats(data.notifications || []);
-      setError(null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch notifications';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token, filters.type, filters.unreadOnly, calculateStats]);
-
-  // Connect to WebSocket
-  const connectWebSocket = useCallback(() => {
-    if (!token || !user) return;
-
-    try {
-      const wsUrl = `${getWebSocketUrl()}?token=${token}`;
-      wsRef.current = new WebSocket(wsUrl);
-
-      wsRef.current.onopen = () => {
+      ws.onopen = () => {
         setIsConnected(true);
-        setError(null);
-        reconnectAttempts.current = 0;
-
-        // Send initial ping
-        if (wsRef.current) {
-          wsRef.current.send('ping');
-        }
+        const pingInterval = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send('ping');
+          }
+        }, 30000);
+        ws.onclose = () => clearInterval(pingInterval);
       };
 
-      wsRef.current.onmessage = (event) => {
+      ws.onmessage = (event) => {
         try {
-          const message = event.data;
-          
-          // Handle ping/pong
-          if (message === 'pong') {
-            return;
+          const notification: Notification = JSON.parse(event.data);
+          setNotifications(prev => [notification, ...prev].slice(0, 100));
+          if (!notification.is_read) {
+            setUnreadCount(prev => prev + 1);
           }
-
-          // Handle stats message
-          if (message.startsWith('stats:')) {
-            return;
-          }
-
-          // Parse notification
-          const notification: Notification = JSON.parse(message);
-          
-          // Add to notifications list
-          setNotifications(prev => [notification, ...prev]);
-          
-          // Show toast for critical and warning notifications
-          if (notification.type === 'critical' || notification.type === 'warning') {
-            toast.error(notification.title, {
-              description: notification.message,
-              action: {
-                label: 'View',
-                onClick: () => handleAction(notification.id, 'view-details')
-              }
-            });
-          } else {
-            toast.info(notification.title, {
-              description: notification.message
-            });
-          }
-
-          // Update stats
-          calculateStats([notification, ...notifications]);
-        } catch (err) {
+        } catch (error) {
+          console.error('Error parsing notification:', error);
         }
       };
 
-      wsRef.current.onclose = (event) => {
+      ws.onclose = (event) => {
         setIsConnected(false);
-        
-        // Attempt reconnection if not a normal closure
-        if (event.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) {
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectAttempts.current++;
-            connectWebSocket();
-          }, delay);
-        } else if (reconnectAttempts.current >= maxReconnectAttempts) {
-          setError('Failed to reconnect to notification service');
-          toast.error('Lost connection to notification service');
+        if (token && event.code !== 1000) {
+           reconnectTimeoutRef.current = setTimeout(connect, 5000);
         }
       };
 
-      wsRef.current.onerror = (error) => {
-        setError('WebSocket connection error');
-      };
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to connect to notification service';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    }
-  }, [token, user, notifications, calculateStats]);
-
-  // Mark notification as read
-  const markAsRead = useCallback(async (notificationId: number) => {
-    if (!token) return;
-
-    try {
-      const response = await fetch(`${NOTIFICATIONS_API}/${notificationId}/read`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to mark notification as read: ${response.statusText}`);
-      }
-
-      // Update local state
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId 
-            ? { ...n, is_read: true, read_at: new Date().toISOString() }
-            : n
-        )
-      );
-
-      // Update stats
-      calculateStats(notifications.map(n => 
-        n.id === notificationId 
-          ? { ...n, is_read: true }
-          : n
-      ));
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to mark notification as read';
-      toast.error(errorMessage);
-      throw err;
-    }
-  }, [token, notifications, calculateStats]);
-
-  // Mark all notifications as read
-  const markAllAsRead = useCallback(async () => {
-    if (!token) return;
-
-    try {
-      const response = await fetch(`${NOTIFICATIONS_API}/mark-all-read`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to mark all notifications as read: ${response.statusText}`);
-      }
-
-      // Update local state
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true, read_at: new Date().toISOString() }))
-      );
-
-      // Update stats
-      calculateStats(notifications.map(n => ({ ...n, is_read: true })));
-
-      toast.success('All notifications marked as read');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to mark all notifications as read';
-      toast.error(errorMessage);
-      throw err;
-    }
-  }, [token, notifications, calculateStats]);
-
-  // Handle notification action
-  const handleAction = useCallback(async (notificationId: number, action: string) => {
-    if (!token) return;
-
-    try {
-      const response = await fetch(`${API_BASE}/notifications/notifications/${notificationId}/actions/${action}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to execute action: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      
-      // Update notification with action result
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId 
-            ? { ...n, action_taken: action, action_result: result }
-            : n
-        )
-      );
-
-      toast.success(`Action "${action}" completed successfully`);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : `Failed to execute action: ${action}`;
-      toast.error(errorMessage);
-      throw err;
+      wsRef.current = ws;
+    } catch (error) {
+      console.error('Failed to connect WebSocket:', error);
     }
   }, [token]);
 
-  // Set filters
-  const setFilters = useCallback((newFilters: Partial<typeof filters>) => {
-    setFiltersState(prev => ({ ...prev, ...newFilters }));
-  }, []);
+  const markAsRead = useCallback(async (notificationId: number) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-  // Refresh notifications
-  const refreshNotifications = useCallback(async () => {
-    await fetchNotifications();
-  }, [fetchNotifications]);
-
-  // Initialize connection and fetch data
-  useEffect(() => {
-    if (token && user && isAuthenticated) {
-      fetchNotifications();
-      connectWebSocket();
+      if (response.ok) {
+        setNotifications(prev =>
+          prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
     }
+  }, [token]);
 
-    // Cleanup
+  const markAllAsRead = useCallback(async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/read-all`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  }, [token]);
+
+  const handleAction = useCallback(async (notificationId: number, actionId: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/notifications/${notificationId}/actions/${actionId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Refresh to get updated status/details
+        await loadNotifications();
+      }
+    } catch (error) {
+      console.error('Error handling notification action:', error);
+    }
+  }, [token]);
+
+  const deleteNotification = useCallback(async (notificationId: number) => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      setUnreadCount(prev => {
+        const deleted = notifications.find(n => n.id === notificationId);
+        return deleted && !deleted.is_read ? Math.max(0, prev - 1) : prev;
+      });
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  }, [token, notifications]);
+
+  const loadNotifications = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Ensure this points to the REST endpoint /notifications, NOT the /websocket path
+      let url = `${process.env.NEXT_PUBLIC_API_URL}/notifications?limit=50`;
+      if (filters.type !== 'all') url += `&type=${filters.type}`;
+      if (filters.unreadOnly) url += `&is_read=false`;
+      else if (filters.isRead !== 'all') url += `&is_read=${filters.isRead === 'read'}`;
+
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data: Notification[] = await response.json();
+        setNotifications(data);
+        setUnreadCount(data.filter((n: Notification) => !n.is_read).length);
+      }
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      setError('Failed to load notifications');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token, filters]);
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      loadNotifications();
+      connect();
+    } else if (!isAuthenticated) {
+      wsRef.current?.close(1000, 'Logout');
+    }
     return () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
-      }
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      wsRef.current?.close();
     };
-  }, [token, user, isAuthenticated]);
+  }, [token, isAuthenticated, connect, loadNotifications]);
 
-  // Reconnect when filters change
-  useEffect(() => {
-    fetchNotifications();
-  }, [filters.type, filters.unreadOnly, fetchNotifications]);
-
-  // Ping interval to keep connection alive
-  useEffect(() => {
-    if (!isConnected) return;
-
-    const pingInterval = setInterval(() => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.send('ping');
-      }
-    }, 30000); // Ping every 30 seconds
-
-    return () => clearInterval(pingInterval);
-  }, [isConnected]);
+  const updateFilters = useCallback((newFilters: Partial<NotificationFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  }, []);
 
   return {
     notifications,
-    stats,
     isConnected,
-    isLoading,
-    error,
+    unreadCount,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
     handleAction,
-    refreshNotifications,
+    refresh: loadNotifications,
+    refreshNotifications: loadNotifications,
+    isLoading,
+    error,
+    stats,
     filters,
-    setFilters
+    setFilters: updateFilters,
   };
-}
+};

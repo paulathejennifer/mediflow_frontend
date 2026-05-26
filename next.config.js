@@ -1,24 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  images: {
-    remotePatterns: [
+  async rewrites() {
+    return [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
-        pathname: '/**',
+        source: '/api/v1/:path*',
+        destination: 'https://mediflow-backend-r2c4.onrender.com/api/v1/:path*',
       },
-      {
-        protocol: 'https',
-        hostname: 'mediflow-backend-r2c4.onrender.com',
-        pathname: '/**',
-      },
-    ],
+    ];
   },
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mediflow-backend-r2c4.onrender.com/api/v1',
-  },
-}
+};
 
-export default nextConfig
+module.exports = nextConfig;
