@@ -230,7 +230,9 @@ export function NotificationDropdown() {
                       className="w-full text-sm text-gray-400 hover:text-white hover:bg-gray-800"
                       onClick={(e) => {
                         e.stopPropagation();
-                        router.push('/dashboard/super-admin/notifications');
+                        // Dynamically route based on user role (e.g., facility_admin -> facility-admin)
+                        const roleSlug = user?.role ? user.role.replace('_', '-') : 'super-admin';
+                        router.push(`/dashboard/${roleSlug}/notifications`);
                         handleToggle();
                       }}
                     >

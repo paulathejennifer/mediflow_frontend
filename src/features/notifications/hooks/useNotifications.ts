@@ -24,7 +24,10 @@ export interface NotificationFilters {
 
 export const useNotifications = () => {
   const { isAuthenticated } = useAuth();
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  // Mismatch Fix: Check for 'access_token' (used by Auth Service) as well as 'token'
+  const token = typeof window !== 'undefined' 
+    ? (localStorage.getItem('access_token') || localStorage.getItem('token')) 
+    : null;
   const wsRef = useRef<WebSocket | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -176,6 +179,10 @@ export const useNotifications = () => {
   }, [token, notifications]);
 
   const loadNotifications = useCallback(async () => {
+    if (!process.env.NEXT_PUBLIC_API_URL) {
+      console.warn('NEXT_PUBLIC_API_URL is undefined. Requests will default to frontend host, causing 405 errors.');
+    }
+
     setIsLoading(true);
     setError(null);
     try {
