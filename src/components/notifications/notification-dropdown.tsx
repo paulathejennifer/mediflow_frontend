@@ -209,7 +209,7 @@ export function NotificationDropdown() {
                                 </p>
 
                                 <p className="text-gray-500 text-xs mt-2">
-                                  {new Date(notification.timestamp).toLocaleTimeString([], {
+                                  {new Date(notification.created_at).toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit',
                                   })}

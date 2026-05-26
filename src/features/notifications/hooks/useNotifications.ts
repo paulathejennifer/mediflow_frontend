@@ -9,8 +9,11 @@ export interface Notification {
   details: Record<string, any>;
   actions: string[];
   created_at: string;
+  expires_at?: string;
   is_read: boolean;
   backend_source: string;
+  roles?: string[];
+  action_result?: { message?: string };
 }
 
 export interface NotificationFilters {
@@ -171,7 +174,6 @@ export const useNotifications = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Ensure this points to the REST endpoint /notifications, NOT the /websocket path
       // Corrected: The persistence endpoint is at /notifications, not /websocket/notifications
       let url = `${process.env.NEXT_PUBLIC_API_URL}/notifications?limit=50`;
       if (filters.type !== 'all') url += `&type=${filters.type}`;

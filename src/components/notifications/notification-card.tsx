@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Notification } from '@/features/notifications/hooks/useNotifications';
+import { Notification as AppNotification } from '@/features/notifications/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 
 interface NotificationCardProps {
-  notification: Notification;
+  notification: AppNotification;
   onMarkAsRead: (id: number) => Promise<void>;
   onAction: (id: number, action: string) => Promise<any>;
   isExpanded?: boolean;
@@ -260,7 +260,7 @@ export function NotificationCard({
             <div className="flex items-center gap-2 ml-2">
               <div className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {formatTimestamp(notification.timestamp)}
+                {formatTimestamp(notification.created_at)}
               </div>
               
               {!notification.is_read && (
