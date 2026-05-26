@@ -190,8 +190,9 @@ export const useNotifications = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Corrected: The persistence endpoint is at /notifications, not /websocket/notifications
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/notifications?limit=50`;
+      // Ensure no double slashes if NEXT_PUBLIC_API_URL ends with one
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+      let url = `${baseUrl}/notifications?limit=50`;
       if (filters.type !== 'all') url += `&type=${filters.type}`;
       if (filters.unreadOnly) url += `&is_read=false`;
       else if (filters.isRead !== 'all') url += `&is_read=${filters.isRead === 'read'}`;
