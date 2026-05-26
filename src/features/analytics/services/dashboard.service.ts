@@ -4,16 +4,16 @@ import { getDateRange, getPreviousDateRange } from '@/utils/trend-calculator'
 
 export const dashboardService = {
   getDashboardStats: async (): Promise<DashboardStats> => {
-    const facilitiesResponse = await apiClient.get('/facilities/')
+    const facilitiesResponse = await apiClient.get('/facilities')
     const facilities = facilitiesResponse.data
     
-    const usersResponse = await apiClient.get('/users/')
+    const usersResponse = await apiClient.get('/users')
     const users = usersResponse.data
     
-    const patientsResponse = await apiClient.get('/patients/')
+    const patientsResponse = await apiClient.get('/patients')
     const patients = patientsResponse.data
     
-    const referralsResponse = await apiClient.get('/referrals/')
+    const referralsResponse = await apiClient.get('/referrals')
     const referrals = referralsResponse.data
     
     let totalDocuments = 0
@@ -40,16 +40,16 @@ export const dashboardService = {
     const previousRange = getPreviousDateRange(30, 30)
 
     // Fetch current period data
-    const facilitiesResponse = await apiClient.get('/facilities/')
+    const facilitiesResponse = await apiClient.get('/facilities')
     const facilities = facilitiesResponse.data
     
-    const usersResponse = await apiClient.get('/users/')
+    const usersResponse = await apiClient.get('/users')
     const users = usersResponse.data
     
-    const patientsResponse = await apiClient.get('/patients/')
+    const patientsResponse = await apiClient.get('/patients')
     const patients = patientsResponse.data
     
-    const referralsResponse = await apiClient.get('/referrals/')
+    const referralsResponse = await apiClient.get('/referrals')
     const referrals = referralsResponse.data
     
     let totalDocuments = 0

@@ -61,7 +61,7 @@ export interface UpdatePatientRequest {
 
 export const patientService = {
   createPatient: async (data: CreatePatientRequest): Promise<Patient> => {
-    const response = await apiClient.post('/patients/', data)
+    const response = await apiClient.post('/patients', data)
     return response.data
   },
 
@@ -70,7 +70,7 @@ export const patientService = {
     limit?: number
     search?: string
   }): Promise<Patient[]> => {
-    const response = await apiClient.get('/patients/', { params })
+    const response = await apiClient.get('/patients', { params })
     return response.data
   },
 
