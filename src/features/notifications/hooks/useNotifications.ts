@@ -81,7 +81,7 @@ export const useNotifications = () => {
           if (message === 'ping' || message === 'pong') {
             return; // Ignore WebSocket keep-alive messages
           }
-          const notification: AppNotification = JSON.parse(event.data);
+          const notification: AppNotification = JSON.parse(message);
           setNotifications(prev => [notification, ...prev].slice(0, 100));
           if (!notification.is_read) {
             setUnreadCount(prev => prev + 1);

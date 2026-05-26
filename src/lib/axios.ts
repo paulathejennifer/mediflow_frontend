@@ -22,10 +22,6 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     } else {
       console.warn('No access token found in localStorage')
-      // Redirect to login if trying to access protected routes
-      if (typeof window !== 'undefined' && !config.url?.includes('/auth/')) {
-        window.location.href = '/auth/login'
-      }
     }
     return config
   },

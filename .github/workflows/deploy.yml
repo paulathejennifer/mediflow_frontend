@@ -18,6 +18,9 @@ jobs:
         run: npm ci --legacy-peer-deps
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
 
   deploy:
     needs: build
