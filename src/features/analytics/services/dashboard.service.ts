@@ -1,84 +1,54 @@
 import apiClient from '@/lib/axios'
 import { DashboardStats } from '@/types/dashboard'
-import { getDateRange, getPreviousDateRange } from '@/utils/trend-calculator'
+import { analyticsService } from './analytics.service'
 
 export const dashboardService = {
   getDashboardStats: async (): Promise<DashboardStats> => {
-    const facilitiesResponse = await apiClient.get('/facilities')
-    const facilities = facilitiesResponse.data
-    
-    const usersResponse = await apiClient.get('/users')
-    const users = usersResponse.data
-    
-    const patientsResponse = await apiClient.get('/patients')
-    const patients = patientsResponse.data
-    
-    const referralsResponse = await apiClient.get('/referrals')
-    const referrals = referralsResponse.data
-    
-    let totalDocuments = 0
-    try {
-      const documentsResponse = await apiClient.get('/documents/facility')
-      totalDocuments = Array.isArray(documentsResponse.data) ? documentsResponse.data.length : 0
-    } catch {
-      // Super admin or users without a facility cannot use /documents/facility
-      totalDocuments = 0
-    }
+    const data = await analyticsService.getDashboardKpis()
 
     return {
-      totalFacilities: facilities.length,
-      totalUsers: users.length,
-      totalPatients: patients.length,
-      totalReferrals: referrals.length,
-      totalDocuments,
-      activeUsers: users.filter((u: any) => u.is_active).length,
+      totalFacilities: data.total_facilities || 0,
+      totalUsers: data.total_users || 0,
+      totalPatients: data.total_patients || 0,
+      totalReferrals: data.total_referrals_30d || 0,
+      totalDocuments: data.total_documents || 0,
+      activeUsers: data.active_users || data.total_users || 0,
     }
   },
 
   getDashboardStatsWithTrends: async (): Promise<DashboardStats & { trends: any }> => {
-    const currentRange = getDateRange(30)
-    const previousRange = getPreviousDateRange(30, 30)
+    const data = await analyticsService.getDashboardKpis()
 
-    // Fetch current period data
-    const facilitiesResponse = await apiClient.get('/facilities')
-    const facilities = facilitiesResponse.data
-    
-    const usersResponse = await apiClient.get('/users')
-    const users = usersResponse.data
-    
-    const patientsResponse = await apiClient.get('/patients')
-    const patients = patientsResponse.data
-    
-    const referralsResponse = await apiClient.get('/referrals')
-    const referrals = referralsResponse.data
-    
-    let totalDocuments = 0
-    try {
-      const documentsResponse = await apiClient.get('/documents/facility')
-      totalDocuments = Array.isArray(documentsResponse.data) ? documentsResponse.data.length : 0
-    } catch {
-      totalDocuments = 0
-    }
-
-    // Fetch previous period data (for trend calculation)
-    // Note: Backend may need to support date filtering. For now, we'll use current data
-    // and calculate trends based on available data structure
-    
     const stats = {
-      totalFacilities: facilities.length,
-      totalUsers: users.length,
-      totalPatients: patients.length,
-      totalReferrals: referrals.length,
-      totalDocuments,
-      activeUsers: users.filter((u: any) => u.is_active).length,
+      totalFacilities: data.total_facilities || 0,
+      totalUsers: data.total_users || 0,
+      totalPatients: data.total_patients || 0,
+      totalReferrals: data.total_referrals_30d || 0,
+      totalDocuments: data.total_documents || 0,
+      activeUsers: data.active_users || data.total_users || 0,
     }
 
-    // Calculate trends (placeholder - will need real historical data from backend)
     const trends = {
-      totalFacilities: { current: stats.totalFacilities, previous: Math.max(0, stats.totalFacilities - 1) },
-      totalUsers: { current: stats.totalUsers, previous: Math.max(0, stats.totalUsers - 2) },
-      totalPatients: { current: stats.totalPatients, previous: Math.max(0, stats.totalPatients - 3) },
-      totalReferrals: { current: stats.totalReferrals, previous: Math.max(0, stats.totalReferrals - 5) },
+      totalFacilities: { 
+        current: stats.totalFacilities, 
+        percentage: 0 
+      },
+      totalUsers: { 
+        current: stats.totalUsers, 
+        percentage: data.total_users_trend 
+      },
+      totalPatients: { 
+        current: stats.totalPatients, 
+        percentage: data.total_patients_trend 
+      },
+      totalReferrals: { 
+        current: stats.totalReferrals, 
+        percentage: data.total_referrals_trend 
+      },
+      totalDocuments: {
+        current: stats.totalDocuments,
+        percentage: data.total_documents_trend
+      }
     }
 
     return { ...stats, trends }

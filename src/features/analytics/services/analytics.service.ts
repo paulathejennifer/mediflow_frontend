@@ -13,13 +13,24 @@ export interface AnalyticsMetrics {
   totalDocuments: number
   growthRate: number
   activeUsers: number
-  // Trend data for overview cards
-  turnaroundTrend: number
-  completionRateTrend: number
-  pendingTrend: number
-  recentAvgTurnaround: number
-  recentCompletionRate: number
-  recentPending: number
+  total_patients: number
+  total_patients_trend: number
+  total_referrals_30d: number
+  total_referrals_trend: number
+  total_documents: number
+  total_documents_trend: number
+  total_users: number
+  total_users_trend: number
+  total_facilities?: number
+  growth_rate?: number
+  active_users?: number
+  // Trend data for overview cards (Legacy support)
+  turnaroundTrend?: number
+  completionRateTrend?: number
+  pendingTrend?: number
+  recentAvgTurnaround?: number
+  recentCompletionRate?: number
+  recentPending?: number
 }
 
 export interface SystemHealthData {
@@ -77,6 +88,16 @@ export interface FacilityPerformanceData {
 }
 
 export const analyticsService = {
+  /**
+   * Unified KPI Fetcher
+   * Used by Dashboard, Patients, Staff, Facilities, and Referrals pages
+   * to ensure consistent trend calculation across the platform.
+   */
+  getDashboardKpis: async (): Promise<AnalyticsMetrics> => {
+    const response = await apiClient.get('/analytics/dashboard')
+    return response.data
+  },
+
   // Get system activity trend (patients, referrals, documents over months)
   getSystemActivityTrend: async (months: number = 6): Promise<SystemActivityData[]> => {
     const response = await apiClient.get('/analytics/system-activity', {
@@ -168,12 +189,6 @@ export const analyticsService = {
       params: { limit }
     })
     return response.data.data || []
-  },
-
-  // Get dashboard KPIs
-  getDashboardKpis: async () => {
-    const response = await apiClient.get('/analytics/dashboard')
-    return response.data
   },
 
   // Get referral analytics summary
