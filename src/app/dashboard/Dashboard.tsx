@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { OverviewCard } from '@/components/shared/OverviewCard';
+import { OverviewCard } from '@/components/shared/pages/OverviewCard';
 import { Users, FileText, Building2 } from 'lucide-react';
 import { analyticsService, AnalyticsMetrics } from '../../features/analytics/services/analytics.service'; // Fixed import path
 
