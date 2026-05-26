@@ -172,6 +172,7 @@ export const useNotifications = () => {
     setError(null);
     try {
       // Ensure this points to the REST endpoint /notifications, NOT the /websocket path
+      // Corrected: The persistence endpoint is at /notifications, not /websocket/notifications
       let url = `${process.env.NEXT_PUBLIC_API_URL}/notifications?limit=50`;
       if (filters.type !== 'all') url += `&type=${filters.type}`;
       if (filters.unreadOnly) url += `&is_read=false`;
