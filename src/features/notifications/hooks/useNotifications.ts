@@ -50,9 +50,14 @@ export const useNotifications = () => {
   const connect = useCallback(() => {
     if (!token || wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const apiHost = process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, '');
-    const wsUrl = `${protocol}//${apiHost}/websocket/notifications?token=${token}`;
+    // Respect NEXT_PUBLIC_WS_URL from env if available, otherwise derive from API URL
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL 
+      ? `${process.env.NEXT_PUBLIC_WS_URL}?token=${token}` 
+      : (() => {
+          const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          const apiHost = process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, '');
+          return `${protocol}//${apiHost}/websocket/notifications?token=${token}`;
+        })();
 
     try {
       const ws = new WebSocket(wsUrl);
