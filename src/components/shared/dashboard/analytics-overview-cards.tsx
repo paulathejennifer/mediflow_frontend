@@ -61,27 +61,42 @@ hover:-translate-y-1
 
 export function AnalyticsOverviewCards() { // Renamed from AnalyticsOverviewCards to avoid confusion
   const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
+  const [systemHealth, setSystemHealth] = useState<SystemHealthData | null>(null)
+  const [apiRequests, setApiRequests] = useState<ApiRequestsData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchKpis = async () => {
+    const fetchData = async () => {
       try {
-        const data = await analyticsService.getDashboardKpis()
-        setKpis(data)
+        const [kpiData, healthData, apiData] = await Promise.all([
+          analyticsService.getDashboardKpis(),
+          analyticsService.getSystemHealth(),
+          analyticsService.getApiRequests(1) // Fetch statistics for the last 24 hours
+        ])
+        setKpis(kpiData)
+        setSystemHealth(healthData)
+        setApiRequests(apiData)
       } catch (error) {
-        console.error('Failed to fetch analytics KPIs:', error)
+        console.error('Failed to fetch analytics overview data:', error)
       } finally {
         setIsLoading(false)
       }
     }
-    fetchKpis()
+    fetchData()
   }, [])
 
-  if (isLoading || !kpis) {
+  // Safe trend formatter to prevent NaN%
+  const formatTrend = (val: number | undefined | null) => {
+    const numeric = Number(val)
+    if (isNaN(numeric)) return "0.0%"
+    return `${numeric >= 0 ? '+' : ''}${numeric.toFixed(1)}%`
+  }
+
+  if (isLoading || !kpis || !systemHealth || !apiRequests) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="h-32 bg-muted rounded-lg animate-pulse"></Card>
+          <Card key={i} className="h-32 bg-muted rounded-lg animate-pulse" />
         ))}
       </div>
     )
@@ -89,40 +104,41 @@ export function AnalyticsOverviewCards() { // Renamed from AnalyticsOverviewCard
 
   const overviewData: KPICardData[] = [
     {
-      title: 'Total Patients',
-      value: kpis.totalPatients,
+      title: 'Total Facilities',
+      value: kpis.total_facilities ?? 0,
       trend: {
-        value: `${(kpis.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalPatientsTrend?.toFixed(1) ?? 0}%`,
-        isPositive: (kpis.totalPatientsTrend ?? 0) >= 0
+        value: '0.0%',
+        isPositive: true
+      },
+      icon: <Building2 className="h-5 w-5" />
+    },
+    {
+      title: 'Active Users',
+      value: kpis.activeUsers ?? 0,
+      trend: {
+        value: formatTrend(kpis.activeUsersTrend),
+        isPositive: (kpis.activeUsersTrend ?? 0) >= 0
       },
       icon: <Users className="h-5 w-5" />
     },
     {
-      title: 'Total Referrals',
-      value: kpis.totalReferrals,
+      title: 'System Health',
+      value: `${systemHealth.healthScore}%`,
       trend: {
-        value: `${(kpis.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalReferralsTrend?.toFixed(1) ?? 0}%`,
-        isPositive: (kpis.totalReferralsTrend ?? 0) >= 0
+        value: '0.0%',
+        isPositive: true
       },
-      icon: <FileText className="h-5 w-5" />
+      icon: <HeartPulse className="h-5 w-5" />
     },
     {
-      title: 'Total Users',
-      value: kpis.totalUsers,
+      title: 'API Requests (24h)',
+      value: apiRequests.requestsLast24h ?? 0,
       trend: {
-        value: `${(kpis.totalUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalUsersTrend?.toFixed(1) ?? 0}%`,
-        isPositive: (kpis.totalUsersTrend ?? 0) >= 0
+        value: formatTrend(apiRequests.trend),
+        isPositive: (apiRequests.trend ?? 0) >= 0
       },
-      icon: <Users className="h-5 w-5" />
-    },
-    {
-      title: 'API Requests (30d)',
-      value: kpis.totalDocuments,
-      trend: {
-        value: `${(kpis.totalDocumentsTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalDocumentsTrend?.toFixed(1) ?? 0}%`,
-        isPositive: (kpis.totalDocumentsTrend ?? 0) >= 0
-      },
-      icon: <FileText className="h-5 w-5" />
+      icon: <Server className="h-5 w-5" />,
+      trendLabel: 'vs yesterday'
     }
   ]
 
