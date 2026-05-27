@@ -49,7 +49,7 @@ export default function SuperAdminDashboard() {
     },
     {
       title: 'Total Facilities',
-      value: kpis?.total_facilities ?? kpis?.totalFacilities ?? 0,
+      value: kpis?.total_facilities ?? 0,
       trend: { value: '0.0%', isPositive: true }, // Facilities don't typically have a monthly trend
       icon: <Building2 className="h-5 w-5" />
     },
