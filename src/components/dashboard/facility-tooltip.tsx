@@ -18,6 +18,8 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
 
     let left = position.x + padding
     let top = position.y - tooltipHeight / 2
+    let left = position.x - tooltipWidth / 2
+    let top = position.y + padding
 
     // RIGHT EDGE FIX
     if (left + tooltipWidth > window.innerWidth) {
@@ -27,11 +29,15 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
     // TOP EDGE FIX
     if (top < 0) {
       top = padding
+    // LEFT EDGE FIX
+    if (left < padding) {
+      left = padding
     }
 
     // BOTTOM EDGE FIX
     if (top + tooltipHeight > window.innerHeight) {
       top = window.innerHeight - tooltipHeight - padding
+      top = position.y - tooltipHeight - padding
     }
 
     setCoords({ left, top })

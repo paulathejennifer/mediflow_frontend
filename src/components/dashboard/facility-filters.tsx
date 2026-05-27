@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { counties } from '@/constants/counties'
+import { facilityService } from '@/features/facilities/services/facility.service'
 
 interface FilterDropdownProps {
   value: string
@@ -85,6 +86,20 @@ interface FacilityFiltersProps {
 export function FacilityFilters({ onFilterChange }: FacilityFiltersProps) {
   const [selectedCounty, setSelectedCounty] = useState<string>('all')
   const [selectedLevel, setSelectedLevel] = useState<string>('all')
+  const [availableLevels, setAvailableLevels] = useState<number[]>([])
+
+  useEffect(() => {
+    const fetchLevels = async () => {
+      try {
+        const facilities = await facilityService.getFacilities()
+        const uniqueLevels = Array.from(new Set(facilities.map(f => f.level))).sort((a, b) => b - a)
+        setAvailableLevels(uniqueLevels)
+      } catch (error) {
+        console.error('Failed to fetch levels for filters:', error)
+      }
+    }
+    fetchLevels()
+  }, [])
 
   const countyOptions = [
     { value: 'all', label: 'All Counties' },
@@ -99,6 +114,10 @@ export function FacilityFilters({ onFilterChange }: FacilityFiltersProps) {
     { value: 'level_3', label: 'Level 3' },
     { value: 'level_2', label: 'Level 2' },
     { value: 'level_1', label: 'Level 1' }
+    ...availableLevels.map(level => ({ 
+      value: level.toString(), 
+      label: `Level ${level}` 
+    }))
   ]
 
   const handleCountyChange = (county: string) => {
