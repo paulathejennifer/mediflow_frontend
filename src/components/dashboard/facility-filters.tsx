@@ -108,7 +108,13 @@ export function FacilityFilters({ onFilterChange }: FacilityFiltersProps) {
 
   const levelOptions = [
     { value: 'all', label: 'All Levels' },
-    ...availableLevels.map(level => ({ 
+    { value: 'level_6', label: 'Level 6' },
+    { value: 'level_5', label: 'Level 5' },
+    { value: 'level_4', label: 'Level 4' },
+    { value: 'level_3', label: 'Level 3' },
+    { value: 'level_2', label: 'Level 2' },
+    { value: 'level_1', label: 'Level 1' }, // <-- Added missing comma here
+    ...availableLevels.map(level => ({
       value: level.toString(), 
       label: `Level ${level}` 
     }))
