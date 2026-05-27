@@ -39,6 +39,7 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
 
   if (!facility) return null
 
+  
   return (
     <div
       className="fixed z-[9999] bg-[#0b0f1a]/95 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-2xl transition-all duration-150"
