@@ -34,7 +34,7 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
       top = position.y - tooltipHeight - padding
     }
 
-    setCoords({ left, top })
+    setCoords({ left, top });
   }, [position, facility])
 
   if (!facility) return null
@@ -72,7 +72,7 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
           className="h-full rounded-full"
           style={{
             width: `${facility.performance}%`,
-            background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(103, 232, 249, 1)'
+            background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(103, 232, 249, 1))'
           }}
         />
       </div>
