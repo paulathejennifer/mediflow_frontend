@@ -113,7 +113,7 @@ export function FacilityFilters({ onFilterChange }: FacilityFiltersProps) {
     { value: 'level_4', label: 'Level 4' },
     { value: 'level_3', label: 'Level 3' },
     { value: 'level_2', label: 'Level 2' },
-    { value: 'level_1', label: 'Level 1' },
+    { value: 'level_1', label: 'Level 1' }, // <-- This comma was missing
     ...availableLevels.map(level => ({
       value: level.toString(), 
       label: `Level ${level}` 

@@ -34,8 +34,6 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
       top = position.y - tooltipHeight - padding
     }
 
-    setCoords({ left, top });
-  }, [facility, position.x, position.y]);
     setCoords({ left, top }); // Ensure this line ends with a semicolon
   }, [facility, position.x, position.y]); // Ensure this dependency array is correct and the line ends with a semicolon
 
