@@ -33,29 +33,36 @@ export default function SuperAdminDashboard() {
     fetchStats()
   }, [])
 
+  // Safe trend formatter to prevent NaN%
+  const formatTrend = (val: number | undefined | null) => {
+    const numeric = Number(val);
+    if (isNaN(numeric)) return "0.0%";
+    return `${numeric >= 0 ? '+' : ''}${numeric.toFixed(1)}%`;
+  }
+
   const dashboardOverviewData: KPICardData[] = [
     {
       title: 'Total Referrals',
       value: kpis?.totalReferrals ?? 0,
-      trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
+      trend: { value: formatTrend(kpis?.totalReferralsTrend), isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
       icon: <FileText className="h-5 w-5" />
     },
     {
       title: 'Total Facilities',
-      value: kpis?.total_facilities ?? 0,
+      value: kpis?.total_facilities ?? kpis?.totalFacilities ?? 0,
       trend: { value: '0.0%', isPositive: true }, // Facilities don't typically have a monthly trend
       icon: <Building2 className="h-5 w-5" />
     },
     {
       title: 'Total Users',
       value: kpis?.totalUsers ?? 0,
-      trend: { value: `${(kpis?.totalUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalUsersTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalUsersTrend ?? 0) >= 0 },
+      trend: { value: formatTrend(kpis?.totalUsersTrend), isPositive: (kpis?.totalUsersTrend ?? 0) >= 0 },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'AI Documents (Processed)',
       value: kpis?.totalDocuments ?? 0,
-      trend: { value: `${(kpis?.totalDocumentsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalDocumentsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalDocumentsTrend ?? 0) >= 0 },
+      trend: { value: formatTrend(kpis?.totalDocumentsTrend), isPositive: (kpis?.totalDocumentsTrend ?? 0) >= 0 },
       icon: <TrendingUp className="h-5 w-5" />
     }
   ]

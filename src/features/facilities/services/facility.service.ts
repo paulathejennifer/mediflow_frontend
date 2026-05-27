@@ -35,6 +35,7 @@ interface ApiFacilitySummary {
   type: string
   level: string
   county: string
+  created_at?: string
 }
 
 interface ApiFacilityResponse extends ApiFacilitySummary {
@@ -42,7 +43,6 @@ interface ApiFacilityResponse extends ApiFacilitySummary {
   phone?: string
   email?: string
   is_active?: boolean
-  created_at?: string
 }
 
 function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
@@ -58,7 +58,7 @@ function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
     county: f.county,
     address: '',
     performance: 75,
-    joined: new Date().toISOString(),
+    joined: f.created_at || new Date().toISOString(),
     status: 'active',
     referrals: 0,
   }

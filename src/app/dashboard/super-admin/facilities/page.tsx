@@ -70,7 +70,9 @@ export default function FacilitiesPage() {
     if (selectedSort === 'performance') {
       return b.performance - a.performance
     } else if (selectedSort === 'joined') {
-      return new Date(b.joined).getTime() - new Date(a.joined).getTime()
+      const dateA = a.joined ? new Date(a.joined).getTime() : 0
+      const dateB = b.joined ? new Date(b.joined).getTime() : 0
+      return dateB - dateA
     }
     return 0
   })
