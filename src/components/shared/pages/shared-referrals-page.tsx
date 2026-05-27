@@ -49,10 +49,14 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
     }
   }, [])
 
+  const fetchDataCombined = useCallback(async () => {
+    await fetchData()
+  }, [fetchData])
+
   useEffect(() => {
     setIsMounted(true)
-    fetchDataCombined() // Call the combined fetch function
-  }, [fetchData])
+    fetchDataCombined()
+  }, [fetchDataCombined])
 
   const filteredReferrals = referrals.filter(referral => {
     const matchesSearch =

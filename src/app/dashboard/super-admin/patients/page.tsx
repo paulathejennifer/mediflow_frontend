@@ -128,12 +128,6 @@ export default function PatientsPage() {
       icon: <UserPlus className="h-5 w-5" />
     },
     {
-      title: 'New This Month',
-      value: kpis?.newPatientsThisMonth ?? 0,
-      trend: { value: `${(kpis?.newPatientsThisMonthTrend ?? 0) >= 0 ? '+' : ''}${kpis?.newPatientsThisMonthTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.newPatientsThisMonthTrend ?? 0) >= 0 },
-      icon: <UserPlus className="h-5 w-5" />
-    },
-    {
       title: 'Referral Volume',
       value: kpis?.totalReferrals ?? 0,
       trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },

@@ -10,7 +10,7 @@ import { FileText, Building2, Users, TrendingUp } from 'lucide-react'
 import { dashboardService } from '@/features/analytics/services/dashboard.service'
 import { calculateTrend } from '@/utils/trend-calculator'
 import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
-import { KPICardData } from '@/components/shared/OverviewCard' // Import KPICardData from the correct source
+import { KPICardData } from '@/components/shared/dashboard/overview-cards'
 
 export default function SuperAdminDashboard() {
   const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
