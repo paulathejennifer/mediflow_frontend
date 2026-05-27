@@ -16,8 +16,6 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
     const tooltipHeight = 120
     const padding = 12
 
-    let left = position.x + padding
-    let top = position.y - tooltipHeight / 2
     let left = position.x - tooltipWidth / 2
     let top = position.y + padding
 
@@ -26,9 +24,6 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
       left = position.x - tooltipWidth - padding
     }
 
-    // TOP EDGE FIX
-    if (top < 0) {
-      top = padding
     // LEFT EDGE FIX
     if (left < padding) {
       left = padding
@@ -36,7 +31,6 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
 
     // BOTTOM EDGE FIX
     if (top + tooltipHeight > window.innerHeight) {
-      top = window.innerHeight - tooltipHeight - padding
       top = position.y - tooltipHeight - padding
     }
 
