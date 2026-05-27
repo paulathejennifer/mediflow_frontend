@@ -34,8 +34,8 @@ export function FacilityTooltip({ facility, position }: FacilityTooltipProps) {
       top = position.y - tooltipHeight - padding
     }
 
-    setCoords({ left, top })
-  }, [facility, position.x, position.y])
+    setCoords({ left, top });
+  }, [facility, position.x, position.y]);
 
   if (!facility) return null
 
