@@ -14,7 +14,7 @@ export const Dashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         const data = await analyticsService.getDashboardKpis();
-        console.log("📊 [DEBUG] Dashboard KPIs:", data);
+        console.log("📊 DASHBOARD KPI DATA:", data);
         setKpis(data);
       } catch (err: any) {
         console.error("Dashboard Load Error:", err.response?.status, err.response?.data);
@@ -34,41 +34,32 @@ export const Dashboard: React.FC = () => {
     <div className="p-6 space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <OverviewCard 
-          title="Total Patients" 
-          value={kpis.totalPatients || 0} 
-          trend={kpis.totalPatientsTrend || 0} 
-          trendLabel="vs last month"
-          icon={<Users className="h-5 w-5" />}
-        />
-        <OverviewCard 
-          title="Referrals (30d)" 
-          value={kpis.totalReferrals || 0} 
-          trend={kpis.totalReferralsTrend || 0} 
+          title="Total Referrals" 
+          value={kpis.totalReferrals ?? 0} 
+          trend={kpis.totalReferralsTrend ?? 0} 
           trendLabel="vs last month"
           icon={<FileText className="h-5 w-5" />}
         />
         <OverviewCard 
-          title="Total Users" 
-          value={kpis.totalUsers || 0} 
-          trend={kpis.totalUsersTrend || 0} 
-          trendLabel="vs last month"
-          icon={<Activity className="h-5 w-5" />}
-        />
-        <OverviewCard 
-          title="Total Documents" 
-          value={kpis.totalDocuments || 0} 
-          trend={kpis.totalDocumentsTrend || 0} 
-          trendLabel="vs last month"
-          icon={<TrendingUp className="h-5 w-5" />}
-        />
-      </div>
-      <div className="mt-6">
-        <OverviewCard 
           title="Total Facilities" 
-          value={kpis.total_facilities || 0} 
+          value={kpis.total_facilities ?? 0} 
           trend={0} 
           trendLabel="vs last month"
           icon={<Building2 className="h-5 w-5" />}
+        />
+        <OverviewCard 
+          title="Total Users" 
+          value={kpis.totalUsers ?? 0} 
+          trend={kpis.totalUsersTrend ?? 0} 
+          trendLabel="vs last month"
+          icon={<Users className="h-5 w-5" />}
+        />
+        <OverviewCard 
+          title="AI Documents (Processed)" 
+          value={kpis.totalDocuments ?? 0} 
+          trend={kpis.totalDocumentsTrend ?? 0} 
+          trendLabel="vs last month"
+          icon={<TrendingUp className="h-5 w-5" />}
         />
       </div>
       {/* Charts would go here */}

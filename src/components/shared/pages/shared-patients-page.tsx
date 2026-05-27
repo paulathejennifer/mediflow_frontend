@@ -39,11 +39,15 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
 
   useEffect(() => {
     setIsMounted(true)
-    fetchData()
+    fetchDataCombined() // Call the combined fetch function
   }, [])
 
   const fetchData = async () => {
     await Promise.all([fetchPatientsData(), fetchKpis()])
+  }
+
+  const fetchDataCombined = async () => {
+    await fetchData();
   }
 
   const fetchKpis = async () => {
@@ -100,7 +104,9 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
     if (selectedSort === 'name') {
       return a.name.localeCompare(b.name)
     } else if (selectedSort === 'date') {
-      return new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime()
+      const dateA = a.registrationDate ? new Date(a.registrationDate).getTime() : 0;
+      const dateB = b.registrationDate ? new Date(b.registrationDate).getTime() : 0;
+      return dateB - dateA;
     }
     return 0
   })

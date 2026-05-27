@@ -51,7 +51,7 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
 
   useEffect(() => {
     setIsMounted(true)
-    fetchData()
+    fetchDataCombined() // Call the combined fetch function
   }, [fetchData])
 
   const filteredReferrals = referrals.filter(referral => {
@@ -67,7 +67,9 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
     return matchesSearch && matchesStatus && matchesPriority
   }).sort((a, b) => {
     if (selectedSort === 'date') {
-      return new Date(b.date).getTime() - new Date(a.date).getTime()
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
     } else if (selectedSort === 'priority') {
       const priorityOrder = { high: 0, medium: 1, low: 2 }
       return priorityOrder[a.priority] - priorityOrder[b.priority]

@@ -37,7 +37,7 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
 
   useEffect(() => {
     setIsMounted(true)
-    fetchData()
+    fetchDataCombined() // Call the combined fetch function
   }, [])
 
   const fetchData = async () => {
@@ -61,6 +61,10 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const fetchDataCombined = async () => {
+    await fetchData();
   }
 
   const filteredClinicians = staffData.filter(clinician => {

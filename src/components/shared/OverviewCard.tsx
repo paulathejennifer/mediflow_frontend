@@ -12,7 +12,9 @@ interface OverviewCardProps {
 }
 
 export const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, trend = 0, trendLabel, icon, suffix = "" }) => {
-  const numericTrend = typeof trend === 'number' ? trend : parseFloat(trend as any) || 0;
+  // Ensure trend is always a number, defaulting to 0 if invalid or NaN
+  const rawTrend = typeof trend === 'number' ? trend : parseFloat(String(trend));
+  const numericTrend = isNaN(rawTrend) ? 0 : rawTrend; // Fallback to 0 if NaN
   const isPositive = numericTrend >= 0;
   
   return (

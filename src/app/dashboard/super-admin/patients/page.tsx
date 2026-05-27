@@ -79,7 +79,9 @@ export default function PatientsPage() {
     if (selectedSort === 'referrals') {
       return b.referrals - a.referrals
     } else if (selectedSort === 'lastVisit') {
-      return new Date(b.lastVisit).getTime() - new Date(a.lastVisit).getTime()
+      const dateA = a.lastVisit ? new Date(a.lastVisit).getTime() : 0;
+      const dateB = b.lastVisit ? new Date(b.lastVisit).getTime() : 0;
+      return dateB - dateA;
     }
     return 0
   })
@@ -118,6 +120,18 @@ export default function PatientsPage() {
       value: kpis?.totalPatients ?? 0, // In production, backend provides 'active' status
       trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
       icon: <Activity className="h-5 w-5" />
+    },
+    {
+      title: 'New This Month',
+      value: kpis?.newPatientsThisMonth ?? 0,
+      trend: { value: `${(kpis?.newPatientsThisMonthTrend ?? 0) >= 0 ? '+' : ''}${kpis?.newPatientsThisMonthTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.newPatientsThisMonthTrend ?? 0) >= 0 },
+      icon: <UserPlus className="h-5 w-5" />
+    },
+    {
+      title: 'New This Month',
+      value: kpis?.newPatientsThisMonth ?? 0,
+      trend: { value: `${(kpis?.newPatientsThisMonthTrend ?? 0) >= 0 ? '+' : ''}${kpis?.newPatientsThisMonthTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.newPatientsThisMonthTrend ?? 0) >= 0 },
+      icon: <UserPlus className="h-5 w-5" />
     },
     {
       title: 'Referral Volume',

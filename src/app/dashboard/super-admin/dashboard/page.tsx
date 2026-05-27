@@ -1,30 +1,33 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { OverviewCards, KPICardData } from '@/components/shared'
+import { OverviewCards } from '@/components/shared'
 import { SkeletonLoadingSection } from '@/components/shared'
 import { RecentAlerts } from '@/components/dashboard/recent-alerts'
 import { QuickInsights } from '@/components/dashboard/quick-insights'
 import { useDashboard } from '@/features/analytics/hooks/useDashboard'
-import { Button } from '@/components/ui/button'
-import { BarChart3, FileText, Clock, Activity, CheckCircle } from 'lucide-react'
+import { FileText, Building2, Users, TrendingUp } from 'lucide-react'
 import { dashboardService } from '@/features/analytics/services/dashboard.service'
 import { calculateTrend } from '@/utils/trend-calculator'
+import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
+import { KPICardData } from '@/components/shared/OverviewCard' // Import KPICardData from the correct source
 
 export default function SuperAdminDashboard() {
-  const { isLoading, error } = useDashboard()
-  const [dashboardStats, setDashboardStats] = useState<any>(null)
-  const [statsLoading, setStatsLoading] = useState(true)
+  const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const stats = await dashboardService.getDashboardStatsWithTrends()
-        setDashboardStats(stats)
+        const data = await analyticsService.getDashboardKpis()
+        console.log("📊 [SUPER ADMIN DASHBOARD] KPI Data:", JSON.stringify(data, null, 2));
+        setKpis(data)
       } catch (err) {
         console.error('Failed to fetch dashboard stats:', err)
+        setError(err instanceof Error ? err.message : 'An unknown error occurred')
       } finally {
-        setStatsLoading(false)
+        setIsLoading(false)
       }
     }
     fetchStats()
@@ -33,39 +36,31 @@ export default function SuperAdminDashboard() {
   const dashboardOverviewData: KPICardData[] = [
     {
       title: 'Total Referrals',
-      value: dashboardStats?.totalReferrals?.toLocaleString() || '0',
-      trend: dashboardStats?.trends?.totalReferrals 
-        ? calculateTrend(dashboardStats.trends.totalReferrals.current, dashboardStats.trends.totalReferrals.previous)
-        : undefined,
+      value: kpis?.totalReferrals ?? 0,
+      trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
       icon: <FileText className="h-5 w-5" />
     },
     {
       title: 'Total Facilities',
-      value: dashboardStats?.totalFacilities?.toLocaleString() || '0',
-      trend: dashboardStats?.trends?.totalFacilities
-        ? calculateTrend(dashboardStats.trends.totalFacilities.current, dashboardStats.trends.totalFacilities.previous)
-        : undefined,
-      icon: <Activity className="h-5 w-5" />
+      value: kpis?.total_facilities ?? 0,
+      trend: { value: '0.0%', isPositive: true }, // Facilities don't typically have a monthly trend
+      icon: <Building2 className="h-5 w-5" />
     },
     {
       title: 'Total Users',
-      value: dashboardStats?.totalUsers?.toLocaleString() || '0',
-      trend: dashboardStats?.trends?.totalUsers
-        ? calculateTrend(dashboardStats.trends.totalUsers.current, dashboardStats.trends.totalUsers.previous)
-        : undefined,
-      icon: <BarChart3 className="h-5 w-5" />
+      value: kpis?.totalUsers ?? 0,
+      trend: { value: `${(kpis?.totalUsersTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalUsersTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalUsersTrend ?? 0) >= 0 },
+      icon: <Users className="h-5 w-5" />
     },
     {
-      title: 'Total Patients',
-      value: dashboardStats?.totalPatients?.toLocaleString() || '0',
-      trend: dashboardStats?.trends?.totalPatients
-        ? calculateTrend(dashboardStats.trends.totalPatients.current, dashboardStats.trends.totalPatients.previous)
-        : undefined,
-      icon: <CheckCircle className="h-5 w-5" />
+      title: 'AI Documents (Processed)',
+      value: kpis?.totalDocuments ?? 0,
+      trend: { value: `${(kpis?.totalDocumentsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalDocumentsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalDocumentsTrend ?? 0) >= 0 },
+      icon: <TrendingUp className="h-5 w-5" />
     }
   ]
 
-  if (isLoading || statsLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6">

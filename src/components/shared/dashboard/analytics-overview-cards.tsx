@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react' // Keep this for local state/effects
 import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown, Building2, Users, Zap, Activity, FileText } from 'lucide-react'
 import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
