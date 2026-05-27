@@ -42,3 +42,7 @@ export const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, trend,
     </div>
   );
 };
+/**
+ * DUPLICATE FILE - DELETE ME.
+ * Use src/components/shared/OverviewCard.tsx instead.
+ */

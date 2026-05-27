@@ -11,8 +11,8 @@ interface OverviewCardProps {
   suffix?: string;
 }
 
-export const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, trend, trendLabel, icon, suffix = "" }) => {
-  const numericTrend = Number(trend) || 0;
+export const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, trend = 0, trendLabel, icon, suffix = "" }) => {
+  const numericTrend = typeof trend === 'number' ? trend : parseFloat(trend as any) || 0;
   const isPositive = numericTrend >= 0;
   
   return (

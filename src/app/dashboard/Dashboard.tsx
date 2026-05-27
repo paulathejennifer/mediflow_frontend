@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { OverviewCard } from '@/components/shared/OverviewCard';
-import { Users, FileText, Building2 } from 'lucide-react';
-import { analyticsService, AnalyticsMetrics } from '../../features/analytics/services/analytics.service'; // Fixed import path
+import { Users, FileText, Building2, Activity, TrendingUp } from 'lucide-react';
+import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service';
 
 export const Dashboard: React.FC = () => {
   const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null);
@@ -14,7 +14,7 @@ export const Dashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         const data = await analyticsService.getDashboardKpis();
-        console.log("📊 Dashboard KPI Data Received:", JSON.stringify(data, null, 2));
+        console.log("📊 [DEBUG] Dashboard KPIs:", data);
         setKpis(data);
       } catch (err: any) {
         console.error("Dashboard Load Error:", err.response?.status, err.response?.data);
@@ -32,41 +32,43 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <OverviewCard 
           title="Total Patients" 
-          value={kpis.totalPatients} 
-          trend={kpis.totalPatientsTrend} 
+          value={kpis.totalPatients || 0} 
+          trend={kpis.totalPatientsTrend || 0} 
           trendLabel="vs last month"
-          icon={<Users className="h-6 w-6" />}
+          icon={<Users className="h-5 w-5" />}
         />
         <OverviewCard 
           title="Referrals (30d)" 
-          value={kpis.totalReferrals} 
-          trend={kpis.totalReferralsTrend} 
+          value={kpis.totalReferrals || 0} 
+          trend={kpis.totalReferralsTrend || 0} 
           trendLabel="vs last month"
-          icon={<FileText className="h-6 w-6" />}
+          icon={<FileText className="h-5 w-5" />}
         />
         <OverviewCard 
           title="Total Users" 
-          value={kpis.totalUsers} 
-          trend={kpis.totalUsersTrend} 
+          value={kpis.totalUsers || 0} 
+          trend={kpis.totalUsersTrend || 0} 
           trendLabel="vs last month"
-          icon={<Users className="h-6 w-6" />}
+          icon={<Activity className="h-5 w-5" />}
         />
         <OverviewCard 
           title="Total Documents" 
-          value={kpis.totalDocuments} 
-          trend={kpis.totalDocumentsTrend} 
+          value={kpis.totalDocuments || 0} 
+          trend={kpis.totalDocumentsTrend || 0} 
           trendLabel="vs last month"
-          icon={<FileText className="h-6 w-6" />}
+          icon={<TrendingUp className="h-5 w-5" />}
         />
+      </div>
+      <div className="mt-6">
         <OverviewCard 
           title="Total Facilities" 
           value={kpis.total_facilities || 0} 
-          trend={0} // Facilities don't typically trend monthly
+          trend={0} 
           trendLabel="vs last month"
-          icon={<Building2 className="h-6 w-6" />}
+          icon={<Building2 className="h-5 w-5" />}
         />
       </div>
       {/* Charts would go here */}
