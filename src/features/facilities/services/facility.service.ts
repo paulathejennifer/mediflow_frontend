@@ -36,6 +36,7 @@ interface ApiFacilitySummary {
   level: string
   county: string
   created_at?: string
+  performance_score?: number
 }
 
 interface ApiFacilityResponse extends ApiFacilitySummary {
@@ -57,7 +58,7 @@ function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
     level: levelNum,
     county: f.county,
     address: '',
-    performance: 75,
+    performance: f.performance_score ?? 0,
     joined: f.created_at || new Date().toISOString(),
     status: 'active',
     referrals: 0,
@@ -106,11 +107,12 @@ export const facilityService = {
   },
 
   createFacility: async (data: CreateFacilityRequest): Promise<Facility> => {
+    // Clean the level (strip "level_" prefix) to ensure backend validation passes
     const payload = {
       name: data.name,
       facility_code: data.facility_code || undefined,
       type: data.type,
-      level: data.level,
+      level: data.level.replace('level_', ''),
       county: data.county,
       address: data.address,
       phone: data.phone,

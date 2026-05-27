@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react' // Keep this for local state/effects
 import { Card, CardContent } from '@/components/ui/card'
-import { TrendingUp, TrendingDown, Building2, Users, Zap, Activity, FileText } from 'lucide-react'
-import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
+import { TrendingUp, TrendingDown, Building2, Users, Zap, Activity, FileText, HeartPulse, Server } from 'lucide-react'
+import { analyticsService, AnalyticsMetrics, SystemHealthData, ApiRequestsData } from '@/features/analytics/services/analytics.service'
 
 interface KPICardProps {
   title: string
@@ -116,7 +116,7 @@ export function AnalyticsOverviewCards() { // Renamed from AnalyticsOverviewCard
       icon: <Users className="h-5 w-5" />
     },
     {
-      title: 'Total Documents',
+      title: 'API Requests (30d)',
       value: kpis.totalDocuments,
       trend: {
         value: `${(kpis.totalDocumentsTrend ?? 0) >= 0 ? '+' : ''}${kpis.totalDocumentsTrend?.toFixed(1) ?? 0}%`,
