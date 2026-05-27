@@ -40,7 +40,7 @@ export default function FacilitiesPage() {
         facilityCode: facility.facility_code,
         status: facility.is_active ? 'active' : 'inactive',
         joined: facility.created_at || new Date().toISOString(),
-        performance: 75 // Default performance since API doesn't provide this
+        performance: facility.performance_score ?? 0
       }))
       setFacilitiesData(transformedData)
     } catch (error) {
