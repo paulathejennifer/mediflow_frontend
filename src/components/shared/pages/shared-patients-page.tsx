@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Users, Activity, Calendar, UserPlus } from 'lucide-react'
+import { Plus, Users, Activity, Calendar, UserPlus, TrendingUp } from 'lucide-react'
 import { OverviewCards, KPICardData } from '@/components/shared'
 import { SearchBar } from '@/components/shared'
 import { PatientFilters } from '@/components/shared/forms/patient-filters'
