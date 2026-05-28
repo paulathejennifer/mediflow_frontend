@@ -35,6 +35,9 @@ interface ApiFacilitySummary {
   type: string
   level: string
   county: string
+  address?: string
+  phone?: string
+  email?: string
   created_at?: string
   performance_score?: number
 }
@@ -51,13 +54,13 @@ function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
   return {
     id: String(f.id),
     name: f.name,
-    email: '',
+    email: f.email || '',
     facilityCode: f.facility_code,
-    phone: '',
+    phone: f.phone || '',
     type: f.type as Facility['type'],
     level: levelNum,
     county: f.county,
-    address: '',
+    address: f.address || '',
     performance: f.performance_score ?? 0,
     joined: f.created_at || new Date().toISOString(),
     status: 'active',

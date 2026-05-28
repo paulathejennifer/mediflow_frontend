@@ -37,7 +37,6 @@ export default function FacilitiesPage() {
       // Transform data to match component expectations
       const transformedData = data.map((facility: any) => ({
         ...facility,
-        facilityCode: facility.facility_code,
         status: facility.is_active ? 'active' : 'inactive',
         joined: facility.created_at || new Date().toISOString(),
         performance: facility.performance_score ?? 0
