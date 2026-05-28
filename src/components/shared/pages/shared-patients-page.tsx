@@ -178,6 +178,12 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
       value: kpis?.totalReferrals ?? 0,
       trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
       icon: <Calendar className="h-5 w-5" />
+    },
+    {
+      title: 'Referral Growth',
+      value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend ?? 0}%`,
+      trend: { value: 'Overall', isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
+      icon: <TrendingUp className="h-5 w-5" />
     }
   ]
 

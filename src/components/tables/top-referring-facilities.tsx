@@ -19,52 +19,8 @@ interface TopReferringFacilitiesProps {
 }
 
 export function TopReferringFacilities({ data }: TopReferringFacilitiesProps) {
-  // Transform API data or use default mock data
-  const defaultFacilitiesData: FacilityData[] = [
-    {
-      name: 'Kenyatta Hospital',
-      referrals: 342,
-      avgTurnaround: '2.1 days',
-      completionRate: '94.2%',
-      trend: {
-        value: '+12.5%',
-        isPositive: true
-      }
-    },
-    {
-      name: 'Riverside Medical',
-      referrals: 287,
-      avgTurnaround: '2.8 days',
-      completionRate: '89.7%',
-      trend: {
-        value: '+8.3%',
-        isPositive: true
-      }
-    },
-    {
-      name: "St. Mary's Hospital",
-      referrals: 234,
-      avgTurnaround: '3.2 days',
-      completionRate: '91.1%',
-      trend: {
-        value: '-2.1%',
-        isPositive: false
-      }
-    },
-    {
-      name: 'Nairobi Medical Center',
-      referrals: 198,
-      avgTurnaround: '2.5 days',
-      completionRate: '87.3%',
-      trend: {
-        value: '+5.7%',
-        isPositive: true
-      }
-    }
-  ]
-
-  // Transform API data to FacilityData format
-  let facilitiesData: FacilityData[]
+  // Transform API data to FacilityData format. No mock fallbacks.
+  let facilitiesData: FacilityData[] = []
   if (data && data.labels.length > 0) {
     facilitiesData = data.labels.map((name, index) => ({
       name,
@@ -76,8 +32,6 @@ export function TopReferringFacilities({ data }: TopReferringFacilitiesProps) {
         isPositive: Math.random() > 0.3
       }
     }))
-  } else {
-    facilitiesData = defaultFacilitiesData
   }
 
   return (

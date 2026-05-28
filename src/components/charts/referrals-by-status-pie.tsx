@@ -29,15 +29,8 @@ function getColorForStatus(name: string): string {
 }
 
 export function ReferralsByStatusPie({ data }: ReferralsByStatusPieProps) {
-  // Default mock data if no data provided (only key workflow statuses)
-  const defaultData: StatusData[] = [
-    { name: 'Submitted', value: 45 },
-    { name: 'Accepted', value: 62 },
-    { name: 'In Progress', value: 38 },
-    { name: 'Completed', value: 145 }
-  ]
-
-  const chartData = data && data.length > 0 ? data : defaultData
+  // Use real data only. If empty, show empty state.
+  const chartData = data || []
 
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = ({
@@ -72,6 +65,11 @@ export function ReferralsByStatusPie({ data }: ReferralsByStatusPieProps) {
         <p className="text-muted-foreground text-sm">Distribution of referral statuses</p>
       </CardHeader>
       <CardContent>
+        {chartData.length === 0 ? (
+          <div className="h-64 flex items-center justify-center text-muted-foreground">
+            No referral data found for this period
+          </div>
+        ) : (
         <div className="relative w-full max-w-md mx-auto -ml-4">
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
@@ -107,6 +105,7 @@ export function ReferralsByStatusPie({ data }: ReferralsByStatusPieProps) {
             </PieChart>
           </ResponsiveContainer>
         </div>
+        )}
       </CardContent>
     </Card>
   )

@@ -27,6 +27,7 @@ export interface AnalyticsMetrics {
   facilityAdminsTrend: number
   activeReferrals: number
   pendingReferrals: number
+  avgReferralsPerStaff: number
   total_facilities?: number
   // Trend data for overview cards (Legacy support)
   turnaroundTrend?: number
@@ -132,6 +133,7 @@ export const analyticsService = {
       facilityAdminsTrend: data.facility_admins_trend || 0,
       activeReferrals: data.active_referrals || 0,
       pendingReferrals: data.pending_referrals || 0,
+      avgReferralsPerStaff: data.avg_referrals_per_staff || 0,
       total_facilities: data.total_facilities,
       growthRate: data.total_patients_trend || 0, // Fallback for components using growthRate
       recentAlerts: data.recent_alerts || [],

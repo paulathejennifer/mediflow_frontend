@@ -137,6 +137,12 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
       value: kpis?.totalReferrals ?? 0,
       trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
       icon: <TrendingUp className="h-5 w-5" />
+    },
+    {
+      title: 'Avg. Referrals/Staff',
+      value: kpis?.avgReferralsPerStaff ?? 0,
+      trend: { value: 'Workload', isPositive: true },
+      icon: <Users className="h-5 w-5" />
     }
   ]
 

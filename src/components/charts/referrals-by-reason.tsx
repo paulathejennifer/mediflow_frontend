@@ -19,17 +19,7 @@ interface ReferralReasonsProps {
 }
 
 export function ReferralReasons({ data }: ReferralReasonsProps) {
-  // Transform incoming data or use default mock data
-  const defaultData: ReferralReasonData[] = [
-    { reason: 'Consultation', count: 85, percentage: 36 },
-    { reason: 'Diagnosis', count: 62, percentage: 26 },
-    { reason: 'Emergency', count: 38, percentage: 16 },
-    { reason: 'Follow up', count: 28, percentage: 12 },
-    { reason: 'Surgery', count: 15, percentage: 6 },
-    { reason: '2nd opinion', count: 9, percentage: 4 }
-  ]
-
-  let chartData: ReferralReasonData[]
+  let chartData: ReferralReasonData[] = []
   if (data && data.length > 0) {
     const total = data.reduce((sum, item) => sum + item.value, 0)
     chartData = data.map(item => ({
@@ -37,8 +27,6 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
       count: item.value,
       percentage: total > 0 ? (item.value / total) * 100 : 0
     }))
-  } else {
-    chartData = defaultData
   }
 
   const maxCount = Math.max(...chartData.map(item => item.count))
@@ -53,6 +41,11 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
         <p className="text-muted-foreground text-sm">Distribution of referral purposes</p>
       </CardHeader>
       <CardContent>
+        {chartData.length === 0 ? (
+          <div className="py-12 text-center text-muted-foreground">
+            No data available
+          </div>
+        ) : (
         <div className="space-y-3">
           {chartData.map((item, index) => (
             <div key={item.reason} className="flex items-center gap-3">
@@ -85,6 +78,7 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
             </div>
           ))}
         </div>
+        )}
         
         <div className="flex justify-center gap-4 mt-6">
           <div className="flex items-center gap-2">
