@@ -41,6 +41,7 @@ interface ApiFacilitySummary {
   created_at?: string
   performance_score?: number
 }
+
 interface ApiFacilityResponse extends ApiFacilitySummary {
   address?: string
   phone?: string
