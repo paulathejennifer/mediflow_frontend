@@ -35,6 +35,17 @@ export interface AnalyticsMetrics {
   recentAvgTurnaround?: number
   recentCompletionRate?: number
   recentPending?: number
+  // New Insights for Super Admin
+  recentAlerts?: {
+    id: string
+    severity: 'critical' | 'warning' | 'info'
+    message: string
+    timestamp: string
+  }[]
+  quickInsights?: {
+    label: string
+    value: string
+  }[]
 }
 
 export interface SystemHealthData {
@@ -123,6 +134,8 @@ export const analyticsService = {
       pendingReferrals: data.pending_referrals || 0,
       total_facilities: data.total_facilities,
       growthRate: data.total_patients_trend || 0, // Fallback for components using growthRate
+      recentAlerts: data.recent_alerts || [],
+      quickInsights: data.quick_insights || []
     } as AnalyticsMetrics
   },
 

@@ -124,7 +124,7 @@ export default function SuperAdminDashboard() {
             <RecentAlerts />
           </div>
           <div>
-            <QuickInsights />
+            <QuickInsights insights={kpis?.quickInsights} isLoading={isLoading} />
           </div>
         </div>
       </div>
