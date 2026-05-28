@@ -95,6 +95,7 @@ export function CTAButton({ userRole }: CTAButtonProps) {
 
   const handleCreateAdmin = (facility: any) => {
     setAdminFacility(facility)
+    setIsFacilityModalOpen(false)
     setIsAdminModalOpen(true)
   }
 

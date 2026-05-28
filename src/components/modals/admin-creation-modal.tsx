@@ -3,148 +3,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { useFacilities } from '@/features/facilities/hooks/useFacilities'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 import { Eye, EyeOff, Check, ChevronDown } from 'lucide-react'
 import { userService } from '@/features/users/services/user.service'
-
-// AutocompleteInput component for long lists like counties and facilities
-function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {
-  value: string
-  onChange: (value: string) => void
-  options: { value: string; label: string }[]
-  placeholder: string
-  disabled?: boolean
-}) {
-  const [inputValue, setInputValue] = useState('')
-  const [isOpen, setIsOpen] = useState(false)
-  const [filteredOptions, setFilteredOptions] = useState<typeof options>([])
-  const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [justSelected, setJustSelected] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  // Initialize input value when prop value changes
-  useEffect(() => {
-    const selectedOption = options.find(option => option.value === value)
-    setInputValue(selectedOption?.label || '')
-  }, [value, options])
-
-  // Filter options based on input
-  useEffect(() => {
-    if (inputValue.trim()) {
-      const filtered = options.filter(option =>
-        option.label.toLowerCase().includes(inputValue.toLowerCase())
-      )
-      setFilteredOptions(filtered)
-      setIsOpen(filtered.length > 0)
-    } else {
-      setFilteredOptions([])
-      setIsOpen(false)
-    }
-  }, [inputValue, options])
-
-  // Handle click outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isOpen) return
-
-      switch (event.key) {
-        case 'ArrowDown':
-          event.preventDefault()
-          setSelectedIndex(prev => (prev + 1) % filteredOptions.length)
-          break
-        case 'ArrowUp':
-          event.preventDefault()
-          setSelectedIndex(prev => prev === -1 ? filteredOptions.length - 1 : (prev - 1 + filteredOptions.length) % filteredOptions.length)
-          break
-        case 'Enter':
-          event.preventDefault()
-          if (selectedIndex >= 0 && filteredOptions[selectedIndex]) {
-            handleSelect(filteredOptions[selectedIndex])
-          }
-          break
-        case 'Escape':
-          event.preventDefault()
-          setIsOpen(false)
-          setSelectedIndex(-1)
-          break
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, filteredOptions, selectedIndex])
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value
-    setInputValue(newValue)
-    setSelectedIndex(-1)
-  }
-
-  const handleSelect = (option: { value: string; label: string }) => {
-    onChange(option.value)
-    setInputValue(option.label)
-    setIsOpen(false)
-    setSelectedIndex(-1)
-    setJustSelected(true)
-    // Reset the flag after a short delay
-    setTimeout(() => setJustSelected(false), 150)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === 'Escape') {
-      e.preventDefault()
-    }
-  }
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <input
-        type="text"
-        value={inputValue}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (inputValue.trim() && !justSelected) {
-            setIsOpen(true)
-          }
-        }}
-        disabled={disabled}
-        placeholder={placeholder}
-        className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-      />
-      
-      {isOpen && filteredOptions.length > 0 && (
-        <div className="absolute top-full left-0 mt-1 w-full bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-          {filteredOptions.map((option, index) => (
-            <button
-              key={option.value}
-              onClick={() => handleSelect(option)}
-              className={`w-full px-3 py-2 text-xs text-left hover:bg-gray-800 transition-colors ${
-                index === selectedIndex ? 'bg-gray-800 text-primary' : 'text-muted-foreground'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 
 // FilterDropdown component
 function FilterDropdown({ value, onChange, options, placeholder, disabled = false }: {
@@ -229,7 +90,6 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
   const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const { facilities: facilitiesData } = useFacilities()
 
   // Reset form when modal opens
   useEffect(() => {

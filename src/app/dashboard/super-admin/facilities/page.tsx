@@ -11,6 +11,7 @@ import { FacilityTable } from '@/components/tables/facility-table'
 import { Pagination } from '@/components/shared'
 import { usePagination } from '@/hooks/usePagination'
 import { FacilityCreationModal } from '@/components/modals/facility-creation-modal'
+import { AdminCreationModal } from '@/components/modals/admin-creation-modal'
 import { facilityService } from '@/features/facilities/services/facility.service'
 
 export default function FacilitiesPage() {
@@ -24,6 +25,8 @@ export default function FacilitiesPage() {
   const [isMounted, setIsMounted] = useState(false)
   const [isFacilityModalOpen, setIsFacilityModalOpen] = useState(false)
   const [facilitiesData, setFacilitiesData] = useState<any[]>([])
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false)
+  const [adminFacility, setAdminFacility] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -84,8 +87,14 @@ export default function FacilitiesPage() {
   const paginatedFacilities = pagination.paginatedItems(filteredFacilities)
 
   const handleFacilityCreated = (newFacility: any) => {
-    // In a real app, this would add to the database
-    // For now, just log it - in production this would refresh data or add to state
+    // Refresh the table data
+    fetchFacilitiesData()
+  }
+
+  const handleCreateAdmin = (facility: any) => {
+    setAdminFacility(facility)
+    setIsFacilityModalOpen(false)
+    setIsAdminModalOpen(true)
   }
 
   const facilitiesOverviewData: KPICardData[] = [
@@ -196,6 +205,15 @@ export default function FacilitiesPage() {
         isOpen={isFacilityModalOpen}
         onClose={() => setIsFacilityModalOpen(false)}
         onSuccess={handleFacilityCreated}
+        onCreateAdmin={handleCreateAdmin}
+      />
+
+      {/* Admin Creation Modal */}
+      <AdminCreationModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        onSuccess={() => fetchFacilitiesData()}
+        facility={adminFacility}
       />
     </div>
   )
