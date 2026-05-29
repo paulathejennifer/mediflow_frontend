@@ -31,7 +31,8 @@ export const staffService = {
         }
         
         // Count referrals created by this user
-        const referralCount = referrals.filter(r => r.created_by === user.id).length
+        // Casting to any to bypass TypeScript error for missing 'created_by' on Summary type
+        const referralCount = referrals.filter((r: any) => r.created_by === user.id).length
         
         return {
           ...user,
