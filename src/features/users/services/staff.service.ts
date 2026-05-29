@@ -31,7 +31,7 @@ export const staffService = {
         }
         
         // Count referrals created by this user
-        const referralCount = 0
+        const referralCount = referrals.filter(r => r.created_by === user.id).length
         
         return {
           ...user,

@@ -51,6 +51,7 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
       const transformedData = data.map((staff: any) => ({
         ...staff,
         name: `${staff.first_name} ${staff.last_name}`,
+        phone: staff.phone || 'No phone',
         status: staff.is_active ? 'active' : 'inactive',
         joinDate: staff.created_at,
       }))
@@ -74,7 +75,7 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
     const matchesSearch =
       clinician.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       clinician.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      clinician.phone.includes(searchTerm) ||
+      (clinician.phone || '').includes(searchTerm) ||
       clinician.role.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = selectedStatus === 'all' || clinician.status === selectedStatus

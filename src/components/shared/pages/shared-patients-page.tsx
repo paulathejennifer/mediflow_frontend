@@ -88,7 +88,7 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
     const matchesSearch =
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.phone.includes(searchTerm) ||
+      (patient.phone || '').includes(searchTerm) ||
       patient.mrn.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = selectedStatus === 'all' || patient.status === selectedStatus
