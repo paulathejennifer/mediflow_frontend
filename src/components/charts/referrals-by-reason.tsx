@@ -79,6 +79,7 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
           ))}
         </div>
         )}
+      
         
         <div className="flex justify-center gap-4 mt-6">
           <div className="flex items-center gap-2">
