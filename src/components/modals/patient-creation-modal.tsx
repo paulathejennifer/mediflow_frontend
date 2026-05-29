@@ -12,6 +12,7 @@ interface PatientCreationModalProps {
   onClose: () => void
   onSuccess: (patient: any) => void
 }
+const toast = { error: (message: string) => window.alert(message) }
 
 // FilterDropdown component
 function FilterDropdown({ value, onChange, options, placeholder, disabled = false, dataField }: {
@@ -204,30 +205,35 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
       return
     }
 
-    await execute(async () => {
-      const newPatient = await patientService.createPatient({
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        date_of_birth: formData.date_of_birth,
-        gender: formData.gender as 'male' | 'female' | 'other',
-        phone: formData.phone,
-        email: formData.email,
-        address: formData.address,
-        emergency_contact_name: formData.emergency_contact_name,
-        emergency_contact_phone: formData.emergency_contact_phone,
-        medical_history: formData.medical_history,
-        allergies: formData.allergies,
-        medications: formData.medications,
-        chronic_conditions: formData.chronic_conditions
-      })
+    try {
+      await execute(async () => {
+        const newPatient = await patientService.createPatient({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          date_of_birth: formData.date_of_birth,
+          gender: formData.gender as 'male' | 'female' | 'other',
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          emergency_contact_name: formData.emergency_contact_name,
+          emergency_contact_phone: formData.emergency_contact_phone,
+          medical_history: formData.medical_history,
+          allergies: formData.allergies,
+          medications: formData.medications,
+          chronic_conditions: formData.chronic_conditions
+        })
 
-      onSuccess(newPatient)
-      setShowSuccess(true)
-    })
+        onSuccess(newPatient)
+        setShowSuccess(true)
+      })
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 'Failed to create patient. Please try again.'
+      toast.error(errorMessage)
+    }
   }
 
   const handleClose = () => {
-    onClose()
+    onClose() // This will close the modal
   }
 
   if (!isOpen) return null
