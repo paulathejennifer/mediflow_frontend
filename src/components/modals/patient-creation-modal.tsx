@@ -197,7 +197,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     e.preventDefault()
 
     if (!validateForm()) {
-      console.error('Form validation failed. Errors:', errors)
       const firstErrorField = Object.keys(errors)[0]
       if (firstErrorField) {
         const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)
