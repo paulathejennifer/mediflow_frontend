@@ -12,7 +12,7 @@ interface PatientCreationModalProps {
   onClose: () => void
   onSuccess: (patient: any) => void
 }
-const toast = { error: (message: string) => window.alert(message) }
+import { toast } from 'sonner'
 
 // FilterDropdown component
 function FilterDropdown({ value, onChange, options, placeholder, disabled = false, dataField }: {
@@ -53,6 +53,7 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
       <Button
         variant="outline"
         size="sm"
+        type="button"
         onClick={handleToggle}
         disabled={disabled}
         className="w-full h-8 px-3 text-xs bg-gray-800/50 border-gray-700 text-muted-foreground hover:bg-gray-700 hover:text-foreground focus:border-primary focus:text-foreground"
@@ -71,6 +72,7 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
             {options.map(option => (
               <button
                 key={option.value}
+                type="button"
                 onClick={() => {
                   onChange(option.value)
                   setIsOpen(false)
@@ -195,6 +197,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     e.preventDefault()
 
     if (!validateForm()) {
+      console.error('Form validation failed. Errors:', errors)
       const firstErrorField = Object.keys(errors)[0]
       if (firstErrorField) {
         const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)

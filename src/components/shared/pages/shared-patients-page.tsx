@@ -69,7 +69,7 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
         return {
           ...patient,
           name: `${patient.first_name} ${patient.last_name}`,
-          phone: patient.phone || 'No phone', // Ensure phone is explicitly mapped
+          phone: patient.phone || 'No phone',
           status: 'active', // Default to active since Patient interface doesn't have status
           registrationDate: patient.created_at,
           age,
