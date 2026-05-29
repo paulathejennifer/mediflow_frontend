@@ -102,7 +102,17 @@ export interface FacilityPerformanceData {
   completion_rate: number
   avg_turnaround_days: number
 }
-
+  // New interface for FacilityData to match backend response
+export interface FacilityData {
+  name: string
+  referrals: number
+  avg_turnaround: string
+  completion_rate: string
+  trend: {
+    value: string
+    is_positive: boolean
+  }
+}
 export const analyticsService = {
   /**
    * Unified KPI Fetcher
@@ -216,15 +226,14 @@ export const analyticsService = {
   },
 
   // Get top referring facilities (super admin only)
-  getTopReferringFacilities: async (limit: number = 10): Promise<{ labels: string[]; data: number[] }> => {
+  getTopReferringFacilities: async (limit: number = 10): Promise<FacilityData[]> => {
     const response = await apiClient.get('/analytics/facilities/top-referring', {
       params: { limit }
     })
-    return {
-      labels: response.data.labels || [],
-      data: response.data.data || []
-    }
+    // Backend now returns an array of objects directly
+    return response.data.data || []
   },
+  
 
   // Get facility performance (super admin only)
   getFacilityPerformance: async (limit: number = 10): Promise<FacilityPerformanceData[]> => {

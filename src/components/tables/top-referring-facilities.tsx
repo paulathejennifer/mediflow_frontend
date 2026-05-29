@@ -2,37 +2,15 @@
 
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-interface FacilityData {
-  name: string
-  referrals: number
-  avgTurnaround: string
-  completionRate: string
-  trend: {
-    value: string
-    isPositive: boolean
-  }
-}
+import { FacilityData } from '@/features/analytics/services/analytics.service' // Import the new interface
 
 interface TopReferringFacilitiesProps {
   data?: { labels: string[]; data: number[] }
 }
 
 export function TopReferringFacilities({ data }: TopReferringFacilitiesProps) {
-  // Transform API data to FacilityData format. No mock fallbacks.
-  let facilitiesData: FacilityData[] = []
-  if (data && data.labels.length > 0) {
-    facilitiesData = data.labels.map((name, index) => ({
-      name,
-      referrals: data.data[index] || 0,
-      avgTurnaround: `${(2 + Math.random() * 2).toFixed(1)} days`,
-      completionRate: `${(85 + Math.random() * 15).toFixed(1)}%`,
-      trend: {
-        value: `${(Math.random() * 20 - 5).toFixed(1)}%`,
-        isPositive: Math.random() > 0.3
-      }
-    }))
-  }
+  // Use the data directly from the analytics service
+  const facilitiesData: FacilityData[] = (data as unknown as FacilityData[]) || [];
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
@@ -67,11 +45,11 @@ export function TopReferringFacilities({ data }: TopReferringFacilitiesProps) {
                 <tr key={index} className="border-b border-border hover:bg-gray-900 transition-colors">
                   <td className="py-3 px-3 font-medium">{facility.name}</td>
                   <td className="text-right py-3 px-3 font-mono">{facility.referrals.toLocaleString()}</td>
-                  <td className="text-right py-3 px-3 font-mono">{facility.avgTurnaround}</td>
-                  <td className="text-right py-3 px-3 font-mono">{facility.completionRate}</td>
+                  <td className="text-right py-3 px-3 font-mono">{facility.avg_turnaround}</td>
+                  <td className="text-right py-3 px-3 font-mono">{facility.completion_rate}</td>
                   <td className="text-right py-3 px-3">
-                    <div className={`flex items-center justify-end text-xs font-medium ${facility.trend.isPositive ? 'text-primary' : 'text-red-400'}`}>
-                      {facility.trend.isPositive ? (
+                    <div className={`flex items-center justify-end text-xs font-medium ${facility.trend.is_positive ? 'text-primary' : 'text-red-400'}`}>
+                      {facility.trend.is_positive ? (
                         <TrendingUp className="h-4 w-4 mr-1" />
                       ) : (
                         <TrendingDown className="h-4 w-4 mr-1" />
