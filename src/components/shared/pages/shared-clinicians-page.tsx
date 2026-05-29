@@ -51,6 +51,7 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
       const transformedData = data.map((staff: any) => ({
         ...staff,
         name: `${staff.first_name} ${staff.last_name}`,
+        // Ensure phone flows through correctly; only fallback to 'No phone' if genuinely null
         phone: staff.phone || 'No phone',
         status: staff.is_active ? 'active' : 'inactive',
         joinDate: staff.created_at,

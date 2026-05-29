@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FacilityData } from '@/features/analytics/services/analytics.service' // Import the new interface
 
 interface TopReferringFacilitiesProps {
-  data?: { labels: string[]; data: number[] }
+  data?: FacilityData[]
 }
 
 export function TopReferringFacilities({ data }: TopReferringFacilitiesProps) {
   // Use the data directly from the analytics service
-  const facilitiesData: FacilityData[] = (data as unknown as FacilityData[]) || [];
+  const facilitiesData: FacilityData[] = data || [];
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">

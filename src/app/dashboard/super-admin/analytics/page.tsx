@@ -14,6 +14,8 @@ import { TopReferringFacilities } from '@/components/tables/top-referring-facili
 import { analyticsService, SystemActivityData, AnalyticsMetrics, StatusData, TurnaroundData, ReasonData, FacilityPerformanceData, SystemHealthData, ApiRequestsData } from '@/features/analytics/services/analytics.service'
 import { Building2, Users, Activity, Zap } from 'lucide-react'
 
+type FacilityData = Awaited<ReturnType<typeof analyticsService.getTopReferringFacilities>> extends Array<infer U> ? U : never
+
 export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +25,7 @@ export default function AnalyticsPage() {
   const [turnaroundData, setTurnaroundData] = useState<TurnaroundData[]>([])
   const [reasonData, setReasonData] = useState<ReasonData[]>([])
   const [facilityPerformance, setFacilityPerformance] = useState<FacilityPerformanceData[]>([])
-  const [topFacilities, setTopFacilities] = useState<{ labels: string[]; data: number[] }>({ labels: [], data: [] })
+  const [topFacilities, setTopFacilities] = useState<FacilityData[]>([])
   const [referralTrendData, setReferralTrendData] = useState<{ month: string; total: number; completed: number }[]>([])
   const [systemHealth, setSystemHealth] = useState<SystemHealthData | null>(null)
   const [apiRequests, setApiRequests] = useState<ApiRequestsData | null>(null)
