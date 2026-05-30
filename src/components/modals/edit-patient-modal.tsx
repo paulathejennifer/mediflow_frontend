@@ -5,22 +5,23 @@ import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { ChevronDown } from 'lucide-react'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
+import { patientService } from '@/features/patients/services/patient.service'
+import { toast } from 'sonner'
 
 interface PatientData {
-  id: string
-  firstName: string
-  lastName: string
-  dateOfBirth: string
+  id: number
+  first_name: string
+  last_name: string
+  date_of_birth: string
   gender: string
   email?: string
   phone?: string
-  emergencyContact?: string
-  emergencyPhone?: string
-  lastVisit: string
-  allergies: string[]
-  medications: string[]
-  medicalHistory: string[]
-  chronicConditions: string[]
+  emergency_contact_name?: string
+  emergency_contact_phone?: string
+  allergies?: string
+  medications?: string
+  medical_history?: string
+  chronic_conditions?: string
   profileImage?: string
 }
 
@@ -112,18 +113,18 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
 
 export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPatientModalProps) {
   const [formData, setFormData] = useState({
-    first_name: patient?.firstName || '',
-    last_name: patient?.lastName || '',
-    email: patient?.email || '',
-    phone: patient?.phone || '',
-    date_of_birth: patient?.dateOfBirth || '',
-    gender: patient?.gender || '',
-    emergency_contact_name: patient?.emergencyContact || '',
-    emergency_contact_phone: patient?.emergencyPhone || '',
-    medical_history: (patient?.medicalHistory || []).join('\n'),
-    allergies: (patient?.allergies || []).join(', '),
-    medications: (patient?.medications || []).join('\n'),
-    chronic_conditions: (patient?.chronicConditions || []).join(', ')
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    date_of_birth: '',
+    gender: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    medical_history: '',
+    allergies: '',
+    medications: '',
+    chronic_conditions: ''
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -134,18 +135,18 @@ export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPa
   useEffect(() => {
     if (isOpen && patient) {
       setFormData({
-        first_name: patient.firstName || '',
-        last_name: patient.lastName || '',
+        first_name: patient.first_name || '',
+        last_name: patient.last_name || '',
         email: patient.email || '',
-        phone: patient.phone || '',
-        date_of_birth: patient.dateOfBirth || '',
+        phone: patient.phone && patient.phone !== 'No phone' ? patient.phone : '',
+        date_of_birth: patient.date_of_birth ? new Date(patient.date_of_birth).toISOString().split('T')[0] : '',
         gender: patient.gender || '',
-        emergency_contact_name: patient.emergencyContact || '',
-        emergency_contact_phone: patient.emergencyPhone || '',
-        medical_history: (patient.medicalHistory || []).join('\n'),
-        allergies: (patient.allergies || []).join(', '),
-        medications: (patient.medications || []).join('\n'),
-        chronic_conditions: (patient.chronicConditions || []).join(', ')
+        emergency_contact_name: patient.emergency_contact_name || '',
+        emergency_contact_phone: patient.emergency_contact_phone || '',
+        medical_history: patient.medical_history || '',
+        allergies: patient.allergies || '',
+        medications: patient.medications || '',
+        chronic_conditions: patient.chronic_conditions || ''
       })
       setErrors({})
       setShowSuccess(false)
@@ -198,42 +199,28 @@ export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPa
     }
 
     await execute(async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      const updatedPatient: PatientData = {
-        ...patient,
-        firstName: formData.first_name,
-        lastName: formData.last_name,
-        email: formData.email,
-        phone: formData.phone,
-        dateOfBirth: formData.date_of_birth,
-        gender: formData.gender,
-        emergencyContact: formData.emergency_contact_name,
-        emergencyPhone: formData.emergency_contact_phone,
-        medicalHistory: formData.medical_history.split('\n').filter(item => item.trim()),
-        allergies: formData.allergies.split(',').map(item => item.trim()).filter(item => item),
-        medications: formData.medications.split('\n').filter(item => item.trim()),
-        chronicConditions: formData.chronic_conditions.split(',').map(item => item.trim()).filter(item => item)
-      }
+      try {
+        const updatedPatient = await patientService.updatePatient(Number(patient.id), {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          phone: formData.phone,
+          date_of_birth: formData.date_of_birth,
+          gender: formData.gender,
+          emergency_contact_name: formData.emergency_contact_name,
+          emergency_contact_phone: formData.emergency_contact_phone,
+          medical_history: formData.medical_history,
+          allergies: formData.allergies,
+          medications: formData.medications,
+          chronic_conditions: formData.chronic_conditions
+        } as any)
 
-      onSuccess(updatedPatient)
-      setShowSuccess(true)
-      // Reset form to updated values
-      setFormData({
-        first_name: updatedPatient.firstName,
-        last_name: updatedPatient.lastName,
-        email: updatedPatient.email || '',
-        phone: updatedPatient.phone || '',
-        date_of_birth: updatedPatient.dateOfBirth,
-        gender: updatedPatient.gender,
-        emergency_contact_name: updatedPatient.emergencyContact || '',
-        emergency_contact_phone: updatedPatient.emergencyPhone || '',
-        medical_history: updatedPatient.medicalHistory.join('\n'),
-        allergies: updatedPatient.allergies.join(', '),
-        medications: updatedPatient.medications.join('\n'),
-        chronic_conditions: updatedPatient.chronicConditions.join(', ')
-      })
+        onSuccess(updatedPatient)
+        setShowSuccess(true)
+      } catch (err: any) {
+        const message = err.response?.data?.detail || 'Failed to update patient'
+        toast.error(message)
+      }
     })
   }
 

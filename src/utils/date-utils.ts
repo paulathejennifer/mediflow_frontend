@@ -21,10 +21,10 @@ export function formatDate(
     return 'N/A';
   }
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dateObj = typeof date === 'string' ? new Date(date) : (date instanceof Date ? date : null);
   
   // Handle invalid dates or null objects
-  if (!dateObj || isNaN(dateObj.getTime())) {
+  if (!dateObj || isNaN(dateObj.getTime?.() ?? NaN)) {
     return 'Invalid Date';
   }
   
@@ -53,11 +53,11 @@ export function formatRelativeTime(date: string | Date): string {
     return 'N/A';
   }
 
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dateObj = typeof date === 'string' ? new Date(date) : (date instanceof Date ? date : null);
   const now = new Date();
   
   // Handle invalid dates or null objects
-  if (!dateObj || isNaN(dateObj.getTime())) {
+  if (!dateObj || isNaN(dateObj.getTime?.() ?? NaN)) {
     return 'Invalid Date';
   }
   

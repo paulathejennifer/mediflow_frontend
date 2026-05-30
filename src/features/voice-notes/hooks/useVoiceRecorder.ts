@@ -102,9 +102,7 @@ export const useVoiceRecorder = () => {
     try {
       setIsTranscribing(true)
       setError(null)
-      // Simulate API call for transcription
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      setTranscription('This is a simulated transcription of the recorded audio.')
+      // Logic moved to component to handle the specific voiceNoteId
     } catch (err) {
       setError('Failed to transcribe audio')
       console.error('Failed to transcribe:', err)

@@ -6,8 +6,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Mic, Pause, Play, Square, Trash2, Save, Loader2 } from 'lucide-react'
 import { useVoiceRecorder } from '@/features/voice-notes/hooks/useVoiceRecorder'
+import { voiceNoteService } from '@/features/voice-notes/services/voice-note.service'
+import { useParams } from 'next/navigation'
+import { toast } from 'sonner'
 
 export function VoiceRecorder() {
+  const params = useParams()
+  const referralId = params?.id ? Number(params.id) : null
   const [editedTranscription, setEditedTranscription] = useState<string>('')
   const [isEditingTranscription, setIsEditingTranscription] = useState(false)
   
@@ -31,10 +36,28 @@ export function VoiceRecorder() {
 
   // Save and transcribe
   const saveAndTranscribe = async () => {
-    await transcribeAudio()
-    if (transcription) {
-      setEditedTranscription(transcription)
-      setIsEditingTranscription(true)
+    if (!audioBlob || !referralId) {
+      toast.error('Missing recording or referral context')
+      return
+    }
+
+    try {
+      // 1. Upload the voice note
+      const voiceNote = await voiceNoteService.uploadVoiceNote({
+        referral_id: referralId,
+        audio_file: new File([audioBlob], 'recording.webm', { type: 'audio/webm' })
+      })
+
+      // 2. Trigger real transcription
+      const result = await voiceNoteService.transcribeVoiceNote(voiceNote.id)
+      
+      if (result.transcript) {
+        setEditedTranscription(result.transcript)
+        setIsEditingTranscription(true)
+        toast.success('Transcription complete')
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to process audio')
     }
   }
 

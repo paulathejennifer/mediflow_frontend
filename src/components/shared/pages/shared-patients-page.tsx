@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Users, Activity, Calendar, UserPlus, TrendingUp } from 'lucide-react'
@@ -65,7 +66,8 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
       const data = await patientService.getPatients()
       // Transform data to match component expectations
       const transformedData = data.map((patient: any) => {
-        const age = new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear()
+        const dob = patient.date_of_birth ? new Date(patient.date_of_birth) : null
+        const age = dob && !isNaN(dob.getTime()) ? new Date().getFullYear() - dob.getFullYear() : 0
         return {
           ...patient,
           name: `${patient.first_name} ${patient.last_name}`,
@@ -126,8 +128,9 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
   const paginatedPatients = pagination.paginatedItems(filteredPatients)
 
   const handlePatientCreated = (newPatient: any) => {
-    // In a real app, this would add to database
-    // For now, just log it - in production this would refresh data or add to state
+    toast.success('Patient created successfully')
+    setIsPatientModalOpen(false)
+    fetchKpis()
   }
 
   const handleEditPatient = (patient: any) => {
@@ -136,8 +139,9 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
   }
 
   const handlePatientUpdated = (updatedPatient: any) => {
-    // In a real app, this would update database
-    // For now, just log it - in production this would refresh data
+    toast.success('Patient updated successfully')
+    fetchPatientsData()
+    setIsEditModalOpen(false)
   }
 
   const handleViewProfile = (patient: any) => {
