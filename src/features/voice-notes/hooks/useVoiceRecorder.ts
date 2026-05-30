@@ -96,21 +96,6 @@ export const useVoiceRecorder = () => {
     }
   }, [])
 
-  const transcribeAudio = useCallback(async () => {
-    if (!audioBlob) return
-
-    try {
-      setIsTranscribing(true)
-      setError(null)
-      // Logic moved to component to handle the specific voiceNoteId
-    } catch (err) {
-      setError('Failed to transcribe audio')
-      console.error('Failed to transcribe:', err)
-    } finally {
-      setIsTranscribing(false)
-    }
-  }, [audioBlob])
-
   const reset = useCallback(() => {
     setAudioBlob(null)
     setAudioUrl(null)
@@ -133,7 +118,6 @@ export const useVoiceRecorder = () => {
     pauseRecording,
     resumeRecording,
     stopRecording,
-    transcribeAudio,
     reset
   }
 }

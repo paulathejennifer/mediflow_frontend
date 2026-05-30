@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 export function VoiceRecorder() {
   const params = useParams()
   const referralId = params?.id ? Number(params.id) : null
+  const [isProcessing, setIsProcessing] = useState(false)
   const [editedTranscription, setEditedTranscription] = useState<string>('')
   const [isEditingTranscription, setIsEditingTranscription] = useState(false)
   
@@ -23,7 +24,6 @@ export function VoiceRecorder() {
     audioBlob,
     audioUrl,
     transcription,
-    isTranscribing,
     error,
     formatTime,
     startRecording,
@@ -41,6 +41,7 @@ export function VoiceRecorder() {
       return
     }
 
+    setIsProcessing(true)
     try {
       // 1. Upload the voice note
       const voiceNote = await voiceNoteService.uploadVoiceNote({
@@ -58,6 +59,8 @@ export function VoiceRecorder() {
       }
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Failed to process audio')
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -177,10 +180,10 @@ export function VoiceRecorder() {
               <Button 
                 size="lg" 
                 className="gap-2 bg-primary/90 hover:bg-primary/80"
-                disabled={isTranscribing}
+                disabled={isProcessing}
                 onClick={saveAndTranscribe}
               >
-                {isTranscribing ? (
+                {isProcessing ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
                     Transcribing...
@@ -206,7 +209,7 @@ export function VoiceRecorder() {
         )}
 
         {/* Transcription Display */}
-        {transcription && (
+        {(transcription || editedTranscription) && (
           <div className="w-full max-w-lg border rounded-lg bg-gray-900 p-4 space-y-4 transition-all duration-300 border-primary/40 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_12px_30px_-12px_hsl(var(--primary)/0.35)] hover:-translate-y-1">
             <label className="text-sm font-medium text-muted-foreground mb-2 block">
               Transcription
@@ -219,8 +222,8 @@ export function VoiceRecorder() {
                 placeholder="Edit transcription..."
               />
             ) : (
-              <p className="text-sm text-foreground">
-                {transcription}
+              <p className="text-sm text-foreground whitespace-pre-wrap">
+                {editedTranscription || transcription}
               </p>
             )}
             {isEditingTranscription && (
