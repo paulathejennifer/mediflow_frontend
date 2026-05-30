@@ -30,14 +30,19 @@ export function VoiceRecorder() {
     pauseRecording,
     resumeRecording,
     stopRecording,
-    transcribeAudio,
     reset
   } = useVoiceRecorder()
 
   // Save and transcribe
   const saveAndTranscribe = async () => {
+    console.log('Attempting save and transcribe. ReferralId:', referralId, 'AudioBlob:', !!audioBlob)
+    
     if (!audioBlob || !referralId) {
-      toast.error('Missing recording or referral context')
+      toast.error(
+        !audioBlob 
+          ? 'Please record audio first' 
+          : 'Cannot save: Referral ID not found in URL. Please save the referral first.'
+      )
       return
     }
 

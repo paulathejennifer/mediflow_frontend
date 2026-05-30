@@ -192,15 +192,17 @@ export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPa
       newErrors.phone = 'Please enter a valid phone number'
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    return newErrors
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateForm()) {
-      const firstErrorField = Object.keys(errors)[0]
+    const newErrors = validateForm()
+    setErrors(newErrors)
+
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorField = Object.keys(newErrors)[0]
       const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)
       if (errorElement) {
         errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
