@@ -304,8 +304,6 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       ])
 
       await referralService.submitReferral(referral.id)
-      toast.success('Referral created and submitted successfully')
-      router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)
       setCreatedReferralId(referral.id)
       setShowSuccessModal(true)
     } catch (error) {
@@ -700,7 +698,6 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
         size="md"
       >
         <div className="p-4">
-          <VoiceRecorder onSaveRecording={handleRecordingComplete} isStandalone={true} />
           <VoiceRecorder referralIdOverride={createdReferralId} isStandalone={true} />
         </div>
       </Modal>

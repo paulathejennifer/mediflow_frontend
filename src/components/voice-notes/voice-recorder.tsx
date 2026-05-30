@@ -16,10 +16,8 @@ interface VoiceRecorderProps {
   referralIdOverride?: number | null
 }
 
-export function VoiceRecorder({ onSaveRecording, isStandalone = false }: VoiceRecorderProps) {
 export function VoiceRecorder({ onSaveRecording, isStandalone = false, referralIdOverride }: VoiceRecorderProps) {
   const params = useParams()
-  const referralId = params?.id ? Number(params.id) : null
   const referralId = referralIdOverride || (params?.id ? Number(params.id) : null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [editedTranscription, setEditedTranscription] = useState<string>('')
