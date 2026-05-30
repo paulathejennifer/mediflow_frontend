@@ -16,11 +16,15 @@ export function formatDate(
   } = {}
 ): string {
   const { includeTime = false, format = 'long' } = options;
+
+  if (!date) {
+    return 'N/A';
+  }
   
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
-  // Handle invalid dates
-  if (isNaN(dateObj.getTime())) {
+  // Handle invalid dates or null objects
+  if (!dateObj || isNaN(dateObj.getTime())) {
     return 'Invalid Date';
   }
   
@@ -45,11 +49,15 @@ export function formatDate(
  * @returns Relative time string
  */
 export function formatRelativeTime(date: string | Date): string {
+  if (!date) {
+    return 'N/A';
+  }
+
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
   
-  // Handle invalid dates
-  if (isNaN(dateObj.getTime())) {
+  // Handle invalid dates or null objects
+  if (!dateObj || isNaN(dateObj.getTime())) {
     return 'Invalid Date';
   }
   

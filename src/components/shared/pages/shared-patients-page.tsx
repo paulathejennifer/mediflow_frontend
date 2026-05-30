@@ -72,6 +72,7 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
           phone: patient.phone || 'No phone',
           status: 'active', // Default to active since Patient interface doesn't have status
           registrationDate: patient.created_at,
+          lastVisit: patient.updated_at || patient.created_at,
           age,
           mrn: patient.identifiers?.[0]?.mrn || 'N/A'
         }
@@ -105,8 +106,13 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
     if (selectedSort === 'name') {
       return a.name.localeCompare(b.name)
     } else if (selectedSort === 'date') {
-      const dateA = a.registrationDate ? new Date(a.registrationDate).getTime() : new Date(0).getTime();
-      const dateB = b.registrationDate ? new Date(b.registrationDate).getTime() : new Date(0).getTime();
+      const dateA = a.registrationDate ? new Date(a.registrationDate).getTime() : 0;
+      const dateB = b.registrationDate ? new Date(b.registrationDate).getTime() : 0;
+      
+      // If one date is invalid/missing, push it to the bottom
+      if (isNaN(dateA)) return 1;
+      if (isNaN(dateB)) return -1;
+      
       return dateB - dateA;
     }
     return 0
