@@ -19,14 +19,16 @@ interface PatientData {
   gender: string
   email?: string
   phone?: string
-  // emergency_contact_name?: string
-  // emergency_contact_phone?: string
+  emergency_contact_name?: string
+  emergency_contact_phone?: string
   emergencyContact?: string
   emergencyPhone?: string
-  allergies?: string
-  medications?: string
-  medical_history?: string
-  chronic_conditions?: string
+  allergies?: string | string[]
+  medications?: string | string[]
+  medical_history?: string | string[]
+  medicalHistory?: string | string[]
+  chronic_conditions?: string | string[]
+  chronicConditions?: string | string[]
   profileImage?: string
 }
 
@@ -139,19 +141,22 @@ export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPa
   // Update form data when patient changes
   useEffect(() => {
     if (isOpen && patient) {
+      const joinList = (val: string | string[] | undefined, sep = ', ') => 
+        Array.isArray(val) ? val.filter(Boolean).join(sep) : (val || '')
+
       setFormData({
-        first_name: patient.first_name || '',
-        last_name: patient.last_name || '',
+        first_name: patient.first_name || patient.firstName || '',
+        last_name: patient.last_name || patient.lastName || '',
         email: patient.email || '',
         phone: patient.phone && patient.phone !== 'No phone' ? patient.phone : '',
-        date_of_birth: patient.date_of_birth ? new Date(patient.date_of_birth).toISOString().split('T')[0] : '',
+        date_of_birth: (patient.date_of_birth || patient.dateOfBirth) ? new Date((patient.date_of_birth || patient.dateOfBirth) as string).toISOString().split('T')[0] : '',
         gender: patient.gender || '',
-        emergency_contact_name: patient.emergency_contact_name || '',
-        emergency_contact_phone: patient.emergency_contact_phone || '',
-        medical_history: patient.medical_history || '',
-        allergies: patient.allergies || '',
-        medications: patient.medications || '',
-        chronic_conditions: patient.chronic_conditions || ''
+        emergency_contact_name: patient.emergency_contact_name || patient.emergencyContact || '',
+        emergency_contact_phone: patient.emergency_contact_phone || patient.emergencyPhone || '',
+        medical_history: joinList(patient.medical_history || patient.medicalHistory, '\n'),
+        allergies: joinList(patient.allergies),
+        medications: joinList(patient.medications, '\n'),
+        chronic_conditions: joinList(patient.chronic_conditions || patient.chronicConditions)
       })
       setErrors({})
       setShowSuccess(false)

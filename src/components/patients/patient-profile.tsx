@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PatientHeader } from './_components/patient-header'
 import { PatientDetails } from './_components/patient-details'
 import { MedicationsList } from './_components/medications-list'
@@ -10,6 +10,7 @@ import { ChronicConditions } from './_components/chronic-conditions'
 import { Allergies } from './_components/allergies'
 import { ReferralSummary } from './_components/referral-summary'
 import { EditPatientModal } from '@/components/modals/edit-patient-modal'
+import { patientService } from '@/features/patients/services/patient.service'
 
 interface ReferralData {
   id: string
@@ -21,15 +22,20 @@ interface ReferralData {
 }
 
 interface LocalPatientData {
-  id: string
+  id: number
   firstName: string
   lastName: string
   dateOfBirth: string
+  first_name?: string
+  last_name?: string
+  date_of_birth?: string
   gender: string
   email?: string
   phone?: string
   emergencyContact?: string
   emergencyPhone?: string
+  emergency_contact_name?: string
+  emergency_contact_phone?: string
   lastVisit: string
   allergies: string[]
   medications: string[]
@@ -43,156 +49,109 @@ interface PatientProfileProps {
   patientId: string
 }
 
-const mockPatientData: Record<string, LocalPatientData> = {
-  '1': {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    dateOfBirth: '1985-06-15',
-    gender: 'Male',
-    email: 'john.doe@email.com',
-    phone: '+254 712 345 678',
-    emergencyContact: 'Jane Doe',
-    emergencyPhone: '+254 712 345 679',
-    lastVisit: '2024-05-08',
-    allergies: ['Penicillin', 'Shellfish'],
-    medications: ['Lisinopril 10mg', 'Metformin 500mg', 'Aspirin 81mg'],
-    medicalHistory: [
-      '2020: Diagnosed with Type 2 Diabetes',
-      '2019: Hypertension diagnosis',
-      '2018: Appendectomy',
-      '2015: Knee surgery'
-    ],
-    chronicConditions: ['Type 2 Diabetes', 'Hypertension'],
-    referrals: [
-      {
-        id: '1',
-        condition: 'Chest pain',
-        to: 'Kenyatta National Hospital',
-        date: '2024-05-08',
-        priority: 'high',
-        status: 'pending'
-      },
-      {
-        id: '2',
-        condition: 'Cardiology consultation',
-        to: 'MTRH',
-        date: '2024-05-06',
-        priority: 'medium',
-        status: 'completed'
-      },
-      {
-        id: '3',
-        condition: 'Orthopedic review',
-        to: 'Nairobi Hospital',
-        date: '2024-04-28',
-        priority: 'low',
-        status: 'completed'
-      }
-    ]
-  },
-  '2': {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    dateOfBirth: '1990-03-22',
-    gender: 'Female',
-    email: 'jane.smith@email.com',
-    phone: '+254 723 456 789',
-    emergencyContact: 'Bob Smith',
-    emergencyPhone: '+254 723 456 790',
-    lastVisit: '2024-05-10',
-    allergies: ['Peanuts', 'Latex'],
-    medications: ['Albuterol inhaler', 'Loratadine 10mg'],
-    medicalHistory: [
-      '2022: Asthma diagnosis',
-      '2021: Allergic reaction treatment',
-      '2019: Sports injury'
-    ],
-    chronicConditions: ['Asthma'],
-    referrals: [
-      {
-        id: '4',
-        condition: 'Asthma exacerbation',
-        to: 'MTRH',
-        date: '2024-05-10',
-        priority: 'medium',
-        status: 'in-progress'
-      }
-    ]
-  },
-  '3': {
-    id: '3',
-    firstName: 'Michael',
-    lastName: 'Johnson',
-    dateOfBirth: '1978-11-30',
-    gender: 'Male',
-    email: 'michael.johnson@email.com',
-    phone: '+254 734 567 890',
-    emergencyContact: 'Sarah Johnson',
-    emergencyPhone: '+254 734 567 891',
-    lastVisit: '2024-05-05',
-    allergies: ['None'],
-    medications: ['Atorvastatin 20mg', 'Losartan 50mg'],
-    medicalHistory: [
-      '2021: Heart attack',
-      '2020: High cholesterol diagnosis',
-      '2018: Stent placement'
-    ],
-    chronicConditions: ['Coronary artery disease', 'High cholesterol'],
-    referrals: [
-      {
-        id: '5',
-        condition: 'Cardiac follow-up',
-        to: 'Kenyatta National Hospital',
-        date: '2024-05-05',
-        priority: 'high',
-        status: 'completed'
-      }
-    ]
-  },
-  '4': {
-    id: '4',
-    firstName: 'Emily',
-    lastName: 'Williams',
-    dateOfBirth: '1995-08-18',
-    gender: 'Female',
-    email: 'emily.williams@email.com',
-    phone: '+254 745 678 901',
-    emergencyContact: 'David Williams',
-    emergencyPhone: '+254 745 678 902',
-    lastVisit: '2024-05-09',
-    allergies: ['None'],
-    medications: ['Folic acid 400mcg', 'Prenatal vitamins'],
-    medicalHistory: [
-      '2023: Pregnancy confirmed',
-      '2022: Regular check-ups',
-      '2021: Vaccination updates'
-    ],
-    chronicConditions: ['None'],
-    referrals: [
-      {
-        id: '6',
-        condition: 'Prenatal care',
-        to: 'Nairobi Hospital',
-        date: '2024-05-09',
-        priority: 'low',
-        status: 'completed'
-      }
-    ]
+const parseStringList = (value: unknown): string[] => {
+  if (!value) return []
+  if (Array.isArray(value)) {
+    return value.filter((item) => typeof item === 'string').map((item) => item.trim()).filter(Boolean)
+  }
+
+  if (typeof value !== 'string') {
+    return []
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return []
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed)
+    if (Array.isArray(parsed)) {
+      return parsed.filter((item) => typeof item === 'string').map((item) => item.trim()).filter(Boolean)
+    }
+  } catch {
+    // ignore invalid JSON and fall back to delimiter parsing
+  }
+
+  return trimmed
+    .split(/[,\n]+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+const parseReferrals = (value: unknown): ReferralData[] => {
+  if (!value) return []
+  if (!Array.isArray(value)) return []
+
+  return value
+    .filter((item) => item && typeof item === 'object')
+    .map((item: any) => ({
+      id: String(item.id ?? item.referralId ?? ''),
+      condition: String(item.condition ?? item.reason ?? 'Unknown condition'),
+      to: String(item.to ?? item.destination ?? 'Unknown facility'),
+      date: String(item.date ?? item.created_at ?? ''),
+      priority: ['high', 'medium', 'low'].includes(item.priority) ? item.priority : 'low',
+      status: ['pending', 'completed', 'in-progress'].includes(item.status) ? item.status : 'pending'
+    }))
+}
+
+const normalizePatient = (raw: any): LocalPatientData => {
+  return {
+    id: Number(raw?.id ?? raw?.patient_id ?? 0),
+    firstName: raw?.first_name || raw?.firstName || '',
+    lastName: raw?.last_name || raw?.lastName || '',
+    dateOfBirth: raw?.date_of_birth || raw?.dateOfBirth || '',
+    first_name: raw?.first_name || raw?.firstName || '',
+    last_name: raw?.last_name || raw?.lastName || '',
+    date_of_birth: raw?.date_of_birth || raw?.dateOfBirth || '',
+    gender: String(raw?.gender || raw?.sex || 'unknown'),
+    email: raw?.email || '',
+    phone: raw?.phone || '',
+    emergencyContact: raw?.emergency_contact_name || raw?.emergencyContact || '',
+    emergencyPhone: raw?.emergency_contact_phone || raw?.emergencyPhone || '',
+    emergency_contact_name: raw?.emergency_contact_name || raw?.emergencyContact || '',
+    emergency_contact_phone: raw?.emergency_contact_phone || raw?.emergencyPhone || '',
+    lastVisit: raw?.updated_at || raw?.lastVisit || raw?.last_visit || '',
+    allergies: parseStringList(raw?.allergies),
+    medications: parseStringList(raw?.medications),
+    medicalHistory: parseStringList(raw?.medical_history),
+    chronicConditions: parseStringList(raw?.chronic_conditions),
+    referrals: parseReferrals(raw?.referrals),
+    profileImage: raw?.profile_image || raw?.profileImage || undefined
   }
 }
 
 export function PatientProfile({ patientId }: PatientProfileProps) {
-  const [patient, setPatient] = useState<PatientData | null>(
-    mockPatientData[patientId] || null
-  )
-  
-  const [medications, setMedications] = useState<string[]>(patient?.medications || [])
-  const [allergies, setAllergies] = useState<string[]>(patient?.allergies || [])
-  const [medicalHistory, setMedicalHistory] = useState<string[]>(patient?.medicalHistory || [])
-  const [chronicConditions, setChronicConditions] = useState<string[]>(patient?.chronicConditions || [])
+  const [patient, setPatient] = useState<LocalPatientData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+  useEffect(() => {
+    const fetchPatient = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      const id = Number(patientId)
+      if (!id) {
+        setError('Invalid patient ID')
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const patientData = await patientService.getPatientById(id)
+        setPatient(normalizePatient(patientData))
+      } catch (err: any) {
+        console.error('Failed to load patient:', err)
+        setError(err?.response?.data?.detail || 'Failed to load patient data')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPatient()
+  }, [patientId])
 
   const handleEditPatient = () => {
     setIsEditModalOpen(true)
@@ -203,10 +162,27 @@ export function PatientProfile({ patientId }: PatientProfileProps) {
   }
 
   const handlePatientUpdate = (updatedPatient: any) => {
-    // Update the patient data in state
-    // In a real app, this would update the backend
-    setPatient(updatedPatient)
+    setPatient(normalizePatient(updatedPatient))
     setIsEditModalOpen(false)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center text-muted-foreground">Loading patient data...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-foreground mb-2">Unable to load patient</h2>
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+      </div>
+    )
   }
 
   if (!patient) {
@@ -224,7 +200,7 @@ export function PatientProfile({ patientId }: PatientProfileProps) {
 
   return (
     <div className="space-y-6">
-      <PatientHeader 
+      <PatientHeader
         patientName={patientName}
         patientDescription="View and manage patient information"
         patientId={patientId}
@@ -244,24 +220,23 @@ export function PatientProfile({ patientId }: PatientProfileProps) {
           lastVisit={patient.lastVisit}
           profileImage={patient.profileImage}
         />
-
-        </div>
+      </div>
 
       <ActivityCards />
 
       <MedicationsList
-        medications={medications}
-        onMedicationsChange={setMedications}
+        medications={patient.medications}
+        onMedicationsChange={(updated) => setPatient((prev) => prev ? { ...prev, medications: updated } : prev)}
       />
 
       <div className="space-y-6">
-        <Allergies allergies={allergies} onAllergiesChange={setAllergies} />
-        <MedicalHistory medicalHistory={medicalHistory} onMedicalHistoryChange={setMedicalHistory} />
-        <ChronicConditions chronicConditions={chronicConditions} onChronicConditionsChange={setChronicConditions} />
+        <Allergies allergies={patient.allergies} onAllergiesChange={(updated) => setPatient((prev) => prev ? { ...prev, allergies: updated } : prev)} />
+        <MedicalHistory medicalHistory={patient.medicalHistory} onMedicalHistoryChange={(updated) => setPatient((prev) => prev ? { ...prev, medicalHistory: updated } : prev)} />
+        <ChronicConditions chronicConditions={patient.chronicConditions} onChronicConditionsChange={(updated) => setPatient((prev) => prev ? { ...prev, chronicConditions: updated } : prev)} />
       </div>
 
       <ReferralSummary referrals={patient.referrals} />
-      
+
       <EditPatientModal
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
