@@ -20,7 +20,7 @@ interface ReferralData {
   status: 'pending' | 'completed' | 'in-progress'
 }
 
-interface PatientData {
+interface LocalPatientData {
   id: string
   firstName: string
   lastName: string
@@ -43,7 +43,7 @@ interface PatientProfileProps {
   patientId: string
 }
 
-const mockPatientData: Record<string, PatientData> = {
+const mockPatientData: Record<string, LocalPatientData> = {
   '1': {
     id: '1',
     firstName: 'John',

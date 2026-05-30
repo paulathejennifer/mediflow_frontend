@@ -10,14 +10,19 @@ import { toast } from 'sonner'
 
 interface PatientData {
   id: number
-  first_name: string
-  last_name: string
-  date_of_birth: string
+  first_name?: string
+  last_name?: string
+  date_of_birth?: string
+  firstName?: string
+  lastName?: string
+  dateOfBirth?: string
   gender: string
   email?: string
   phone?: string
-  emergency_contact_name?: string
-  emergency_contact_phone?: string
+  // emergency_contact_name?: string
+  // emergency_contact_phone?: string
+  emergencyContact?: string
+  emergencyPhone?: string
   allergies?: string
   medications?: string
   medical_history?: string
