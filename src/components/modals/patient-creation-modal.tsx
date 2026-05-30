@@ -12,6 +12,7 @@ interface PatientCreationModalProps {
   onClose: () => void
   onSuccess: (patient: any) => void
 }
+import { toast } from 'sonner'
 
 // FilterDropdown component
 function FilterDropdown({ value, onChange, options, placeholder, disabled = false, dataField }: {
@@ -111,7 +112,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
   
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { isLoading: isSubmitting, execute } = useAsyncOperation()
-  const [submitError, setSubmitError] = useState<string | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
 
   // Reset form when modal opens
@@ -135,7 +135,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
         is_active: true
       })
       setErrors({})
-      setSubmitError(null)
       setShowSuccess(false)
     }
   }, [isOpen])
@@ -198,8 +197,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     e.preventDefault()
 
     if (!validateForm()) {
-      setSubmitError('Please correct the highlighted errors below.')
-      console.error('Form validation failed. Errors:', errors)
       const firstErrorField = Object.keys(errors)[0]
       if (firstErrorField) {
         const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)
@@ -211,7 +208,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     }
 
     try {
-      setSubmitError(null)
       await execute(async () => {
         const newPatient = await patientService.createPatient({
           first_name: formData.first_name,
@@ -233,8 +229,13 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
         setShowSuccess(true)
       })
     } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Failed to create patient. Please try again.'
-      setSubmitError(errorMessage)
+      // Improved error handling to show actual backend explanation
+      let errorMessage = 'Failed to create patient. Please try again.'
+      const detail = error.response?.data?.detail
+      if (detail) {
+        errorMessage = typeof detail === 'string' ? detail : JSON.stringify(detail)
+      }
+      toast.error(errorMessage)
     }
   }
 
@@ -255,13 +256,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
       {!showSuccess ? (
         <div className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6 pb-20">
-            {/* API Error Message */}
-            {submitError && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md text-red-500 text-sm">
-                {submitError}
-              </div>
-            )}
-
             {/* Personal Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">Personal Information</h3>
