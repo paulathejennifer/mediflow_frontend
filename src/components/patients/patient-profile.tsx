@@ -38,6 +38,7 @@ interface LocalPatientData {
   emergency_contact_phone?: string
   lastVisit: string
   allergies: string[]
+  registrationDate: string
   medications: string[]
   medicalHistory: string[]
   chronicConditions: string[]
@@ -112,6 +113,7 @@ const normalizePatient = (raw: any): LocalPatientData => {
     emergency_contact_name: raw?.emergency_contact_name || raw?.emergencyContact || '',
     emergency_contact_phone: raw?.emergency_contact_phone || raw?.emergencyPhone || '',
     lastVisit: raw?.updated_at || raw?.lastVisit || raw?.last_visit || '',
+    registrationDate: raw?.created_at || '',
     allergies: parseStringList(raw?.allergies),
     medications: parseStringList(raw?.medications),
     medicalHistory: parseStringList(raw?.medical_history),
@@ -222,7 +224,10 @@ export function PatientProfile({ patientId }: PatientProfileProps) {
         />
       </div>
 
-      <ActivityCards />
+      <ActivityCards 
+        referrals={patient.referrals} 
+        registrationDate={patient.registrationDate} 
+      />
 
       <MedicationsList
         medications={patient.medications}

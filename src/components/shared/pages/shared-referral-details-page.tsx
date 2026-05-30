@@ -246,7 +246,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
               {/* REASON FOR REFERRAL */}
               <div>
                 <p className="text-sm font-semibold mb-1 text-foreground">Reason for Referral</p>
-                <p className="text-sm text-foreground">{referral.reason || referral.condition}</p>
+                <p className="text-sm text-muted-foreground">{referral.reason || referral.condition}</p>
               </div>
               
               <Separator />

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Clock, ChevronDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Scrollbar } from '@/components/shared/ui/scrollbar'
+import { formatRelativeTime } from '@/utils/date-utils'
 
 interface Activity {
   title: string
@@ -13,21 +14,44 @@ interface Activity {
   type: 'patient' | 'referral' | 'document' | 'staff'
 }
 
-export function ActivityCards() {
+interface ReferralData {
+  id: string
+  condition: string
+  to: string
+  date: string
+  priority: 'high' | 'medium' | 'low'
+  status: 'pending' | 'completed' | 'in-progress'
+}
+
+interface ActivityCardsProps {
+  referrals?: ReferralData[]
+  registrationDate?: string
+}
+
+export function ActivityCards({ referrals = [], registrationDate }: ActivityCardsProps) {
   const [expanded, setExpanded] = useState(false)
 
+  // Transform real data into the Activity format
   const allActivities: Activity[] = [
-    { title: 'Patient information updated', description: 'Dr. Smith modified contact details', time: '2 hours ago', type: 'patient' },
-    { title: 'Medical history added', description: 'New diagnosis recorded', time: '1 day ago', type: 'patient' },
-    { title: 'Allergy information updated', description: 'Added shellfish allergy', time: '3 days ago', type: 'patient' },
-
-    { title: 'Referral created', description: 'Emergency referral to Kenyatta Hospital', time: '5 hours ago', status: 'pending', type: 'referral' },
-    { title: 'Referral accepted', description: 'MTRH accepted cardiology referral', time: '2 days ago', status: 'completed', type: 'referral' },
-
-    { title: 'Lab results uploaded', description: 'Blood test results from 2024-05-08', time: '6 hours ago', type: 'document' },
-
-    { title: 'Clinician review', description: 'Dr. Johnson reviewed patient history', time: '4 hours ago', type: 'staff' },
+    ...referrals.map(r => ({
+      title: `Referral to ${r.to}`,
+      description: `Reason: ${r.condition}`,
+      time: r.date,
+      status: r.status,
+      type: 'referral' as const
+    })),
+    ...(registrationDate ? [{
+      title: 'Patient Registered',
+      description: 'Initial record created in the system',
+      time: registrationDate,
+      type: 'patient' as const
+    }] : [])
   ]
+  .sort((a, b) => new Date(b.time || 0).getTime() - new Date(a.time || 0).getTime())
+  .map(activity => ({
+    ...activity,
+    time: formatRelativeTime(activity.time)
+  }))
 
   const getActivityColor = (type: Activity['type']) => {
     switch (type) {
@@ -63,7 +87,7 @@ export function ActivityCards() {
               ${expanded ? 'max-h-[1000px]' : 'max-h-56'}
             `}
           >
-            {allActivities.map((activity, index) => (
+            {allActivities.length > 0 ? allActivities.map((activity, index) => (
               <div
                 key={index}
                 className="flex items-start gap-3 p-3 bg-gray-800/30 rounded-lg hover:bg-gray-800/50 transition-colors"
@@ -96,7 +120,13 @@ export function ActivityCards() {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Clock className="h-8 w-8 text-muted-foreground/30 mb-2" />
+                <p className="text-sm text-muted-foreground">No recent activity recorded</p>
+                <p className="text-xs text-muted-foreground/50">New referrals and updates will appear here</p>
+              </div>
+            )}
           </Scrollbar>
 
           {/* FADE EFFECT */}
