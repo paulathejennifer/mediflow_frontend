@@ -12,6 +12,8 @@ import { documentService } from '@/features/documents/services/document.service'
 import { voiceNoteService } from '@/features/voice-notes/services/voice-note.service'
 import { formatTableDate } from '@/utils/date-utils'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
+import { VoiceRecorder } from '@/components/voice-notes/voice-recorder'
+import { Modal } from '@/components/shared'
 import { toast } from '@/lib/toast'
 
 // AutocompleteInput component for patient and facility search
@@ -155,6 +157,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
+  const [isRecordingModalOpen, setIsRecordingModalOpen] = useState(false)
   const [patients, setPatients] = useState<any[]>([])
   const [facilities, setFacilities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -337,6 +340,14 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       ...prev,
       voiceNotes: prev.voiceNotes.filter((_, i) => i !== index)
     }))
+  }
+
+  const handleRecordingComplete = (file: File) => {
+    setFormData(prev => ({
+      ...prev,
+      voiceNotes: [...prev.voiceNotes, file]
+    }))
+    setIsRecordingModalOpen(false)
   }
 
   if (isLoading) {
@@ -570,7 +581,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
                       variant="outline"
                       size="sm"
                       className="text-xs text-foreground hover:text-black"
-                      onClick={() => router.push(`/dashboard/${userRole.replace('_', '-')}/voice-notes`)}
+                      onClick={() => setIsRecordingModalOpen(true)}
                     >
                       <Mic className="h-3 w-3 mr-1" />
                       Record
@@ -640,6 +651,18 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
           </Button>
         </div>
       </form>
+
+      {/* Recording Modal */}
+      <Modal
+        isOpen={isRecordingModalOpen}
+        onClose={() => setIsRecordingModalOpen(false)}
+        title="Record Voice Note"
+        size="md"
+      >
+        <div className="p-4">
+          <VoiceRecorder onSaveRecording={handleRecordingComplete} isStandalone={true} />
+        </div>
+      </Modal>
 
       {/* Patient Creation Modal */}
       <PatientCreationModal

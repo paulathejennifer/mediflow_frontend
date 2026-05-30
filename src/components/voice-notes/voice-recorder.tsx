@@ -10,7 +10,12 @@ import { voiceNoteService } from '@/features/voice-notes/services/voice-note.ser
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
 
-export function VoiceRecorder() {
+interface VoiceRecorderProps {
+  onSaveRecording?: (file: File) => void
+  isStandalone?: boolean
+}
+
+export function VoiceRecorder({ onSaveRecording, isStandalone = false }: VoiceRecorderProps) {
   const params = useParams()
   const referralId = params?.id ? Number(params.id) : null
   const [isProcessing, setIsProcessing] = useState(false)
@@ -37,12 +42,21 @@ export function VoiceRecorder() {
   const saveAndTranscribe = async () => {
     console.log('Attempting save and transcribe. ReferralId:', referralId, 'AudioBlob:', !!audioBlob)
     
+    if (!audioBlob) {
+      toast.error('Please record audio first')
+      return
+    }
+
+    // If we are in a creation flow, we just pass the file back to the form
+    if (onSaveRecording) {
+      const file = new File([audioBlob], `recording_${Date.now()}.webm`, { type: 'audio/webm' })
+      onSaveRecording(file)
+      toast.success('Recording attached to referral')
+      return
+    }
+
     if (!audioBlob || !referralId) {
-      toast.error(
-        !audioBlob 
-          ? 'Please record audio first' 
-          : 'Cannot save: Referral ID not found in URL. Please save the referral first.'
-      )
+      toast.error('Cannot save: Referral ID not found. Please save the referral first.')
       return
     }
 
