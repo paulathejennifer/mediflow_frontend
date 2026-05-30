@@ -105,8 +105,8 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
     if (selectedSort === 'name') {
       return a.name.localeCompare(b.name)
     } else if (selectedSort === 'date') {
-      const dateA = a.registrationDate ? new Date(a.registrationDate).getTime() : 0;
-      const dateB = b.registrationDate ? new Date(b.registrationDate).getTime() : 0;
+      const dateA = a.registrationDate ? new Date(a.registrationDate).getTime() : new Date(0).getTime();
+      const dateB = b.registrationDate ? new Date(b.registrationDate).getTime() : new Date(0).getTime();
       return dateB - dateA;
     }
     return 0
