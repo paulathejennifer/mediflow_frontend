@@ -149,6 +149,7 @@ export function EditPatientModal({ isOpen, onClose, onSuccess, patient }: EditPa
         last_name: patient.last_name || patient.lastName || '',
         email: patient.email || '',
         phone: patient.phone && patient.phone !== 'No phone' ? patient.phone : '',
+        phone: (patient.phone && patient.phone !== 'No phone') ? patient.phone : '',
         date_of_birth: (patient.date_of_birth || patient.dateOfBirth) ? new Date((patient.date_of_birth || patient.dateOfBirth) as string).toISOString().split('T')[0] : '',
         gender: patient.gender || '',
         emergency_contact_name: patient.emergency_contact_name || patient.emergencyContact || '',

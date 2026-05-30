@@ -158,6 +158,8 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
   const [isRecordingModalOpen, setIsRecordingModalOpen] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [createdReferralId, setCreatedReferralId] = useState<number | null>(null)
   const [patients, setPatients] = useState<any[]>([])
   const [facilities, setFacilities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -304,6 +306,8 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       await referralService.submitReferral(referral.id)
       toast.success('Referral created and submitted successfully')
       router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)
+      setCreatedReferralId(referral.id)
+      setShowSuccessModal(true)
     } catch (error) {
       console.error('Failed to create referral:', error)
       toast.error('Failed to create referral. Please try again.')
@@ -348,6 +352,10 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       voiceNotes: [...prev.voiceNotes, file]
     }))
     setIsRecordingModalOpen(false)
+  }
+
+  const handleFinalRedirect = () => {
+    router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)
   }
 
   if (isLoading) {
@@ -652,6 +660,38 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
         </div>
       </form>
 
+      {/* Success Modal with Voice AI Prompt */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={handleFinalRedirect}
+        title="Referral Created Successfully"
+        size="md"
+      >
+        <div className="p-6 text-center space-y-6">
+          <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+            <Zap className="h-8 w-8 text-primary" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-white">Want to add clinical detail?</h3>
+            <p className="text-sm text-gray-400">
+              Use our Voice AI to record a summary of this case. It will be automatically transcribed and attached to the referral.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={() => { setShowSuccessModal(false); setIsRecordingModalOpen(true); }}
+              className="w-full bg-primary/90 hover:bg-primary/80"
+            >
+              <Mic className="h-4 w-4 mr-2" />
+              Start Voice Dictation
+            </Button>
+            <Button variant="ghost" onClick={handleFinalRedirect} className="text-gray-400">
+              Skip and Finish
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Recording Modal */}
       <Modal
         isOpen={isRecordingModalOpen}
@@ -661,6 +701,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       >
         <div className="p-4">
           <VoiceRecorder onSaveRecording={handleRecordingComplete} isStandalone={true} />
+          <VoiceRecorder referralIdOverride={createdReferralId} isStandalone={true} />
         </div>
       </Modal>
 
