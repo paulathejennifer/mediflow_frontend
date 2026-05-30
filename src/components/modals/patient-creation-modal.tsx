@@ -197,6 +197,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     e.preventDefault()
 
     if (!validateForm()) {
+      console.log('Frontend Validation Failed:', errors)
       const firstErrorField = Object.keys(errors)[0]
       if (firstErrorField) {
         const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)
@@ -229,13 +230,9 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
         setShowSuccess(true)
       })
     } catch (error: any) {
-      // Improved error handling to show actual backend explanation
-      let errorMessage = 'Failed to create patient. Please try again.'
       const detail = error.response?.data?.detail
-      if (detail) {
-        errorMessage = typeof detail === 'string' ? detail : JSON.stringify(detail)
-      }
-      toast.error(errorMessage)
+      const message = typeof detail === 'string' ? detail : JSON.stringify(detail) || 'Server Error'
+      toast.error(`Creation Failed: ${message}`)
     }
   }
 

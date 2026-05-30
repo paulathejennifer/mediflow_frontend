@@ -11,10 +11,8 @@ import { TurnaroundTimeTrend } from '@/components/charts/turnaround-time-trend'
 import { ReferralReasons } from '@/components/charts/referrals-by-reason'
 import { FacilityPerformance } from '@/components/charts/facility-performance'
 import { TopReferringFacilities } from '@/components/tables/top-referring-facilities'
-import { analyticsService, SystemActivityData, AnalyticsMetrics, StatusData, TurnaroundData, ReasonData, FacilityPerformanceData, SystemHealthData, ApiRequestsData } from '@/features/analytics/services/analytics.service'
+import { analyticsService, SystemActivityData, AnalyticsMetrics, StatusData, TurnaroundData, ReasonData, FacilityPerformanceData, SystemHealthData, ApiRequestsData, FacilityData } from '@/features/analytics/services/analytics.service'
 import { Building2, Users, Activity, Zap } from 'lucide-react'
-
-type FacilityData = Awaited<ReturnType<typeof analyticsService.getTopReferringFacilities>> extends Array<infer U> ? U : never
 
 export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true)
