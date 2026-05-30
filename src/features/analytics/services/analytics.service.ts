@@ -146,7 +146,10 @@ export const analyticsService = {
       avgReferralsPerStaff: data.avg_referrals_per_staff || 0,
       total_facilities: data.total_facilities,
       growthRate: data.total_patients_trend || 0, // Fallback for components using growthRate
-      recentAlerts: data.recent_alerts || [],
+      recentAlerts: (data.recent_alerts || []).map((alert: any) => ({
+        ...alert,
+        timestamp: alert.createdAt || alert.timestamp || alert.created_at || new Date().toISOString()
+      })),
       quickInsights: data.quick_insights || []
     } as AnalyticsMetrics
   },
