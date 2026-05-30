@@ -157,8 +157,8 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
-  const [isRecordingModalOpen, setIsRecordingModalOpen] = useState(false)
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showEnrichmentModal, setShowEnrichmentModal] = useState(false)
+  const [isRecordingInEnrichment, setIsRecordingInEnrichment] = useState(false)
   const [createdReferralId, setCreatedReferralId] = useState<number | null>(null)
   const [patients, setPatients] = useState<any[]>([])
   const [facilities, setFacilities] = useState<any[]>([])
@@ -305,7 +305,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
 
       await referralService.submitReferral(referral.id)
       setCreatedReferralId(referral.id)
-      setShowSuccessModal(true)
+      setShowEnrichmentModal(true)
     } catch (error) {
       console.error('Failed to create referral:', error)
       toast.error('Failed to create referral. Please try again.')
@@ -349,7 +349,6 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       ...prev,
       voiceNotes: [...prev.voiceNotes, file]
     }))
-    setIsRecordingModalOpen(false)
   }
 
   const handleFinalRedirect = () => {
@@ -511,132 +510,6 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
           </CardContent>
         </Card>
 
-        {/* Attachments */}
-        <Card className="bg-gray-900/60 border-border/50">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
-              Supporting Documents
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Upload Documents */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Upload Documents
-                </label>
-                <div className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center">
-                  <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Upload PDF files, images, or lab results
-                  </p>
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('file-upload')?.click()}
-                    className="text-xs text-foreground hover:text-black"
-                  >
-                    <FileText className="h-3 w-3 mr-1" />
-                    Choose Files
-                  </Button>
-                </div>
-                
-                {/* Display uploaded files */}
-                {formData.attachments.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {formData.attachments.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-gray-800 rounded text-xs">
-                        <span className="text-muted-foreground truncate">{file.name}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeAttachment(index)}
-                          className="h-6 w-6 p-0 text-red-500 hover:text-red-400"
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Voice Notes */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Voice Notes
-                </label>
-                <div className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center">
-                  <Mic className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Record voice notes or upload audio files
-                  </p>
-                  <div className="flex gap-2 justify-center">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="text-xs text-foreground hover:text-black"
-                      onClick={() => setIsRecordingModalOpen(true)}
-                    >
-                      <Mic className="h-3 w-3 mr-1" />
-                      Record
-                    </Button>
-                    <input
-                      type="file"
-                      multiple
-                      accept=".mp3,.wav,.m4a"
-                      onChange={handleVoiceNoteUpload}
-                      className="hidden"
-                      id="voice-upload"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => document.getElementById('voice-upload')?.click()}
-                      className="text-xs text-foreground hover:text-black"
-                    >
-                      <Upload className="h-3 w-3 mr-1" />
-                      Upload
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Display uploaded voice notes */}
-                {formData.voiceNotes.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {formData.voiceNotes.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-gray-800 rounded text-xs">
-                        <span className="text-muted-foreground truncate">{file.name}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeVoiceNote(index)}
-                          className="h-6 w-6 p-0 text-red-500 hover:text-red-400"
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-4">
           <Button
@@ -658,50 +531,6 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
         </div>
       </form>
 
-      {/* Success Modal with Voice AI Prompt */}
-      <Modal
-        isOpen={showSuccessModal}
-        onClose={handleFinalRedirect}
-        title="Referral Created Successfully"
-        size="md"
-      >
-        <div className="p-6 text-center space-y-6">
-          <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
-            <Zap className="h-8 w-8 text-primary" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-white">Want to add clinical detail?</h3>
-            <p className="text-sm text-gray-400">
-              Use our Voice AI to record a summary of this case. It will be automatically transcribed and attached to the referral.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <Button 
-              onClick={() => { setShowSuccessModal(false); setIsRecordingModalOpen(true); }}
-              className="w-full bg-primary/90 hover:bg-primary/80"
-            >
-              <Mic className="h-4 w-4 mr-2" />
-              Start Voice Dictation
-            </Button>
-            <Button variant="ghost" onClick={handleFinalRedirect} className="text-gray-400">
-              Skip and Finish
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Recording Modal */}
-      <Modal
-        isOpen={isRecordingModalOpen}
-        onClose={() => setIsRecordingModalOpen(false)}
-        title="Record Voice Note"
-        size="md"
-      >
-        <div className="p-4">
-          <VoiceRecorder referralIdOverride={createdReferralId} isStandalone={true} />
-        </div>
-      </Modal>
-
       {/* Patient Creation Modal */}
       <PatientCreationModal
         isOpen={isPatientModalOpen}
@@ -710,4 +539,79 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       />
     </div>
   )
+      {/* Success Modal with Voice AI & Documents Prompt */}
+      <Modal
+        isOpen={showEnrichmentModal}
+        onClose={handleFinalRedirect}
+        title="Referral Created Successfully"
+        size="lg"
+      >
+        <div className="p-6 space-y-8">
+          {!isRecordingInEnrichment ? (
+            <>
+              <div className="text-center space-y-2">
+                <div className="mx-auto w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                  <Zap className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-white">Enhance this referral?</h3>
+                <p className="text-sm text-gray-400 max-w-md mx-auto">
+                  The referral has been saved as a draft. Would you like to add clinical documents or record a voice AI summary before finishing?
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Document Upload Card */}
+                <Card className="bg-gray-800/40 border-border/50 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-4 flex flex-col items-center text-center space-y-3">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-medium">Attach Documents</h4>
+                      <p className="text-xs text-muted-foreground">Upload lab results, PDFs, or images</p>
+                    </div>
+                    <input type="file" multiple className="hidden" id="enrich-upload" onChange={handleFileUpload} />
+                    <Button variant="outline" size="sm" onClick={() => document.getElementById('enrich-upload')?.click()} className="w-full text-xs">
+                      Choose Files
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Voice Record Card */}
+                <Card className="bg-gray-800/40 border-border/50 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-4 flex flex-col items-center text-center space-y-3">
+                    <Mic className="h-8 w-8 text-primary" />
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-medium">Voice Dictation</h4>
+                      <p className="text-xs text-muted-foreground">Record an AI-transcribed case summary</p>
+                    </div>
+                    <Button onClick={() => setIsRecordingInEnrichment(true)} className="w-full text-xs bg-primary/90">
+                      Start Recording
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="pt-4 border-t border-gray-800 flex justify-center">
+                <Button variant="ghost" onClick={handleFinalRedirect} className="text-gray-400 hover:text-white">
+                  Skip and Finish
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Button variant="ghost" size="sm" onClick={() => setIsRecordingInEnrichment(false)} className="h-8 w-8 p-0">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm font-medium">Back to options</span>
+              </div>
+              <VoiceRecorder referralIdOverride={createdReferralId} isStandalone={true} />
+              <div className="flex justify-center pt-4">
+                 <Button variant="outline" onClick={handleFinalRedirect} className="text-xs">
+                   I'm done, go to dashboard
+                 </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
 }
