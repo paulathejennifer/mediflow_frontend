@@ -175,7 +175,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-foreground">Referral Details</h1>
               <div className="inline-flex items-center px-3 py-1 rounded-md border border-border/30 bg-background/50">
-                <span className="text-sm font-mono text-foreground">{referral.id.slice(0, 6).toUpperCase()}</span>
+                <span className="text-sm font-mono text-foreground">{referral.id}</span>
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-2">Created {createdDate}</p>

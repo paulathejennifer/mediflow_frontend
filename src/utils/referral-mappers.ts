@@ -18,6 +18,7 @@ export interface ReferralSummaryApi {
   status: string
   priority: string
   created_at: string
+  reason_for_referral?: string
 }
 
 function mapPriority(priority: string): ReferralTableRow['priority'] {
@@ -47,10 +48,16 @@ function mapStatus(status: string): ReferralTableRow['status'] {
 }
 
 export function mapReferralSummaryToTableRow(r: ReferralSummaryApi): ReferralTableRow {
+  const truncateCondition = (text?: string) => {
+    if (!text) return 'General Consultation'
+    const words = text.split(' ')
+    return words.length > 4 ? words.slice(0, 4).join(' ') + '...' : text
+  }
+
   return {
-    id: `REF-${String(r.id).padStart(3, '0')}`,
+    id: `#${r.id}`,
     patient: r.patient_name,
-    condition: `Referral to ${r.to_facility_name}`,
+    condition: truncateCondition(r.reason_for_referral),
     priority: mapPriority(r.priority),
     status: mapStatus(r.status),
     receivingFacility: r.to_facility_name,
@@ -140,7 +147,7 @@ export function mapApiReferralToDetailView(r: ApiReferral): ReferralDetailView {
   }
 
   return {
-    id: `REF-${String(r.id).padStart(3, '0')}`,
+    id: `#${r.id}`,
     patientId: String(r.patient_id),
     patient: patientName,
     condition: r.reason_for_referral,

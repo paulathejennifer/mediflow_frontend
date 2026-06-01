@@ -11,6 +11,7 @@ import { Allergies } from './_components/allergies'
 import { ReferralSummary } from './_components/referral-summary'
 import { EditPatientModal } from '@/components/modals/edit-patient-modal'
 import { patientService } from '@/features/patients/services/patient.service'
+import { referralService } from '@/features/referrals/services/referral.service'
 
 interface ReferralData {
   id: string
@@ -87,12 +88,18 @@ const parseReferrals = (value: unknown): ReferralData[] => {
   return value
     .filter((item) => item && typeof item === 'object')
     .map((item: any) => ({
-      id: String(item.id ?? item.referralId ?? ''),
-      condition: String(item.condition ?? item.reason ?? 'Unknown condition'),
-      to: String(item.to ?? item.destination ?? 'Unknown facility'),
-      date: String(item.date ?? item.created_at ?? ''),
-      priority: ['high', 'medium', 'low'].includes(item.priority) ? item.priority : 'low',
-      status: ['pending', 'completed', 'in-progress'].includes(item.status) ? item.status : 'pending'
+      id: String(item.id ?? ''),
+      condition: String(item.reason_for_referral ?? item.condition ?? item.reason ?? 'Unknown condition'),
+      to: String(item.to_facility_name ?? item.to ?? item.destination ?? 'Unknown facility'),
+      date: String(item.created_at ?? item.date ?? ''),
+      priority: ['high', 'medium', 'low', 'emergency'].includes(item.priority) 
+        ? (item.priority === 'emergency' ? 'high' : item.priority) 
+        : 'low',
+      status: item.status === 'completed' 
+        ? 'completed' 
+        : (item.status === 'submitted' || item.status === 'accepted' || item.status === 'received') 
+          ? 'in-progress' 
+          : 'pending'
     }))
 }
 
@@ -142,8 +149,13 @@ export function PatientProfile({ patientId }: PatientProfileProps) {
       }
 
       try {
-        const patientData = await patientService.getPatientById(id)
-        setPatient(normalizePatient(patientData))
+        const [patientData, referralsData] = await Promise.all([
+          patientService.getPatientById(id),
+          referralService.getReferrals({ patient_id: id })
+        ])
+        const normalized = normalizePatient(patientData)
+        normalized.referrals = parseReferrals(referralsData)
+        setPatient(normalized)
       } catch (err: any) {
         console.error('Failed to load patient:', err)
         setError(err?.response?.data?.detail || 'Failed to load patient data')
