@@ -8,7 +8,6 @@ if (!API_BASE_URL && typeof window !== 'undefined') {
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
   timeout: 60000, // Increased to 60s to handle Render cold starts
   headers: {
     'Content-Type': 'application/json',
