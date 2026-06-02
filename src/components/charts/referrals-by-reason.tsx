@@ -29,7 +29,7 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
     }))
   }
 
-  const maxCount = Math.max(...chartData.map(item => item.count))
+  const maxCount = chartData.length > 0 ? Math.max(...chartData.map(item => item.count)) : 1;
 
   return (
     <Card className="bg-background border-border shadow-lg shadow-[hsl(var(--primary))]/20">
@@ -50,7 +50,7 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
           {chartData.map((item, index) => (
             <div key={item.reason} className="flex items-center gap-3">
               {/* Label */}
-              <div className="w-20 text-[14px] text-gray-400 text-right">
+              <div className="w-28 text-xs text-muted-foreground text-right truncate" title={item.reason}>
                 {item.reason}
               </div>
               
@@ -60,7 +60,7 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
                 <div className="h-6 bg-gray-900 rounded-full">
                   {/* Filled bar */}
                   <div
-                    className="h-6 bg-primary rounded-full transition-all duration-500"
+                    className="h-6 bg-[#67e8f9] rounded-full transition-all duration-500"
                     style={{ width: `${(item.count / maxCount) * 100}%` }}
                   />
                 </div>
@@ -69,7 +69,7 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
                 <div 
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium"
                   style={{ 
-                    color: (item.count / maxCount) * 100 > 85 ? '#2563EB' : 'white'
+                    color: (item.count / maxCount) * 100 > 20 ? '#000' : '#fff'
                   }}
                 >
                   {item.count}

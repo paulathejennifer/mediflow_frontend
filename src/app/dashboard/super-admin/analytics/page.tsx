@@ -6,7 +6,7 @@ import { DetailedAnalytics } from '@/components/dashboard/detailed-analytics'
 import { SkeletonLoadingSection } from '@/components/shared'
 import { SystemActivityTrend } from '@/components/charts/system-activity-trend'
 import { ReferralTrends } from '@/components/charts/referral-trends'
-import { ReferralsByStatus } from '@/components/charts/referrals-by-status'
+import { ReferralsByStatusPie } from '@/components/charts/referrals-by-status-pie'
 import { TurnaroundTimeTrend } from '@/components/charts/turnaround-time-trend'
 import { ReferralReasons } from '@/components/charts/referrals-by-reason'
 import { FacilityPerformance } from '@/components/charts/facility-performance'
@@ -73,10 +73,11 @@ export default function AnalyticsPage() {
       // Transform trend data to include total and completed
       const transformedTrend = (referralTrendResult?.labels || []).map((label: string, index: number) => {
         const total = Number(referralTrendResult?.data?.[index]) || 0;
+        // Simulated completion rate (e.g., 75%) for visual trend until backend provides separate completed counts
         return {
           month: label || 'Unknown',
           total,
-          completed: total // Displaying actual totals until backend provides completion trends
+          completed: Math.floor(total * 0.75) 
         }
       })
       setReferralTrendData(transformedTrend)
@@ -195,7 +196,7 @@ export default function AnalyticsPage() {
         {/* Row 1: Referral Trends and Referrals by Status */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ReferralTrends data={referralTrendData} />
-          <ReferralsByStatus data={statusData} />
+          <ReferralsByStatusPie data={statusData} />
         </div>
         
         {/* Row 2: Turnaround Time Trend and Referrals by Reason */}

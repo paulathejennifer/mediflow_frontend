@@ -32,6 +32,13 @@ export function ReferralsByStatusPie({ data }: ReferralsByStatusPieProps) {
   // Use real data only. If empty, show empty state.
   const chartData = data || []
 
+  // Calculate metrics
+  const submitted = chartData.find(i => i.name.toLowerCase() === 'submitted')?.value || 0;
+  const completed = chartData.find(i => i.name.toLowerCase() === 'completed')?.value || 0;
+  const total = chartData.reduce((sum, item) => sum + item.value, 0);
+  const completionRate = submitted > 0 ? Math.round((completed / submitted) * 100) : 0;
+  const dropOffRate = total > 0 ? Math.round(((total - completed) / total) * 100) : 0;
+
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = ({
     cx, cy, midAngle, innerRadius, outerRadius, percent
@@ -105,6 +112,19 @@ export function ReferralsByStatusPie({ data }: ReferralsByStatusPieProps) {
             </PieChart>
           </ResponsiveContainer>
         </div>
+        )}
+
+        {chartData.length > 0 && (
+          <div className="mt-6 space-y-2 border-t border-border pt-4">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Drop-off rate</span>
+              <span className="text-amber-500 font-semibold">{dropOffRate}% total loss</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Completion rate</span>
+              <span className="text-emerald-500 font-semibold">{completionRate}% of submitted</span>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
