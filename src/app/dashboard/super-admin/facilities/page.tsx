@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Building, Activity, TrendingUp, MapPin } from 'lucide-react'
@@ -95,6 +96,26 @@ export default function FacilitiesPage() {
     setAdminFacility(facility)
     setIsFacilityModalOpen(false)
     setIsAdminModalOpen(true)
+  }
+
+  const handleActivate = async (facility: any) => {
+    try {
+      await facilityService.updateFacility(facility.id, { is_active: true })
+      toast.success('Facility activated successfully')
+      fetchFacilitiesData()
+    } catch (err) {
+      toast.error('Failed to activate facility')
+    }
+  }
+
+  const handleDeactivate = async (facility: any) => {
+    try {
+      await facilityService.updateDeactivate(facility.id, { is_active: false })
+      toast.success('Facility deactivated')
+      fetchFacilitiesData()
+    } catch (err) {
+      toast.error('Failed to deactivate facility')
+    }
   }
 
   const facilitiesOverviewData: KPICardData[] = [
@@ -193,7 +214,14 @@ export default function FacilitiesPage() {
       </Card>
 
       {/* Facility Table */}
-      <FacilityTable facilities={paginatedFacilities} userRole="super-admin" />
+      <FacilityTable 
+        facilities={paginatedFacilities} 
+        userRole="super-admin" 
+        onViewProfile={handleViewProfile}
+        onEdit={(f) => { setAdminFacility(f); setIsFacilityModalOpen(true); }}
+        onActivate={handleActivate}
+        onDeactivate={handleDeactivate}
+      />
 
       {/* Pagination */}
       <Pagination

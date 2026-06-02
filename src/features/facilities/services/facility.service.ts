@@ -40,6 +40,7 @@ interface ApiFacilitySummary {
   email?: string
   created_at?: string
   performance_score?: number
+  is_active?: boolean
 }
 
 interface ApiFacilityResponse extends ApiFacilitySummary {
@@ -63,7 +64,7 @@ function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
     address: f.address || '',
     performance: f.performance_score ?? 0,
     joined: f.created_at || new Date().toISOString(),
-    status: 'active',
+    status: f.is_active === false ? 'inactive' : 'active',
     referrals: 0,
   }
 }
@@ -106,6 +107,12 @@ export const facilityService = {
 
   getFacilityById: async (id: string): Promise<Facility> => {
     const response = await apiClient.get<ApiFacilityResponse>(`/facilities/${id}`)
+    return mapResponseToFacility(response.data)
+  },
+
+
+  updateFacility: async (id: string, data: Partial<CreateFacilityRequest>): Promise<Facility> => {
+    const response = await apiClient.put<ApiFacilityResponse>(`/facilities/${id}`, data)
     return mapResponseToFacility(response.data)
   },
 

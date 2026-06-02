@@ -71,11 +71,14 @@ export default function AnalyticsPage() {
       setApiRequests(apiRequestsResult)
 
       // Transform trend data to include total and completed
-      const transformedTrend = (referralTrendResult?.labels || []).map((label: string, index: number) => ({
-        month: label || 'Unknown',
-        total: Number(referralTrendResult?.data?.[index] || 0),
-        completed: Math.round(Number(referralTrendResult?.data?.[index] || 0) * 0.85)
-      }))
+      const transformedTrend = (referralTrendResult?.labels || []).map((label: string, index: number) => {
+        const total = Number(referralTrendResult?.data?.[index]) || 0;
+        return {
+          month: label || 'Unknown',
+          total,
+          completed: total // Displaying actual totals until backend provides completion trends
+        }
+      })
       setReferralTrendData(transformedTrend)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch analytics data')
@@ -89,14 +92,14 @@ export default function AnalyticsPage() {
   }, [])
 
   // Calculate KPI values from real data
-  const totalFacilitiesCount = Number(metrics?.total_facilities ?? facilityPerformance?.length ?? 0);
-  const activeUsersCount = Number(metrics?.activeUsers ?? metrics?.totalUsers ?? 0);
-  const healthScoreValue = Number(systemHealth?.healthScore ?? 100);
-  const totalApiRequestsCount = Number(apiRequests?.totalRequests ?? 0);
+  const totalFacilitiesCount = Number(metrics?.total_facilities || facilityPerformance?.length || 0);
+  const activeUsersCount = Number(metrics?.activeUsers || metrics?.totalUsers || 0);
+  const healthScoreValue = Number(systemHealth?.healthScore || 100);
+  const totalApiRequestsCount = Number(apiRequests?.totalRequests || 0);
 
   // Format large numbers for API requests
   const formatApiRequests = (num: number): string => {
-    const n = Number(num || 0)
+    const n = Math.max(0, Number(num) || 0)
     if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
     if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
     return n.toLocaleString()
@@ -105,21 +108,20 @@ export default function AnalyticsPage() {
   const analyticsOverviewData: KPICardData[] = [
     {
       title: 'New Facilities',
-      value: totalFacilitiesCount.toLocaleString(),
+      value: totalFacilitiesCount.toLocaleString() || '0',
       trend: {
         // Estimate facility growth based on metrics growth rate
-        value: `+${Number(metrics?.growthRate ?? 0).toFixed(1)}%`,
-        isPositive: Number(metrics?.growthRate ?? 0) >= 0
+        value: `+${(Number(metrics?.growthRate) || 0).toFixed(1)}%`,
+        isPositive: (Number(metrics?.growthRate) || 0) >= 0
       },
       icon: <Building2 className="h-5 w-5" />
     },
     {
       title: 'Active Users',
-      value: (activeUsersCount || 0).toLocaleString(),
+      value: activeUsersCount.toLocaleString() || '0',
       trend: {
-        // Estimate user growth based on metrics growth rate
-        value: `+${Number(metrics?.growthRate ?? 0).toFixed(1)}%`,
-        isPositive: Number(metrics?.growthRate ?? 0) >= 0
+        value: `+${(Number(metrics?.totalUsersTrend) || 0).toFixed(1)}%`,
+        isPositive: (Number(metrics?.totalUsersTrend) || 0) >= 0
       },
       icon: <Users className="h-5 w-5" />
     },

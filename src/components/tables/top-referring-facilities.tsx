@@ -44,17 +44,17 @@ export function TopReferringFacilities({ data }: TopReferringFacilitiesProps) {
               {facilitiesData.map((facility, index) => (
                 <tr key={index} className="border-b border-border hover:bg-gray-900 transition-colors">
                   <td className="py-3 px-3 font-medium">{facility.name}</td>
-                  <td className="text-right py-3 px-3 font-mono">{Number(facility.referrals || 0).toLocaleString()}</td>
+                  <td className="text-right py-3 px-3 font-mono">{(Number(facility.referrals) || 0).toLocaleString()}</td>
                   <td className="text-right py-3 px-3 font-mono">{facility.avg_turnaround}</td>
                   <td className="text-right py-3 px-3 font-mono">{facility.completion_rate}</td>
                   <td className="text-right py-3 px-3">
-                    <div className={`flex items-center justify-end text-xs font-medium ${facility.trend.is_positive ? 'text-primary' : 'text-red-400'}`}>
-                      {facility.trend.is_positive ? (
+                    <div className={`flex items-center justify-end text-xs font-medium ${(facility.trend?.is_positive) ? 'text-primary' : 'text-red-400'}`}>
+                      {(facility.trend?.is_positive) ? (
                         <TrendingUp className="h-4 w-4 mr-1" />
                       ) : (
                         <TrendingDown className="h-4 w-4 mr-1" />
                       )}
-                      <span className="font-mono">{facility.trend.value}</span>
+                      <span className="font-mono">{facility.trend?.value || '0%'}</span>
                     </div>
                   </td>
                 </tr>

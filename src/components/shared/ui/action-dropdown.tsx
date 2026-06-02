@@ -150,18 +150,6 @@ export function ActionDropdown({
     if (type === 'facility') {
       return [
         ...baseActions,
-        {
-          label: 'Manage Staff',
-          icon: Users,
-          onClick: onManageStaff,
-          show: true
-        },
-        ...(userRole === 'super-admin' ? [{
-          label: 'View Analytics',
-          icon: BarChart3,
-          onClick: onViewAnalytics,
-          show: true
-        } as Action] : []),
         ...(userRole === 'super-admin' ? [{
           label: isActive ? 'Deactivate Facility' : 'Activate Facility',
           icon: isActive ? Ban : CheckCircle,
