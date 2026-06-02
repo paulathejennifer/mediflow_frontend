@@ -31,16 +31,10 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
 
   // Filter options based on input
   useEffect(() => {
-    if (inputValue.trim()) {
-      const filtered = options.filter(option =>
-        option.label.toLowerCase().includes(inputValue.toLowerCase())
-      )
-      setFilteredOptions(filtered)
-      setIsOpen(filtered.length > 0)
-    } else {
-      setFilteredOptions([])
-      setIsOpen(false)
-    }
+    const filtered = options.filter(option =>
+      option.label.toLowerCase().includes(inputValue.toLowerCase())
+    )
+    setFilteredOptions(filtered)
   }, [inputValue, options])
 
   // Handle click outside
@@ -111,11 +105,7 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
         value={inputValue}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (inputValue.trim()) {
-            setIsOpen(true)
-          }
-        }}
+        onFocus={() => setIsOpen(true)}
         disabled={disabled}
         placeholder={placeholder}
         className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"

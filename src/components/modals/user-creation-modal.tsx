@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef, FormEvent } from 'react'
 import { ChevronDown, Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { useFacilities } from '@/features/facilities/hooks/useFacilities'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
+import { userService } from '@/features/users/services/user.service'
 
 // AutocompleteInput component for long lists like counties and facilities
 function AutocompleteInput({ value, onChange, options, placeholder, disabled = false }: {
@@ -31,16 +33,10 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
 
   // Filter options based on input
   useEffect(() => {
-    if (inputValue.trim()) {
-      const filtered = options.filter(option =>
-        option.label.toLowerCase().includes(inputValue.toLowerCase())
-      )
-      setFilteredOptions(filtered)
-      setIsOpen(filtered.length > 0)
-    } else {
-      setFilteredOptions([])
-      setIsOpen(false)
-    }
+    const filtered = options.filter(option =>
+      option.label.toLowerCase().includes(inputValue.toLowerCase())
+    )
+    setFilteredOptions(filtered)
   }, [inputValue, options])
 
   // Handle click outside
@@ -103,21 +99,14 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
     setTimeout(() => setJustSelected(false), 150)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === 'Escape') {
-      e.preventDefault()
-    }
-  }
-
   return (
     <div className="relative" ref={dropdownRef}>
       <input
         type="text"
         value={inputValue}
         onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
         onFocus={() => {
-          if (inputValue.trim() && !justSelected) {
+          if (!justSelected) {
             setIsOpen(true)
           }
         }}
@@ -362,30 +351,24 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
     }
 
     await execute(async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      const newUser = {
-        ...formData,
-        id: `user_${Date.now()}`,
-        created_at: new Date().toISOString()
-      }
+      try {
+        const newUser = await userService.createUser({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          role: formData.role as any,
+          facility_id: formData.facility_id ? parseInt(formData.facility_id) : undefined,
+          is_active: formData.is_active
+        })
 
-      onSuccess(newUser)
-      setShowSuccess(true)
-      
-      // Reset form
-      setFormData({
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirm_password: '',
-        role: preSelectedFacilityId ? 'facility_admin' : '',
-        facility_id: preSelectedFacilityId || '',
-        is_active: true
-      })
+        onSuccess(newUser)
+        setShowSuccess(true)
+      } catch (err: any) {
+        toast.error(err.response?.data?.detail || 'Failed to create user')
+        throw err
+      }
     })
   }
 
@@ -600,7 +583,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
                   <AutocompleteInput
                     value={formData.facility_id}
                     onChange={(value) => setFormData(prev => ({ ...prev, facility_id: value }))}
-                    options={facilitiesData.map(facility => ({
+                    options={(facilitiesData || []).map(facility => ({
                       value: String(facility.id),
                       label: `${facility.name} (${facility.facilityCode})`
                     }))}
