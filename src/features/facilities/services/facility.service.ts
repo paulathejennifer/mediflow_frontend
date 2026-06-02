@@ -122,6 +122,11 @@ export const facilityService = {
     return mapResponseToFacility(response.data)
   },
 
+  updateDeactivate: async (id: string, data: { is_active: boolean }): Promise<Facility> => {
+    const response = await apiClient.put<ApiFacilityResponse>(`/facilities/${id}`, data)
+    return mapResponseToFacility(response.data)
+  },
+
   createFacility: async (data: CreateFacilityRequest): Promise<Facility> => {
     // Clean the level (strip "level_" prefix) to ensure backend validation passes
     const payload = {
