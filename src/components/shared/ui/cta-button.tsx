@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useRouter } from 'next/navigation'
 import { Plus, ChevronDown, X, ArrowDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ROLES, UserRole } from '@/constants/roles'
@@ -15,6 +16,7 @@ interface CTAButtonProps {
 }
 
 export function CTAButton({ userRole }: CTAButtonProps) {
+  const router = useRouter()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -74,7 +76,8 @@ export function CTAButton({ userRole }: CTAButtonProps) {
         setIsPatientModalOpen(true)
         break
       case 'create-referral':
-        // TODO: Implement referral creation modal
+        const rolePath = userRole.replace('_', '-')
+        router.push(`/dashboard/${rolePath}/referrals/create`)
         break
       default:
         break
