@@ -149,7 +149,12 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
   ]
 
   if (!isMounted || isLoading) {
-    return null
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground animate-pulse">Loading clinician team...</p>
+      </div>
+    )
   }
 
   return (
