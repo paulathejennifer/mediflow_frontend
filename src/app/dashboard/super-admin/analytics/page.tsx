@@ -44,7 +44,8 @@ export default function AnalyticsPage() {
         topFacilitiesResult,
         referralTrendResult,
         systemHealthResult,
-        apiRequestsResult
+        apiRequestsResult,
+        kpiData
       ] = await Promise.all([
         analyticsService.getSystemActivityTrend(6),
         analyticsService.getAnalyticsMetrics(),
@@ -55,11 +56,12 @@ export default function AnalyticsPage() {
         analyticsService.getTopReferringFacilities(10),
         analyticsService.getReferralTrend(30),
         analyticsService.getSystemHealth(),
-        analyticsService.getApiRequests(1)
+        analyticsService.getApiRequests(1),
+        analyticsService.getDashboardKpis()
       ])
 
       setSystemActivityTrend(trendData)
-      setMetrics(metricsData)
+      setMetrics({ ...(metricsData || {}), ...(kpiData || {}) })
       setStatusData(statusResult)
       setTurnaroundData(turnaroundResult)
       setReasonData(reasonResult)
@@ -69,10 +71,10 @@ export default function AnalyticsPage() {
       setApiRequests(apiRequestsResult)
 
       // Transform trend data to include total and completed
-      const transformedTrend = (referralTrendResult?.labels || []).map((label, index) => ({
-        month: label,
-        total: referralTrendResult?.data?.[index] || 0,
-        completed: Math.round((referralTrendResult?.data?.[index] || 0) * 0.85)
+      const transformedTrend = (referralTrendResult?.labels || []).map((label: string, index: number) => ({
+        month: label || 'Unknown',
+        total: Number(referralTrendResult?.data?.[index] || 0),
+        completed: Math.round(Number(referralTrendResult?.data?.[index] || 0) * 0.85)
       }))
       setReferralTrendData(transformedTrend)
     } catch (err) {
@@ -87,16 +89,16 @@ export default function AnalyticsPage() {
   }, [])
 
   // Calculate KPI values from real data
-  const totalFacilities = facilityPerformance?.length || 0
+  const totalFacilities = Number(metrics?.total_facilities ?? facilityPerformance?.length ?? 0)
   const activeUsers = Number(metrics?.activeUsers || 0)
   const healthScore = Number(systemHealth?.healthScore || 0)
   const totalApiRequests = Number(apiRequests?.totalRequests || 0)
 
   // Format large numbers for API requests
   const formatApiRequests = (num: number): string => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000000) return `${(Number(num) / 1000000).toFixed(1)}M`
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
-    return num.toString()
+    return (num || 0).toLocaleString()
   }
 
   const analyticsOverviewData: KPICardData[] = [

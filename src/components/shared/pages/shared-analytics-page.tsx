@@ -34,17 +34,18 @@ export function SharedAnalyticsPage() {
           analyticsService.getDashboardKpis()
         ])
 
-        setMetrics(metricsData)
         setReferralVolume(volumeData)
         setStatusData(statusDataResult)
         setTurnaroundData(turnaroundDataResult)
-        setMetrics(kpiData) // Use kpiData for overview cards
+        
+        // Merge metrics and KPI data to ensure all fields are available
+        setMetrics({ ...(metricsData || {}), ...(kpiData || {}) })
 
         // Transform trend data to include total and completed
-        const transformedTrend = (trendResult?.labels || []).map((label, index) => ({
-          month: label,
-          total: trendResult?.data?.[index] || 0,
-          completed: Math.round((trendResult?.data?.[index] || 0) * 0.85)
+        const transformedTrend = (trendResult?.labels || []).map((label: string, index: number) => ({
+          month: label || 'Unknown',
+          total: Number(trendResult?.data?.[index] || 0),
+          completed: Math.round(Number(trendResult?.data?.[index] || 0) * 0.85)
         }))
         setReferralTrendData(transformedTrend)
       } catch (err) {
@@ -65,9 +66,10 @@ export function SharedAnalyticsPage() {
 
   // Format trend values with proper signs
   const formatTrendValue = (value: number, suffix: string = '%', showSign: boolean = true): string => {
-    if (value === 0) return '0%'
-    const sign = showSign ? (value > 0 ? '+' : '') : ''
-    return `${sign}${value?.toFixed(1)}${suffix}`
+    const safeValue = Number(value || 0)
+    if (safeValue === 0) return '0%'
+    const sign = showSign ? (safeValue > 0 ? '+' : '') : ''
+    return `${sign}${Number(safeValue || 0).toFixed(1)}${suffix}`
   }
 
   const analyticsOverviewData: KPICardData[] = [
