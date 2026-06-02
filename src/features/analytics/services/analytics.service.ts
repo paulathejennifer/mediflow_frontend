@@ -165,7 +165,23 @@ export const analyticsService = {
   // Get overall analytics metrics
   getAnalyticsMetrics: async (): Promise<AnalyticsMetrics> => {
     const response = await apiClient.get('/analytics/metrics')
-    return response.data
+    const data = response.data
+    // Map backend response for consistency
+    return {
+      ...data,
+      totalPatients: data.total_patients || 0,
+      totalReferrals: data.total_referrals || 0,
+      activeUsers: data.active_users || 0,
+      cliniciansCount: data.clinicians_count || 0,
+      facilityAdminsCount: data.facility_admins_count || 0,
+      growthRate: data.growth_rate || 0,
+      recentAvgTurnaround: data.avg_turnaround_days || 0,
+      recentCompletionRate: data.completion_rate || 0,
+      totalReferralsTrend: data.referrals_trend || 0,
+      totalPatientsTrend: data.patients_trend || 0,
+      totalUsersTrend: data.users_trend || 0,
+      totalDocumentsTrend: data.documents_trend || 0
+    } as AnalyticsMetrics
   },
 
   // Get referral volume (incoming vs outgoing by month)

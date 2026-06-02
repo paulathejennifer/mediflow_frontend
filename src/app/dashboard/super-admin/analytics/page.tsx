@@ -89,42 +89,43 @@ export default function AnalyticsPage() {
   }, [])
 
   // Calculate KPI values from real data
-  const totalFacilities = Number(metrics?.total_facilities ?? facilityPerformance?.length ?? 0)
-  const activeUsers = Number(metrics?.activeUsers || 0)
-  const healthScore = Number(systemHealth?.healthScore || 0)
-  const totalApiRequests = Number(apiRequests?.totalRequests || 0)
+  const totalFacilitiesCount = Number(metrics?.total_facilities ?? facilityPerformance?.length ?? 0);
+  const activeUsersCount = Number(metrics?.activeUsers ?? metrics?.totalUsers ?? 0);
+  const healthScoreValue = Number(systemHealth?.healthScore ?? 100);
+  const totalApiRequestsCount = Number(apiRequests?.totalRequests ?? 0);
 
   // Format large numbers for API requests
   const formatApiRequests = (num: number): string => {
-    if (num >= 1000000) return `${(Number(num) / 1000000).toFixed(1)}M`
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
-    return (num || 0).toLocaleString()
+    const n = Number(num || 0)
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
+    return n.toLocaleString()
   }
 
   const analyticsOverviewData: KPICardData[] = [
     {
       title: 'New Facilities',
-      value: totalFacilities.toString(),
+      value: totalFacilitiesCount.toLocaleString(),
       trend: {
         // Estimate facility growth based on metrics growth rate
-        value: `+${Number(metrics?.growthRate || 0).toFixed(1)}%`,
-        isPositive: (metrics?.growthRate || 0) >= 0
+        value: `+${Number(metrics?.growthRate ?? 0).toFixed(1)}%`,
+        isPositive: Number(metrics?.growthRate ?? 0) >= 0
       },
       icon: <Building2 className="h-5 w-5" />
     },
     {
       title: 'Active Users',
-      value: activeUsers.toLocaleString(),
+      value: (activeUsersCount || 0).toLocaleString(),
       trend: {
         // Estimate user growth based on metrics growth rate
-        value: `+${Number(metrics?.growthRate || 0).toFixed(1)}%`,
-        isPositive: (metrics?.growthRate || 0) >= 0
+        value: `+${Number(metrics?.growthRate ?? 0).toFixed(1)}%`,
+        isPositive: Number(metrics?.growthRate ?? 0) >= 0
       },
       icon: <Users className="h-5 w-5" />
     },
     {
       title: 'System Health',
-      value: `${healthScore}%`,
+      value: `${healthScoreValue}%`,
       trend: {
         // System health trend based on error rate
         value: `${(systemHealth?.errorRate || 0) <= 5 ? '+0.5%' : '-1.2%'}`,
@@ -134,7 +135,7 @@ export default function AnalyticsPage() {
     },
     {
       title: 'API Requests (24h)',
-      value: formatApiRequests(totalApiRequests),
+      value: formatApiRequests(totalApiRequestsCount),
       trend: {
         value: `${(apiRequests?.trend || 0) >= 0 ? '+' : ''}${(apiRequests?.trend || 0).toFixed(1)}%`,
         isPositive: (apiRequests?.trend || 0) >= 0

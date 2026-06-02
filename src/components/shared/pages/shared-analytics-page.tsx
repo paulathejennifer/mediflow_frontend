@@ -59,10 +59,10 @@ export function SharedAnalyticsPage() {
   }, [])
 
   // Calculate KPI values from real data
-  const totalReferrals = Number(metrics?.totalReferrals || 0)
-  const avgTurnaround = Number(metrics?.recentAvgTurnaround || 0)
-  const completionRate = Number(metrics?.recentCompletionRate || 0)
-  const pendingReferrals = Number(metrics?.pendingReferrals || 0)
+  const totalReferralsCount = Number(metrics?.totalReferrals ?? 0);
+  const avgTurnaroundDays = Number(metrics?.recentAvgTurnaround ?? 0);
+  const completionRatePercent = Number(metrics?.recentCompletionRate ?? 0);
+  const pendingReferralsCount = Number(metrics?.pendingReferrals ?? 0);
 
   // Format trend values with proper signs
   const formatTrendValue = (value: number, suffix: string = '%', showSign: boolean = true): string => {
@@ -75,32 +75,32 @@ export function SharedAnalyticsPage() {
   const analyticsOverviewData: KPICardData[] = [
     {
       title: 'Total Referrals',
-      value: totalReferrals.toLocaleString(),
+      value: (totalReferralsCount || 0).toLocaleString(),
       trend: {
-        value: formatTrendValue(metrics?.totalReferralsTrend || 0),
-        isPositive: (metrics?.totalReferralsTrend || 0) >= 0
+        value: formatTrendValue(Number(metrics?.totalReferralsTrend ?? 0)),
+        isPositive: Number(metrics?.totalReferralsTrend ?? 0) >= 0
       },
       icon: <FileText className="h-5 w-5" />
     },
     {
       title: 'Average Turnaround',
-      value: `${avgTurnaround} days`,
+      value: `${avgTurnaroundDays} days`,
       trend: {
         // Negative trend is good for turnaround (faster is better)
-        value: formatTrendValue(-(metrics?.turnaroundTrend || 0)), // Still using legacy trend
-        isPositive: (metrics?.turnaroundTrend || 0) <= 0 // Still using legacy trend
+        value: formatTrendValue(-Number(metrics?.turnaroundTrend ?? 0)),
+        isPositive: Number(metrics?.turnaroundTrend ?? 0) <= 0
       },
       icon: <Clock className="h-5 w-5" />
     },
     {
       title: 'Completion Rate',
-      value: `${completionRate.toFixed(1)}%`,
+      value: `${completionRatePercent.toFixed(1)}%`,
       trend: { value: '0%', isPositive: true }, // Backend doesn't provide this trend in getDashboardKpis
       icon: <TrendingUp className="h-5 w-5" />
     },
     {
       title: 'Pending Referrals',
-      value: pendingReferrals.toString(),
+      value: pendingReferralsCount.toString(),
       trend: {
         value: '0%', isPositive: true // Backend doesn't provide trend for pending count
       }, 
