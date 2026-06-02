@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,6 +17,7 @@ import { AdminCreationModal } from '@/components/modals/admin-creation-modal'
 import { facilityService } from '@/features/facilities/services/facility.service'
 
 export default function FacilitiesPage() {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState('all')
   const [selectedLevel, setSelectedLevel] = useState('all')
@@ -96,6 +98,10 @@ export default function FacilitiesPage() {
     setAdminFacility(facility)
     setIsFacilityModalOpen(false)
     setIsAdminModalOpen(true)
+  }
+
+  const handleViewProfile = (facility: any) => {
+    router.push(`/dashboard/super-admin/facilities/${facility.id}`)
   }
 
   const handleActivate = async (facility: any) => {
