@@ -41,10 +41,10 @@ export function SharedAnalyticsPage() {
         setMetrics(kpiData) // Use kpiData for overview cards
 
         // Transform trend data to include total and completed
-        const transformedTrend = trendResult.labels.map((label, index) => ({
+        const transformedTrend = (trendResult?.labels || []).map((label, index) => ({
           month: label,
-          total: trendResult.data[index] || 0,
-          completed: Math.round((trendResult.data[index] || 0) * 0.85) // Estimate 85% completion rate
+          total: trendResult?.data?.[index] || 0,
+          completed: Math.round((trendResult?.data?.[index] || 0) * 0.85)
         }))
         setReferralTrendData(transformedTrend)
       } catch (err) {
@@ -58,10 +58,10 @@ export function SharedAnalyticsPage() {
   }, [])
 
   // Calculate KPI values from real data
-  const totalReferrals = metrics?.totalReferrals || 0 // This is now totalReferrals from getDashboardKpis
-  const avgTurnaround = metrics?.recentAvgTurnaround || 0 // This is still from getAnalyticsMetrics
-  const completionRate = metrics?.recentCompletionRate || 0 // This is still from getAnalyticsMetrics
-  const pendingReferrals = metrics?.pendingReferrals || 0 // This is now pendingReferrals from getDashboardKpis
+  const totalReferrals = Number(metrics?.totalReferrals || 0)
+  const avgTurnaround = Number(metrics?.recentAvgTurnaround || 0)
+  const completionRate = Number(metrics?.recentCompletionRate || 0)
+  const pendingReferrals = Number(metrics?.pendingReferrals || 0)
 
   // Format trend values with proper signs
   const formatTrendValue = (value: number, suffix: string = '%', showSign: boolean = true): string => {

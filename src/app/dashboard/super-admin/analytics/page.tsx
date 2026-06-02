@@ -69,10 +69,10 @@ export default function AnalyticsPage() {
       setApiRequests(apiRequestsResult)
 
       // Transform trend data to include total and completed
-      const transformedTrend = referralTrendResult.labels.map((label, index) => ({
+      const transformedTrend = (referralTrendResult?.labels || []).map((label, index) => ({
         month: label,
-        total: referralTrendResult.data[index] || 0,
-        completed: Math.round((referralTrendResult.data[index] || 0) * 0.85) // Estimate 85% completion rate
+        total: referralTrendResult?.data?.[index] || 0,
+        completed: Math.round((referralTrendResult?.data?.[index] || 0) * 0.85)
       }))
       setReferralTrendData(transformedTrend)
     } catch (err) {
@@ -87,10 +87,10 @@ export default function AnalyticsPage() {
   }, [])
 
   // Calculate KPI values from real data
-  const totalFacilities = facilityPerformance.length
-  const activeUsers = metrics?.activeUsers || 0
-  const healthScore = systemHealth?.healthScore || 0
-  const totalApiRequests = apiRequests?.totalRequests || 0
+  const totalFacilities = facilityPerformance?.length || 0
+  const activeUsers = Number(metrics?.activeUsers || 0)
+  const healthScore = Number(systemHealth?.healthScore || 0)
+  const totalApiRequests = Number(apiRequests?.totalRequests || 0)
 
   // Format large numbers for API requests
   const formatApiRequests = (num: number): string => {
@@ -105,7 +105,7 @@ export default function AnalyticsPage() {
       value: totalFacilities.toString(),
       trend: {
         // Estimate facility growth based on metrics growth rate
-        value: `+${(metrics?.growthRate || 0).toFixed(1)}%`,
+        value: `+${Number(metrics?.growthRate || 0).toFixed(1)}%`,
         isPositive: (metrics?.growthRate || 0) >= 0
       },
       icon: <Building2 className="h-5 w-5" />
@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
       value: activeUsers.toLocaleString(),
       trend: {
         // Estimate user growth based on metrics growth rate
-        value: `+${(metrics?.growthRate || 0).toFixed(1)}%`,
+        value: `+${Number(metrics?.growthRate || 0).toFixed(1)}%`,
         isPositive: (metrics?.growthRate || 0) >= 0
       },
       icon: <Users className="h-5 w-5" />
