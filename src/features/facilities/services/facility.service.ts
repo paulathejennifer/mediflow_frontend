@@ -13,7 +13,12 @@ export interface Facility {
   performance: number
   joined: string
   status: 'active' | 'inactive'
+  isActive: boolean
   referrals?: number
+  trend?: {
+    is_positive: boolean
+    value: number
+  }
 }
 
 export interface CreateFacilityRequest {
@@ -41,6 +46,10 @@ interface ApiFacilitySummary {
   created_at?: string
   performance_score?: number
   is_active?: boolean
+  performance_trend?: {
+    is_positive: boolean
+    percentage_change: number
+  }
 }
 
 interface ApiFacilityResponse extends ApiFacilitySummary {
@@ -51,7 +60,7 @@ interface ApiFacilityResponse extends ApiFacilitySummary {
 }
 
 function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
-  const levelNum = parseInt(String(f.level).replace(/\D/g, ''), 10) || 1
+  const levelNum = parseInt(String(f?.level || '').replace(/\D/g, ''), 10) || 1
   return {
     id: String(f.id),
     name: f.name,
@@ -65,20 +74,17 @@ function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
     performance: f.performance_score ?? 0,
     joined: f.created_at || new Date().toISOString(),
     status: f.is_active === false ? 'inactive' : 'active',
+    isActive: f.is_active !== false,
     referrals: 0,
+    trend: f.performance_trend ? {
+      is_positive: f.performance_trend.is_positive,
+      value: f.performance_trend.percentage_change ?? 0
+    } : { is_positive: true, value: 0 },
   }
 }
 
 function mapResponseToFacility(f: ApiFacilityResponse): Facility {
-  const base = mapSummaryToFacility(f)
-  return {
-    ...base,
-    email: f.email || '',
-    phone: f.phone || '',
-    address: f.address || '',
-    joined: f.created_at || base.joined,
-    status: f.is_active === false ? 'inactive' : 'active',
-  }
+  return mapSummaryToFacility(f)
 }
 
 export const getPerformanceVariant = (score: number): string => {
@@ -101,13 +107,13 @@ export const facilityService = {
     facility_type?: string
     level?: string
   }): Promise<Facility[]> => {
-    const response = await apiClient.get<ApiFacilitySummary[]>('/facilities/', { params })
-    return response.data.map(mapSummaryToFacility)
+    const { data } = await apiClient.get<ApiFacilitySummary[]>('/facilities/', { params })
+    return (data || []).map(mapSummaryToFacility)
   },
 
   getFacilityById: async (id: string): Promise<Facility> => {
-    const response = await apiClient.get<ApiFacilityResponse>(`/facilities/${id}`)
-    return mapResponseToFacility(response.data)
+    const { data } = await apiClient.get<ApiFacilityResponse>(`/facilities/${id}`)
+    return mapResponseToFacility(data)
   },
 
 
