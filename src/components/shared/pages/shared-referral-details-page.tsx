@@ -141,11 +141,17 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     switch (status) {
       case 'pending':
         return 'bg-yellow-600/10 text-yellow-600 border-yellow-600/20'
+      case 'submitted':
+        return 'bg-yellow-600/10 text-yellow-600 border-yellow-600/20'
       case 'accepted':
         return 'bg-blue-600/10 text-blue-600 border-blue-600/20'
       case 'completed':
         return 'bg-green-600/10 text-green-600 border-green-600/20'
+      case 'received':
+        return 'bg-green-600/10 text-green-600 border-green-600/20'
       case 'in_progress':
+        return 'bg-chart-5/10 text-chart-5 border-chart-5/20'
+      case 'in_transit':
         return 'bg-chart-5/10 text-chart-5 border-chart-5/20'
       case 'rejected':
         return 'bg-destructive/10 text-destructive border-destructive/20'

@@ -11,8 +11,8 @@ interface Referral {
   id: string
   patient: string
   condition: string
-  priority: 'high' | 'medium' | 'low'
-  status: 'draft' | 'pending' | 'accepted' | 'in_progress' | 'completed' | 'rejected' | 'cancelled'
+  priority: 'high' | 'medium' | 'low' | 'emergency'
+  status: 'draft' | 'pending' | 'submitted' | 'accepted' | 'in_progress' | 'completed' | 'rejected' | 'cancelled' | 'in_transit' | 'received'
   receivingFacility: string
   date: string
 }
@@ -113,6 +113,7 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                   referral.status === 'draft' ? 'bg-gray-600/10 text-gray-600 border-gray-600/20'
                   : referral.status === 'pending' ? 'bg-yellow-600/10 text-yellow-600 border-yellow-600/20'
+                  : referral.status === 'submitted' ? 'bg-yellow-600/10 text-yellow-600 border-yellow-600/20'
                   : referral.status === 'accepted' ? 'bg-blue-600/10 text-blue-600 border-blue-600/20'
                   : referral.status === 'in_progress' ? 'bg-purple-600/10 text-purple-600 border-purple-600/20'
                   : referral.status === 'completed' ? 'bg-green-600/10 text-green-600 border-green-600/20'

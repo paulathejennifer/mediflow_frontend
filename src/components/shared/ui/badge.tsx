@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 type UrgencyLevel = 'low' | 'medium' | 'high' | 'emergency'
-type ReferralStatus = 'draft' | 'pending' | 'accepted' | 'in_progress' | 'completed' | 'rejected' | 'cancelled'
+type ReferralStatus = 'draft' | 'pending' | 'submitted' | 'accepted' | 'in_progress' | 'completed' | 'rejected' | 'cancelled' | 'in_transit' | 'received'
 
 const urgencyConfig: Record<UrgencyLevel, { label: string; className: string }> = {
   low: { label: 'Low', className: 'bg-success/10 text-success border-success/20' },
@@ -13,7 +13,10 @@ const urgencyConfig: Record<UrgencyLevel, { label: string; className: string }> 
 const statusConfig: Record<ReferralStatus, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-muted text-muted-foreground' },
   pending: { label: 'Pending', className: 'bg-warning/10 text-warning' },
+  submitted: { label: 'Submitted', className: 'bg-warning/10 text-warning' },
   accepted: { label: 'Accepted', className: 'bg-primary/10 text-primary' },
+  in_transit: { label: 'In Transit', className: 'bg-chart-5/10 text-chart-5' },
+  received: { label: 'Received', className: 'bg-chart-5/10 text-chart-5' },
   in_progress: { label: 'In Progress', className: 'bg-chart-5/10 text-chart-5' },
   completed: { label: 'Completed', className: 'bg-success/10 text-success' },
   rejected: { label: 'Rejected', className: 'bg-destructive/10 text-destructive' },
