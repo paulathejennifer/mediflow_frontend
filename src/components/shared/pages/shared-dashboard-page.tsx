@@ -160,9 +160,9 @@ export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
           <CardContent>
             <RecentReferralsTable
               referrals={referrals.slice(0, 5)}
-              userRole={userRole === ROLES.SUPER_ADMIN ? 'facility-admin' :
+              userRole={userRole === ROLES.SUPER_ADMIN ? 'super-admin' :
                       userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' :
-                      userRole === ROLES.CLINICIAN ? 'clinician' : 'clinician'}
+                      'clinician'}
             />
           </CardContent>
         </Card>

@@ -31,6 +31,10 @@ export function ReferralTrends({ data }: ReferralTrendsProps) {
 
   // Transform any incoming data to use month names (limit to 6 months)
   const transformData = (incomingData: ReferralData[]) => {
+    // If we have more than 10 items, it's likely daily data (e.g. 30 days). 
+    // Do not overwrite labels or slice the data.
+    if (incomingData.length > 10) return incomingData;
+
     const monthNames = generateMonthNames();
     return incomingData.slice(0, 6).map((item, index) => ({
       ...item,

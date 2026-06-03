@@ -180,6 +180,7 @@ export function ActionDropdown({
     <div className="relative inline-block" ref={dropdownRef}>
       <Button
         variant="ghost"
+        type="button"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
         className="h-8 w-8 p-0 hover:bg-gray-800"
@@ -200,7 +201,10 @@ export function ActionDropdown({
               {actions.map((action, index) => (
                 <button
                   key={index}
-                  onClick={() => {
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
                     action.onClick?.()
                     setIsOpen(false)
                   }}

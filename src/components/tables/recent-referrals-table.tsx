@@ -26,14 +26,11 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
   const displayedReferrals = referrals.slice(0, 5)
 
   const handleViewDetails = (referralId: string) => {
-    // Navigate based on user role
-    if (userRole === 'facility-admin') {
-      router.push(`/dashboard/facility-admin/referrals/${referralId}`)
-    } else if (userRole === 'clinician') {
-      router.push(`/dashboard/clinician/referrals/${referralId}`)
-    } else {
-      router.push(`/dashboard/super-admin/referrals/${referralId}`)
-    }
+    if (!referralId) return
+    
+    // Normalize the role for the path (replace underscore with hyphen if needed)
+    const pathRole = userRole.replace('_', '-')
+    router.push(`/dashboard/${pathRole}/referrals/${referralId}`)
   }
 
   return (
