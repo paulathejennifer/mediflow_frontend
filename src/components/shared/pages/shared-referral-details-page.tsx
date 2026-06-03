@@ -19,7 +19,9 @@ import {
   Lightbulb,
   Brain,
   Clock,
-  Send
+  Send,
+  Check,
+  XCircle
 } from 'lucide-react'
 import { referralService } from '@/features/referrals/services/referral.service'
 import { mapApiReferralToDetailView, ReferralDetailView } from '@/utils/referral-mappers'
@@ -63,6 +65,29 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
     loadReferral()
   }, [referralId])
+
+  const handleAccept = async () => {
+    if (!referral) return
+    try {
+      setIsLoading(true)
+      const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
+      await referralService.acceptReferral(numericId)
+      toast.success("Referral accepted successfully")
+      window.location.reload()
+    } catch (error) {
+      toast.error("Failed to accept referral")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleReject = async () => {
+    if (!referral) return
+    const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
+    await referralService.rejectReferral(numericId)
+    toast.error("Referral rejected")
+    router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)
+  }
 
   const handleGoBack = () => {
     router.back()
@@ -195,6 +220,24 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           <Badge className={`${getStatusBadgeClass(referral.status)} text-xs font-semibold px-3 py-1.5`}>
             {referral.status.charAt(0).toUpperCase() + referral.status.slice(1).replace('_', ' ')}
           </Badge>
+          
+          {/* ACTION BUTTONS */}
+          {(referral.status === 'pending' || referral.status === 'submitted') && userRole !== ROLES.SUPER_ADMIN && (
+            <div className="flex items-center gap-2 ml-4">
+              <Button 
+                onClick={handleReject}
+                variant="outline" 
+                className="h-9 border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-400"
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Reject
+              </Button>
+              <Button onClick={handleAccept} className="h-9 bg-success hover:bg-success/90 text-white">
+                <Check className="h-4 w-4 mr-2" />
+                Accept Referral
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

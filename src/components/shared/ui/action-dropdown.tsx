@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Eye, Edit, UserPlus, FileText, Settings, Ban, CheckCircle, Building, Users, BarChart3, ArrowRightLeft, Download, Trash2, type LucideIcon } from 'lucide-react'
+import { MoreHorizontal, Eye, Edit, UserPlus, FileText, Settings, Ban, CheckCircle, Building, Users, BarChart3, ArrowRightLeft, Download, Trash2, Check, XCircle, type LucideIcon } from 'lucide-react'
 
 interface Action {
   label: string
@@ -28,6 +28,8 @@ interface ActionDropdownProps {
   onViewDetails?: () => void
   onDownload?: () => void
   onDelete?: () => void
+  onAccept?: () => void
+  onReject?: () => void
 }
 
 export function ActionDropdown({
@@ -45,7 +47,9 @@ export function ActionDropdown({
   onViewAnalytics,
   onViewDetails,
   onDownload,
-  onDelete
+  onDelete,
+  onAccept,
+  onReject
 }: ActionDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom')
@@ -118,6 +122,18 @@ export function ActionDropdown({
           label: 'View Details',
           icon: Eye,
           onClick: onViewProfile || onViewDetails,
+          show: true
+        },
+        {
+          label: 'Accept Referral',
+          icon: Check,
+          onClick: onAccept,
+          show: userRole !== 'super-admin' && isActive // Only clinicians/facility admins can accept
+        },
+        {
+          label: 'Reject Referral',
+          icon: XCircle,
+          onClick: onReject,
           show: true
         }
       ].filter(action => action.show)

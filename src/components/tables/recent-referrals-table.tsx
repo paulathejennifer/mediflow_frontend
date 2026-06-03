@@ -4,6 +4,8 @@ import { MoreHorizontal, User, Calendar, MapPin, FileText } from 'lucide-react'
 import { ActionDropdown } from '@/components/shared'
 import { useRouter } from 'next/navigation'
 import { formatTableDate } from '@/utils/date-utils'
+import { referralService } from '@/features/referrals/services/referral.service'
+import { toast } from 'sonner'
 
 interface Referral {
   id: string
@@ -40,6 +42,28 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
 
     console.log(`🚀 [NAVIGATION] Moving to: ${targetPath}`);
     router.push(targetPath);
+  }
+
+  const handleAccept = async (id: string) => {
+    try {
+      const numericId = parseInt(id.replace(/\D/g, ''), 10)
+      await referralService.acceptReferral(numericId)
+      toast.success(`Referral #${id} accepted`)
+      router.refresh()
+    } catch (error) {
+      toast.error("Failed to accept referral")
+    }
+  }
+
+  const handleReject = async (id: string) => {
+    try {
+      const numericId = parseInt(id.replace(/\D/g, ''), 10)
+      await referralService.rejectReferral(numericId)
+      toast.error(`Referral #${id} rejected`)
+      router.refresh()
+    } catch (error) {
+      toast.error("Failed to reject referral")
+    }
   }
 
   return (
@@ -114,6 +138,9 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
                 <ActionDropdown
                   type="referral"
                   userRole={userRole}
+                  isActive={referral.status === 'pending' || referral.status === 'submitted'}
+                  onAccept={() => handleAccept(referral.id)}
+                  onReject={() => handleReject(referral.id)}
                   onViewProfile={() => handleViewDetails(referral.id)}
                 />
               </td>
