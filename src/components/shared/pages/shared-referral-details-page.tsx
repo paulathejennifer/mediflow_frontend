@@ -524,8 +524,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
         <div className="flex items-center justify-end gap-4 pt-8 mt-4 border-t border-border/50">
           <Button 
             onClick={handleReject}
-            variant="destructive" 
-            className="px-8 h-11"
+            variant="outline" 
+            className="px-8 h-11 border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-400"
             disabled={isLoading}
           >
             <XCircle className="h-4 w-4 mr-2" />
