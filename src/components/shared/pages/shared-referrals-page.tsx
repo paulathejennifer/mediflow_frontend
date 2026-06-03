@@ -190,7 +190,7 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
         <CardHeader>
           <CardTitle className="text-white flex items-center">
             <FileText className="h-5 w-5 mr-2 text-primary" />
-            Recent Referrals
+            Referrals
           </CardTitle>
         </CardHeader>
         <CardContent>

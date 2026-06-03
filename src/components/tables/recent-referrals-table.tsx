@@ -27,14 +27,19 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
   const displayedReferrals = onViewMore ? referrals.slice(0, 5) : referrals
 
   const handleViewDetails = (referralId: string) => {
-    if (!referralId) return
+    if (!referralId) {
+      console.warn('⚠️ [NAVIGATION] Missing referral ID');
+      return
+    }
     
     // Normalize the role for the path and ensure absolute routing
-    const pathRole = String(userRole).replace('_', '-')
-    const targetPath = `/dashboard/${pathRole}/referrals/${referralId}`
+    const pathRole = String(userRole).replace('_', '-');
+    // Ensure ID is clean of any existing hashtags before building path
+    const cleanId = String(referralId).replace('#', '');
+    const targetPath = `/dashboard/${pathRole}/referrals/${cleanId}`;
 
-    console.log(`🚀 [NAVIGATION] Moving to: ${targetPath}`)
-    router.push(targetPath)
+    console.log(`🚀 [NAVIGATION] Moving to: ${targetPath}`);
+    router.push(targetPath);
   }
 
   return (

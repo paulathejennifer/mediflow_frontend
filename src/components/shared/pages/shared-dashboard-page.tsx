@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FileText, Users, Activity, Calendar, TrendingUp, Clock, ArrowRight } from 'lucide-react'
@@ -19,6 +20,7 @@ interface SharedDashboardPageProps {
 }
 
 export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
+  const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
   const [referrals, setReferrals] = useState<any[]>([])
   const [referralsLoading, setReferralsLoading] = useState(true)
@@ -151,7 +153,12 @@ export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
                 <Activity className="h-5 w-5 mr-2 text-primary" />
                 Recent Referrals
               </CardTitle>
-              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-gray-900">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary hover:text-primary/80 hover:bg-gray-900"
+                onClick={() => router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)}
+              >
                 View all
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
