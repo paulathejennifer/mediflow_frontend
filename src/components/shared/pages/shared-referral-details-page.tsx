@@ -521,7 +521,16 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
       {/* BOTTOM ACTION SECTION */}
       {(referral.status === 'pending' || referral.status === 'submitted') && userRole !== ROLES.SUPER_ADMIN && (
-        <div className="flex items-center justify-end gap-4 pt-8 mt-4 border-t border-border/50">
+        <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50">
+          <Button 
+            onClick={handleAccept} 
+            variant="default" 
+            className="px-8 h-11 bg-primary text-primary-foreground shadow-[0_0_15px_rgba(56,189,248,0.4)] animate-pulse hover:animate-none" 
+            disabled={isLoading}
+          >
+            <Check className="h-4 w-4 mr-2" />
+            Accept Referral
+          </Button>
           <Button 
             onClick={handleReject}
             variant="outline" 
@@ -530,15 +539,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           >
             <XCircle className="h-4 w-4 mr-2" />
             Reject Referral
-          </Button>
-          <Button 
-            onClick={handleAccept} 
-            variant="default" 
-            className="px-8 h-11 shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)] animate-pulse hover:animate-none" 
-            disabled={isLoading}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Accept Referral
           </Button>
         </div>
       )}
