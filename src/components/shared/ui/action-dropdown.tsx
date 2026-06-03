@@ -117,7 +117,7 @@ export function ActionDropdown({
         {
           label: 'View Details',
           icon: Eye,
-          onClick: onViewDetails,
+          onClick: onViewProfile || onViewDetails,
           show: true
         }
       ].filter(action => action.show)
@@ -128,7 +128,7 @@ export function ActionDropdown({
         {
           label: 'View',
           icon: Eye,
-          onClick: onViewDetails,
+          onClick: onViewProfile || onViewDetails,
           show: true
         },
         {
