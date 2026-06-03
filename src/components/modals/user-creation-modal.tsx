@@ -214,6 +214,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
     last_name: '',
     email: '',
     phone: '',
+    gender: '',
     password: '',
     confirm_password: '',
     role: preSelectedFacilityId ? 'facility_admin' : '',
@@ -235,6 +236,12 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
     { value: 'clinician', label: 'Clinician' }
   ]
 
+  const genderOptions = [
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'other', label: 'Other' }
+  ]
+
   // Reset form when modal opens or preSelectedFacilityId changes
   useEffect(() => {
     if (isOpen) {
@@ -243,6 +250,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
         last_name: '',
         email: '',
         phone: '',
+        gender: '',
         password: '',
         confirm_password: '',
         role: preSelectedFacilityId ? 'facility_admin' : '',
@@ -453,6 +461,19 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
                   data-field="phone"
                 />
                 {errors.phone && <p className="mt-1 text-sm text-red-500" data-field="phone">{errors.phone}</p>}
+              </div>
+
+              {/* Gender */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Gender
+                </label>
+                <FilterDropdown
+                  value={formData.gender}
+                  onChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
+                  options={genderOptions}
+                  placeholder="Select Gender"
+                />
               </div>
 
               {/* Password */}

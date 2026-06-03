@@ -17,12 +17,7 @@ interface Referral {
 
 interface RecentReferralsTableProps {
   referrals: Referral[]
-  userRole: 'facility-admin' | 'clinician'
-}
-
-interface RecentReferralsTableProps {
-  referrals: Referral[]
-  userRole: 'facility-admin' | 'clinician'
+  userRole: 'super-admin' | 'facility-admin' | 'clinician'
   onViewMore?: () => void
 }
 
@@ -113,7 +108,7 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
                 <ActionDropdown
                   type="referral"
                   userRole={userRole}
-                  onViewDetails={() => handleViewDetails(referral.id)}
+                  onViewProfile={() => handleViewDetails(referral.id)}
                 />
               </td>
             </tr>
