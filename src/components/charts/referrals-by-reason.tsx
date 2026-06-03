@@ -65,13 +65,7 @@ export function ReferralReasons({ data }: ReferralReasonsProps) {
                   />
                 </div>
                 
-                {/* Count label on bar */}
-                <div
-                  className="absolute left-0 top-1/2 -translate-y-1/2 text-[10px] font-bold pl-2"
-                  style={{ color: '#000', left: `min(calc(${(item.count / maxCount) * 100}% - 24px), 0px)` }}
-                >
-                </div>
-                <span className="absolute left-[calc(var(--width)+8px)] top-1/2 -translate-y-1/2 text-xs text-muted-foreground ml-1" style={{ left: `${(item.count / maxCount) * 100}%`, marginLeft: '8px' }}>
+                <span className="absolute left-full top-1/2 -translate-y-1/2 text-xs text-muted-foreground ml-2 whitespace-nowrap">
                   {item.count}
                 </span>
               </div>

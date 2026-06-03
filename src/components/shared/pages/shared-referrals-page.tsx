@@ -196,7 +196,7 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
         <CardContent>
           <RecentReferralsTable 
             referrals={paginatedReferrals} 
-            userRole={userRole === ROLES.SUPER_ADMIN ? 'super-admin' : 
+            userRole={userRole === (ROLES.SUPER_ADMIN as string) ? 'super-admin' : 
                     userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' : 
                     'clinician'} 
           />

@@ -180,9 +180,13 @@ export function ActionDropdown({
     <div className="relative inline-block" ref={dropdownRef}>
       <Button
         variant="ghost"
-        type="button"
         size="sm"
-        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setIsOpen(!isOpen)
+        }}
         className="h-8 w-8 p-0 hover:bg-gray-800"
       >
         <MoreHorizontal className="h-4 w-4 text-gray-400" />

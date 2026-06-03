@@ -23,14 +23,18 @@ interface RecentReferralsTableProps {
 
 export function RecentReferralsTable({ referrals, userRole, onViewMore }: RecentReferralsTableProps) {
   const router = useRouter()
-  const displayedReferrals = referrals.slice(0, 5)
+  // Only slice to 5 items if we are in "Recent" mode (dashboard)
+  const displayedReferrals = onViewMore ? referrals.slice(0, 5) : referrals
 
   const handleViewDetails = (referralId: string) => {
     if (!referralId) return
     
-    // Normalize the role for the path (replace underscore with hyphen if needed)
-    const pathRole = userRole.replace('_', '-')
-    router.push(`/dashboard/${pathRole}/referrals/${referralId}`)
+    // Normalize the role for the path and ensure absolute routing
+    const pathRole = String(userRole).replace('_', '-')
+    const targetPath = `/dashboard/${pathRole}/referrals/${referralId}`
+
+    console.log(`🚀 [NAVIGATION] Moving to: ${targetPath}`)
+    router.push(targetPath)
   }
 
   return (
