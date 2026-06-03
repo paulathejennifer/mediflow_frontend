@@ -21,6 +21,7 @@ interface RecentReferralsTableProps {
   referrals: Referral[]
   userRole: 'super-admin' | 'facility-admin' | 'clinician'
   onViewMore?: () => void
+  onActionComplete?: () => void
 }
 
 export function RecentReferralsTable({ referrals, userRole, onViewMore }: RecentReferralsTableProps) {
@@ -49,7 +50,11 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
       const numericId = parseInt(id.replace(/\D/g, ''), 10)
       await referralService.acceptReferral(numericId)
       toast.success(`Referral #${id} accepted`)
-      router.refresh()
+      if (onActionComplete) {
+        onActionComplete()
+      } else {
+        router.refresh()
+      }
     } catch (error) {
       toast.error("Failed to accept referral")
     }
@@ -60,7 +65,11 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore }: Recent
       const numericId = parseInt(id.replace(/\D/g, ''), 10)
       await referralService.rejectReferral(numericId)
       toast.error(`Referral #${id} rejected`)
-      router.refresh()
+      if (onActionComplete) {
+        onActionComplete()
+      } else {
+        router.refresh()
+      }
     } catch (error) {
       toast.error("Failed to reject referral")
     }

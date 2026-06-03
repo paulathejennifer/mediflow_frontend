@@ -30,19 +30,20 @@ export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
     setIsMounted(true)
   }, [])
 
-  useEffect(() => {
-    const fetchReferrals = async () => {
-      try {
-        const data = await referralService.getReferrals()
-        const mapped = data.map(mapReferralSummaryToTableRow)
-        setReferrals(mapped)
-        setPreviousReferrals(mapped.slice(0, Math.max(0, mapped.length - 5)))
-      } catch (err) {
-        console.error('Failed to fetch referrals:', err)
-      } finally {
-        setReferralsLoading(false)
-      }
+  const fetchReferrals = async () => {
+    try {
+      const data = await referralService.getReferrals()
+      const mapped = data.map(mapReferralSummaryToTableRow)
+      setReferrals(mapped)
+      setPreviousReferrals(mapped.slice(0, Math.max(0, mapped.length - 5)))
+    } catch (err) {
+      console.error('Failed to fetch referrals:', err)
+    } finally {
+      setReferralsLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchReferrals()
   }, [])
 
@@ -170,6 +171,7 @@ export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
               userRole={userRole === ROLES.SUPER_ADMIN ? 'super-admin' :
                       userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' :
                       'clinician'}
+              onActionComplete={fetchReferrals}
             />
           </CardContent>
         </Card>

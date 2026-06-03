@@ -116,17 +116,17 @@ export const referralService = {
   },
 
   submitReferral: async (referralId: number): Promise<{ message: string }> => {
-    const response = await apiClient.post(`/referrals/${referralId}/submit`)
+    const response = await apiClient.post(`/referrals/${referralId}/submit/`)
     return response.data
   },
 
   acceptReferral: async (referralId: number): Promise<Referral> => {
-    const response = await apiClient.post(`/referrals/${referralId}/accept`)
+    const response = await apiClient.post(`/referrals/${referralId}/accept/`)
     return response.data
   },
 
   rejectReferral: async (referralId: number): Promise<Referral> => {
-    const response = await apiClient.post(`/referrals/${referralId}/reject`)
+    const response = await apiClient.post(`/referrals/${referralId}/reject/`)
     return response.data
   },
 }

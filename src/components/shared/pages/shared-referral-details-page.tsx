@@ -40,6 +40,19 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  const loadReferral = async () => {
+    const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
+    try {
+      const data = await referralService.getReferralById(numericId)
+      setReferral(mapApiReferralToDetailView(data))
+    } catch (error) {
+      console.error('Failed to load referral:', error)
+      toast.error('Failed to load referral details')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
     setIsMounted(true)
     const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
@@ -48,21 +61,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       setIsLoading(false)
       return
     }
-
-    const loadReferral = async () => {
-      try {
-        setIsLoading(true)
-        const data = await referralService.getReferralById(numericId)
-        setReferral(mapApiReferralToDetailView(data))
-      } catch (error) {
-        console.error('Failed to load referral:', error)
-        toast.error('Failed to load referral details')
-        setReferral(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     loadReferral()
   }, [referralId])
 
@@ -73,7 +71,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
       await referralService.acceptReferral(numericId)
       toast.success("Referral accepted successfully")
-      window.location.reload()
+      await loadReferral() // Re-fetch data instead of full page reload
     } catch (error) {
       toast.error("Failed to accept referral")
     } finally {
@@ -536,6 +534,25 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           </Card>
         </div>
       </div>
+
+      {/* BOTTOM ACTION SECTION */}
+      {(referral.status === 'pending' || referral.status === 'submitted') && userRole !== ROLES.SUPER_ADMIN && (
+        <div className="flex items-center justify-end gap-4 pt-8 mt-4 border-t border-border/50">
+          <Button 
+            onClick={handleReject}
+            variant="destructive" 
+            className="px-8 h-11"
+            disabled={isLoading}
+          >
+            <XCircle className="h-4 w-4 mr-2" />
+            Reject Referral
+          </Button>
+          <Button onClick={handleAccept} variant="default" className="px-8 h-11" disabled={isLoading}>
+            <Check className="h-4 w-4 mr-2" />
+            Accept Referral
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

@@ -199,6 +199,7 @@ export function SharedReferralsPage({ userRole }: SharedReferralsPageProps) {
             userRole={userRole === (ROLES.SUPER_ADMIN as string) ? 'super-admin' : 
                     userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' : 
                     'clinician'} 
+            onActionComplete={fetchData}
           />
         </CardContent>
       </Card>
