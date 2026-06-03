@@ -1,6 +1,4 @@
-import { Badge } from '@/components/shared'
-import { Button } from '@/components/ui/button'
-import { MoreHorizontal, User, Calendar, MapPin, FileText } from 'lucide-react'
+import { Calendar, MapPin, FileText } from 'lucide-react'
 import { ActionDropdown } from '@/components/shared'
 import { useRouter } from 'next/navigation'
 import { formatTableDate } from '@/utils/date-utils'
@@ -24,7 +22,7 @@ interface RecentReferralsTableProps {
   onActionComplete?: () => void
 }
 
-export function RecentReferralsTable({ referrals, userRole, onViewMore }: RecentReferralsTableProps) {
+export function RecentReferralsTable({ referrals, userRole, onViewMore, onActionComplete }: RecentReferralsTableProps) {
   const router = useRouter()
   // Only slice to 5 items if we are in "Recent" mode (dashboard)
   const displayedReferrals = onViewMore ? referrals.slice(0, 5) : referrals
