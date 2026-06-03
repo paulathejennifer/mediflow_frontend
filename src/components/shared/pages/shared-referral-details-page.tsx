@@ -40,19 +40,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadReferral = async () => {
-    const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
-    try {
-      const data = await referralService.getReferralById(numericId)
-      setReferral(mapApiReferralToDetailView(data))
-    } catch (error) {
-      console.error('Failed to load referral:', error)
-      toast.error('Failed to load referral details')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   useEffect(() => {
     setIsMounted(true)
     const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
@@ -61,6 +48,21 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       setIsLoading(false)
       return
     }
+
+    const loadReferral = async () => {
+      try {
+        setIsLoading(true)
+        const data = await referralService.getReferralById(numericId)
+        setReferral(mapApiReferralToDetailView(data))
+      } catch (error) {
+        console.error('Failed to load referral:', error)
+        toast.error('Failed to load referral details')
+        setReferral(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     loadReferral()
   }, [referralId])
 
@@ -71,7 +73,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
       await referralService.acceptReferral(numericId)
       toast.success("Referral accepted successfully")
-      await loadReferral() // Re-fetch data instead of full page reload
+      window.location.reload()
     } catch (error) {
       toast.error("Failed to accept referral")
     } finally {
@@ -224,24 +226,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           <Badge className={`${getStatusBadgeClass(referral.status)} text-xs font-semibold px-3 py-1.5`}>
             {referral.status.charAt(0).toUpperCase() + referral.status.slice(1).replace('_', ' ')}
           </Badge>
-          
-          {/* ACTION BUTTONS */}
-          {(referral.status === 'pending' || referral.status === 'submitted') && userRole !== ROLES.SUPER_ADMIN && (
-            <div className="flex items-center gap-2 ml-4">
-              <Button 
-                onClick={handleReject}
-                variant="outline" 
-                className="h-9 border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-400"
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Reject
-              </Button>
-              <Button onClick={handleAccept} className="h-9 bg-success hover:bg-success/90 text-white">
-                <Check className="h-4 w-4 mr-2" />
-                Accept Referral
-              </Button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -547,7 +531,12 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
             <XCircle className="h-4 w-4 mr-2" />
             Reject Referral
           </Button>
-          <Button onClick={handleAccept} variant="default" className="px-8 h-11" disabled={isLoading}>
+          <Button 
+            onClick={handleAccept} 
+            variant="default" 
+            className="px-8 h-11 shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)] animate-pulse hover:animate-none" 
+            disabled={isLoading}
+          >
             <Check className="h-4 w-4 mr-2" />
             Accept Referral
           </Button>
