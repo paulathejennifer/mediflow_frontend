@@ -112,10 +112,17 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
   const handleReject = async () => {
     if (!referral) return
-    const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-    await referralService.rejectReferral(numericId)
-    toast.error("Referral rejected")
-    router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)
+    try {
+      setIsLoading(true)
+      const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
+      await referralService.rejectReferral(numericId)
+      toast.error("Referral rejected")
+      router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)
+    } catch (error) {
+      toast.error("Failed to reject referral")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleGoBack = () => {
@@ -232,10 +239,10 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const timelineEvents = (referral.timeline && referral.timeline.length > 0) 
     ? referral.timeline 
     : [
-        submittedAt && { id: 'sub', action: 'submitted', timestamp: submittedAt, user: (referral as any).creator || 'System', description: 'Referral submitted' },
-        acceptedAt && { id: 'acc', action: 'accepted', timestamp: acceptedAt, user: (referral as any).accepted_by_user || 'Clinician', description: 'Referral accepted' },
-        rejectedAt && { id: 'rej', action: 'rejected', timestamp: rejectedAt, user: (referral as any).rejected_by_user || 'Clinician', description: 'Referral rejected' },
-        completedAt && { id: 'com', action: 'completed', timestamp: completedAt, user: (referral as any).completed_by_user || 'Clinician', description: 'Referral completed' }
+        submittedAt && { id: 'sub', action: 'submitted', timestamp: submittedAt, user: (referral as any).creator || 'System', description: 'Referral submitted at ' + (referral as any).creator_facility },
+        acceptedAt && { id: 'acc', action: 'accepted', timestamp: acceptedAt, user: (referral as any).accepted_by_user || 'Clinician', description: 'Referral accepted by receiving facility' },
+        rejectedAt && { id: 'rej', action: 'rejected', timestamp: rejectedAt, user: (referral as any).rejected_by_user || 'Clinician', description: 'Referral rejected by receiving facility' },
+        completedAt && { id: 'com', action: 'completed', timestamp: completedAt, user: (referral as any).completed_by_user || 'Clinician', description: 'Clinical handover completed' }
       ].filter(Boolean) as any[];
 
   const sortedEvents = [...timelineEvents].sort((a, b) => 
