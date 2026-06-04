@@ -176,6 +176,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
         last_name: formData.last_name,
         email: formData.email,
         phone: '',
+        gender: (formData as any).gender || '',
         password: formData.password,
         role: formData.role as 'facility_admin' | 'clinician',
         facility_id: facilityData?.id ? Number(facilityData.id) : undefined,

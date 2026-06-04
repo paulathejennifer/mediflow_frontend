@@ -365,6 +365,7 @@ export function UserCreationModal({ isOpen, onClose, onSuccess, preSelectedFacil
           last_name: formData.last_name,
           email: formData.email,
           phone: formData.phone,
+          gender: formData.gender,
           password: formData.password,
           role: formData.role as any,
           facility_id: formData.facility_id ? parseInt(formData.facility_id) : undefined,
