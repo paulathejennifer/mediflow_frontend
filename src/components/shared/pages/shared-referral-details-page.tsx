@@ -90,7 +90,17 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     try {
       setIsLoading(true)
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-      await referralService.completeReferral(numericId)
+      // referralService may not have a concrete "completeReferral" method on its type.
+      // Call whichever implementation is available at runtime to mark the referral completed.
+      const svc: any = referralService
+      if (typeof svc.completeReferral === 'function') {
+        await svc.completeReferral(numericId)
+      } else if (typeof svc.updateReferral === 'function') {
+        // fallback to a generic update method if available
+        await svc.updateReferral(numericId, { status: 'completed' })
+      } else {
+        throw new Error('No method available to complete referral')
+      }
       toast.success("Referral completed successfully")
       window.location.reload()
     } catch (error) {
@@ -212,14 +222,20 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
   const createdDate = formatDate(referral.date)
 
+  // Priority fields for timeline construction
+  const submittedAt = (referral as any).submitted_at
+  const acceptedAt = (referral as any).accepted_at
+  const rejectedAt = (referral as any).rejected_at
+  const completedAt = (referral as any).completed_at
+
   // Construct timeline from explicit fields as requested
   const timelineEvents = (referral.timeline && referral.timeline.length > 0) 
     ? referral.timeline 
     : [
-        (referral as any).submitted_at && { id: 'sub', action: 'submitted', timestamp: (referral as any).submitted_at, user: (referral as any).creator || 'System', description: 'Referral submitted' },
-        (referral as any).accepted_at && { id: 'acc', action: 'accepted', timestamp: (referral as any).accepted_at, user: (referral as any).accepted_by_user || 'Clinician', description: 'Referral accepted' },
-        (referral as any).rejected_at && { id: 'rej', action: 'rejected', timestamp: (referral as any).rejected_at, user: (referral as any).rejected_by_user || 'Clinician', description: 'Referral rejected' },
-        (referral as any).completed_at && { id: 'com', action: 'completed', timestamp: (referral as any).completed_at, user: (referral as any).completed_by_user || 'Clinician', description: 'Referral completed' }
+        submittedAt && { id: 'sub', action: 'submitted', timestamp: submittedAt, user: (referral as any).creator || 'System', description: 'Referral submitted' },
+        acceptedAt && { id: 'acc', action: 'accepted', timestamp: acceptedAt, user: (referral as any).accepted_by_user || 'Clinician', description: 'Referral accepted' },
+        rejectedAt && { id: 'rej', action: 'rejected', timestamp: rejectedAt, user: (referral as any).rejected_by_user || 'Clinician', description: 'Referral rejected' },
+        completedAt && { id: 'com', action: 'completed', timestamp: completedAt, user: (referral as any).completed_by_user || 'Clinician', description: 'Referral completed' }
       ].filter(Boolean) as any[];
 
   const sortedEvents = [...timelineEvents].sort((a, b) => 
@@ -553,7 +569,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       </div>
 
       {/* BOTTOM ACTION SECTION */}
-      {(referral.status === 'pending' || referral.status === 'submitted') && userRole !== ROLES.SUPER_ADMIN && (
+      {(referral.status === 'pending' || referral.status === 'submitted') && !acceptedAt && userRole !== ROLES.SUPER_ADMIN && (
         <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50">
           <div className="flex flex-row gap-4">
             <Button 
