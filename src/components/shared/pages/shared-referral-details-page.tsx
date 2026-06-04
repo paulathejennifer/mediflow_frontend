@@ -521,25 +521,27 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
       {/* BOTTOM ACTION SECTION */}
       {(referral.status === 'pending' || referral.status === 'submitted') && userRole !== ROLES.SUPER_ADMIN && (
-        <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50 border-primary/20">
-          <Button 
-            onClick={handleAccept} 
-            variant="default" 
-            className="px-8 h-11 bg-primary text-primary-foreground shadow-[0_0_20px_rgba(56,189,248,0.5)] animate-pulse hover:animate-none" 
-            disabled={isLoading}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Accept Referral
-          </Button>
-          <Button 
-            onClick={handleReject}
-            variant="outline" 
-            className="px-8 h-11 border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-400"
-            disabled={isLoading}
-          >
-            <XCircle className="h-4 w-4 mr-2" />
-            Reject Referral
-          </Button>
+        <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50">
+          <div className="flex flex-row gap-4">
+            <Button 
+              onClick={handleAccept} 
+              variant="default" 
+              className="px-10 h-12 bg-primary text-primary-foreground shadow-[0_0_25px_rgba(var(--primary-rgb),0.5)] animate-pulse hover:animate-none text-base font-semibold" 
+              disabled={isLoading}
+            >
+              <Check className="h-5 w-5 mr-2" />
+              Accept Referral
+            </Button>
+            <Button 
+              onClick={handleReject}
+              variant="outline" 
+              className="px-10 h-12 border-destructive/50 text-destructive hover:bg-destructive/10 text-base font-semibold"
+              disabled={isLoading}
+            >
+              <XCircle className="h-5 w-5 mr-2" />
+              Reject Referral
+            </Button>
+          </div>
         </div>
       )}
     </div>
