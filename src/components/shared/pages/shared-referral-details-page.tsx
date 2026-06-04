@@ -521,7 +521,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
       {/* BOTTOM ACTION SECTION */}
       {(referral.status === 'pending' || referral.status === 'submitted') && userRole !== ROLES.SUPER_ADMIN && (
-        <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50">
+        <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50 border-primary/20">
           <Button 
             onClick={handleAccept} 
             variant="default" 
