@@ -186,6 +186,7 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
     last_name: '',
     email: '',
     phone: '',
+    gender: '', // Add gender to formData state
     password: '',
     confirm_password: '',
     role: 'clinician',
@@ -205,6 +206,12 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
     { value: 'clinician', label: 'Clinician' }
   ]
 
+  const genderOptions = [
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'other', label: 'Other' }
+  ]
+
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -213,6 +220,7 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
         last_name: '',
         email: '',
         phone: '',
+        gender: '', // Reset gender
         password: '',
         confirm_password: '',
         role: 'clinician',
@@ -307,7 +315,7 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
         last_name: formData.last_name,
         email: formData.email,
         phone: formData.phone,
-        gender: (formData as any).gender || '',
+        gender: formData.gender, // Use formData.gender directly
         password: formData.password,
         role: 'clinician',
         facility_id: formData.facility_id ? parseInt(formData.facility_id) : undefined,
@@ -324,6 +332,7 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
         last_name: '',
         email: '',
         phone: '',
+        gender: '',
         password: '',
         confirm_password: '',
         role: 'clinician',
@@ -414,6 +423,19 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
                   data-field="phone"
                 />
                 {errors.phone && <p className="mt-1 text-sm text-red-500" data-field="phone">{errors.phone}</p>}
+              </div>
+
+              {/* Gender */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Gender
+                </label>
+                <FilterDropdown
+                  value={formData.gender}
+                  onChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
+                  options={genderOptions}
+                  placeholder="Select Gender"
+                />
               </div>
 
               {/* Password */}

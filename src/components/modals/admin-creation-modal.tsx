@@ -67,6 +67,12 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
   )
 }
 
+const genderOptions = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' }
+]
+
 interface AdminCreationModalProps {
   isOpen: boolean
   onClose: () => void
@@ -80,6 +86,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
     first_name: '',
     last_name: '',
     email: '',
+    gender: '', // Add gender to formData state
     password: '',
     role: 'facility_admin',
     facility_id: facilityData?.id || '',
@@ -98,6 +105,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
         first_name: '',
         last_name: '',
         email: '',
+        gender: '',
         password: '',
         role: 'facility_admin',
         facility_id: facilityData?.id || '',
@@ -176,7 +184,6 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
         last_name: formData.last_name,
         email: formData.email,
         phone: '',
-        gender: (formData as any).gender || '',
         password: formData.password,
         role: formData.role as 'facility_admin' | 'clinician',
         facility_id: facilityData?.id ? Number(facilityData.id) : undefined,
@@ -192,6 +199,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
         last_name: '',
         email: '',
         password: '',
+        gender: '', // Reset gender
         role: 'facility_admin',
         facility_id: facilityData?.id || '',
         is_active: true
@@ -272,6 +280,19 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                   disabled={isSubmitting}
                 />
                 {errors.email && <p className="mt-1 text-sm text-red-500" data-field="email">{errors.email}</p>}
+              </div>
+
+              {/* Gender */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Gender
+                </label>
+                <FilterDropdown
+                  value={formData.gender}
+                  onChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
+                  options={genderOptions}
+                  placeholder="Select Gender"
+                />
               </div>
 
               {/* Password */}
