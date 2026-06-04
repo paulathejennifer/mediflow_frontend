@@ -40,19 +40,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadReferral = async () => {
-    const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
-    try {
-      const data = await referralService.getReferralById(numericId)
-      setReferral(mapApiReferralToDetailView(data))
-    } catch (error) {
-      console.error('Failed to load referral:', error)
-      toast.error('Failed to load referral details')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   useEffect(() => {
     setIsMounted(true)
     const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
@@ -61,6 +48,21 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       setIsLoading(false)
       return
     }
+
+    const loadReferral = async () => {
+      try {
+        setIsLoading(true)
+        const data = await referralService.getReferralById(numericId)
+        setReferral(mapApiReferralToDetailView(data))
+      } catch (error) {
+        console.error('Failed to load referral:', error)
+        toast.error('Failed to load referral details')
+        setReferral(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     loadReferral()
   }, [referralId])
 
@@ -71,7 +73,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
       await referralService.acceptReferral(numericId)
       toast.success("Referral accepted successfully")
-      await loadReferral() // Refresh data in place
+      window.location.reload()
     } catch (error) {
       toast.error("Failed to accept referral")
     } finally {

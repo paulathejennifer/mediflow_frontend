@@ -87,7 +87,7 @@ export interface UpdateReferralRequest {
 
 export const referralService = {
   createReferral: async (data: CreateReferralRequest): Promise<Referral> => {
-    const response = await apiClient.post('/referrals/', data)
+    const response = await apiClient.post('referrals/', data)
     return response.data
   },
 
@@ -98,12 +98,12 @@ export const referralService = {
     priority?: string
     patient_id?: number
   }): Promise<ReferralSummary[]> => {
-    const response = await apiClient.get('/referrals/', { params })
+    const response = await apiClient.get('referrals/', { params })
     return response.data
   },
 
   getReferralById: async (referralId: number): Promise<Referral> => {
-    const response = await apiClient.get(`/referrals/${referralId}`)
+    const response = await apiClient.get(`referrals/${referralId}/`)
     return response.data
   },
 
@@ -111,22 +111,22 @@ export const referralService = {
     referralId: number,
     data: UpdateReferralRequest
   ): Promise<Referral> => {
-    const response = await apiClient.put(`/referrals/${referralId}`, data)
+    const response = await apiClient.put(`referrals/${referralId}/`, data)
     return response.data
   },
 
   submitReferral: async (referralId: number): Promise<{ message: string }> => {
-    const response = await apiClient.post(`/referrals/${referralId}/submit/`)
+    const response = await apiClient.post(`referrals/${referralId}/submit/`)
     return response.data
   },
 
   acceptReferral: async (referralId: number): Promise<Referral> => {
-    const response = await apiClient.post(`/referrals/${referralId}/accept/`)
+    const response = await apiClient.post(`referrals/${referralId}/accept/`)
     return response.data
   },
 
   rejectReferral: async (referralId: number): Promise<Referral> => {
-    const response = await apiClient.post(`/referrals/${referralId}/reject/`)
+    const response = await apiClient.post(`referrals/${referralId}/reject/`)
     return response.data
   },
 }
