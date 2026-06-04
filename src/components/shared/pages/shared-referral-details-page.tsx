@@ -29,6 +29,29 @@ import { useAuthStore } from '@/store/auth-store'
 import { toast } from '@/lib/toast'
 import { ROLES, UserRole } from '@/constants/roles'
 
+// A simple Typewriter component to handle the "cool" word-by-word typing effect
+function Typewriter({ text, speed = 40 }: { text: string; speed?: number }) {
+  const [displayedText, setDisplayedText] = useState('')
+  
+  useEffect(() => {
+    setDisplayedText('')
+    if (!text) return
+
+    const words = text.split(' ')
+    let i = 0
+    
+    const intervalId = setInterval(() => {
+      setDisplayedText((prev) => prev + (i === 0 ? '' : ' ') + words[i])
+      i++
+      if (i >= words.length) clearInterval(intervalId)
+    }, speed)
+
+    return () => clearInterval(intervalId)
+  }, [text, speed])
+
+  return <span>{displayedText}</span>
+}
+
 interface SharedReferralDetailsPageProps {
   userRole: UserRole
 }
@@ -500,9 +523,12 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                       <CheckCircle className="h-4 w-4 text-primary" />
                       <p className="text-sm font-semibold text-foreground">Patient Summary</p>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {referral.aiAnalysis.summary}
-                    </p>
+                    <div className="text-sm text-muted-foreground leading-relaxed min-h-[4em]">
+                      <Typewriter 
+                        text={referral.aiAnalysis.summary} 
+                        speed={50} 
+                      />
+                    </div>
                   </div>
 
                   {/* MISSING INFORMATION */}
