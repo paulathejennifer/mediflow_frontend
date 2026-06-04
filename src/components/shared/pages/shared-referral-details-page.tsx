@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { referralService } from '@/features/referrals/services/referral.service'
 import { mapApiReferralToDetailView, ReferralDetailView } from '@/utils/referral-mappers'
+import { useAuthStore } from '@/store/auth-store'
 import { toast } from '@/lib/toast'
 import { ROLES, UserRole } from '@/constants/roles'
 
@@ -36,6 +37,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const params = useParams()
   const router = useRouter()
   const referralId = params.id as string
+  const { user } = useAuthStore()
   const [referral, setReferral] = useState<ReferralDetailView | null>(null)
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -66,6 +68,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     loadReferral()
   }, [referralId])
 
+  const isReceivingFacility = user?.facility_id?.toString() === (referral as any)?.toFacilityId?.toString()
+
   const handleAccept = async () => {
     if (!referral) return
     try {
@@ -76,6 +80,21 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       window.location.reload()
     } catch (error) {
       toast.error("Failed to accept referral")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleComplete = async () => {
+    if (!referral) return
+    try {
+      setIsLoading(true)
+      const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
+      await referralService.completeReferral(numericId)
+      toast.success("Referral completed successfully")
+      window.location.reload()
+    } catch (error) {
+      toast.error("Failed to complete referral")
     } finally {
       setIsLoading(false)
     }
@@ -192,6 +211,20 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   }
 
   const createdDate = formatDate(referral.date)
+
+  // Construct timeline from explicit fields as requested
+  const timelineEvents = (referral.timeline && referral.timeline.length > 0) 
+    ? referral.timeline 
+    : [
+        (referral as any).submitted_at && { id: 'sub', action: 'submitted', timestamp: (referral as any).submitted_at, user: (referral as any).creator || 'System', description: 'Referral submitted' },
+        (referral as any).accepted_at && { id: 'acc', action: 'accepted', timestamp: (referral as any).accepted_at, user: (referral as any).accepted_by_user || 'Clinician', description: 'Referral accepted' },
+        (referral as any).rejected_at && { id: 'rej', action: 'rejected', timestamp: (referral as any).rejected_at, user: (referral as any).rejected_by_user || 'Clinician', description: 'Referral rejected' },
+        (referral as any).completed_at && { id: 'com', action: 'completed', timestamp: (referral as any).completed_at, user: (referral as any).completed_by_user || 'Clinician', description: 'Referral completed' }
+      ].filter(Boolean) as any[];
+
+  const sortedEvents = [...timelineEvents].sort((a, b) => 
+    new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
 
   return (
     <div className="space-y-6">
@@ -375,8 +408,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                 {/* VERTICAL LINE */}
                 <div className="absolute left-4 top-2 bottom-0 w-0.5 bg-border"></div>
                 
-                {referral.timeline?.map((event, index) => (
-                  <div key={event.id} className="relative pl-10 pb-6" style={{ paddingBottom: index === (referral.timeline?.length || 0) - 1 ? '0' : '1.5rem' }}>
+                {sortedEvents.map((event, index) => (
+                  <div key={event.id || index} className="relative pl-10 pb-6" style={{ paddingBottom: index === sortedEvents.length - 1 ? '0' : '1.5rem' }}>
                     {/* ICON */}
                     <div className="absolute left-0 h-8 w-8 rounded-full flex items-center justify-center">
                       <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
@@ -544,6 +577,23 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           </div>
         </div>
       )}
+
+      {referral.status === 'accepted' && isReceivingFacility && userRole !== ROLES.SUPER_ADMIN && (
+        <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50">
+          <div className="flex flex-row gap-4">
+            <Button 
+              onClick={handleComplete} 
+              variant="default" 
+              className="px-10 h-12 bg-green-600 text-white shadow-[0_0_25px_rgba(22,163,74,0.4)] animate-pulse hover:animate-none text-base font-semibold" 
+              disabled={isLoading}
+            >
+              <CheckCircle className="h-5 w-5 mr-2" />
+              Complete Referral
+            </Button>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
