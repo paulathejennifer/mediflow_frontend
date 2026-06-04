@@ -40,6 +40,19 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  const loadReferral = async () => {
+    const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
+    try {
+      const data = await referralService.getReferralById(numericId)
+      setReferral(mapApiReferralToDetailView(data))
+    } catch (error) {
+      console.error('Failed to load referral:', error)
+      toast.error('Failed to load referral details')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
     setIsMounted(true)
     const numericId = parseInt(referralId.replace(/\D/g, ''), 10)
@@ -48,21 +61,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       setIsLoading(false)
       return
     }
-
-    const loadReferral = async () => {
-      try {
-        setIsLoading(true)
-        const data = await referralService.getReferralById(numericId)
-        setReferral(mapApiReferralToDetailView(data))
-      } catch (error) {
-        console.error('Failed to load referral:', error)
-        toast.error('Failed to load referral details')
-        setReferral(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     loadReferral()
   }, [referralId])
 
@@ -73,7 +71,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
       await referralService.acceptReferral(numericId)
       toast.success("Referral accepted successfully")
-      window.location.reload()
+      await loadReferral() // Refresh data in place
     } catch (error) {
       toast.error("Failed to accept referral")
     } finally {
@@ -525,7 +523,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           <Button 
             onClick={handleAccept} 
             variant="default" 
-            className="px-8 h-11 bg-primary text-primary-foreground shadow-[0_0_15px_rgba(56,189,248,0.4)] animate-pulse hover:animate-none" 
+            className="px-8 h-11 bg-primary text-primary-foreground shadow-[0_0_20px_rgba(56,189,248,0.5)] animate-pulse hover:animate-none" 
             disabled={isLoading}
           >
             <Check className="h-4 w-4 mr-2" />
