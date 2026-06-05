@@ -113,18 +113,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     if (!referral) return
     try {
       setIsLoading(true)
-      const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-      // referralService may not have a concrete "completeReferral" method on its type.
-      // Call whichever implementation is available at runtime to mark the referral completed.
-      const svc: any = referralService
-      if (typeof svc.completeReferral === 'function') {
-        await svc.completeReferral(numericId)
-      } else if (typeof svc.updateReferral === 'function') {
-        // fallback to a generic update method if available
-        await svc.updateReferral(numericId, { status: 'completed' })
-      } else {
-        throw new Error('No method available to complete referral')
-      }
+      const numericId = parseInt(String(referral.id).replace(/\D/g, ''), 10)
+      await referralService.completeReferral(numericId)
       toast.success("Referral completed successfully")
       window.location.reload()
     } catch (error) {
@@ -154,8 +144,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     try {
       setIsLoading(true)
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-      const svc: any = referralService
-      const response = await svc.refreshAISummary(numericId)
+      const response = await referralService.refreshAISummary(numericId)
       
       if (response && response.ai_summary) {
         const newSummary = response.ai_summary?.summary ?? response.ai_summary;

@@ -78,14 +78,10 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
 
   const handleComplete = async (id: string) => {
     try {
-      const numericId = parseInt(id.replace(/\D/g, ''), 10)
-      const svc: any = referralService
-      if (typeof svc.completeReferral === 'function') {
-        await svc.completeReferral(numericId)
-      } else {
-        // Fallback to updateReferral if specific method is not defined
-        await svc.updateReferral(numericId, { status: 'completed' })
-      }
+      // Remove any non-numeric characters and ensure no trailing slashes in logic
+      const numericId = parseInt(String(id).replace(/\D/g, ''), 10)
+      await referralService.completeReferral(numericId)
+
       toast.success(`Referral #${id} completed`)
       if (onActionComplete) {
         onActionComplete()

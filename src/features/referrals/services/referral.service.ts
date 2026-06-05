@@ -129,4 +129,14 @@ export const referralService = {
     const response = await apiClient.post(`referrals/${referralId}/reject/`)
     return response.data
   },
+
+  completeReferral: async (referralId: number): Promise<Referral> => {
+    const response = await apiClient.post(`referrals/${referralId}/complete/`)
+    return response.data
+  },
+
+  refreshAISummary: async (referralId: number): Promise<any> => {
+    const response = await apiClient.post(`ai/referral/${referralId}/summarize`)
+    return response.data
+  }
 }

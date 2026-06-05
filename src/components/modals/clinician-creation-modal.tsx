@@ -17,13 +17,6 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
 }) {
   const [inputValue, setInputValue] = useState('')
 
-  // Initialize with selected option if value exists
-  useEffect(() => {
-    if (value) {
-      const selectedOption = options.find(option => option.value === value)
-      setInputValue(selectedOption?.label || '')
-    }
-  }, [value, options])
   const [isOpen, setIsOpen] = useState(false)
   const [filteredOptions, setFilteredOptions] = useState<typeof options>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
