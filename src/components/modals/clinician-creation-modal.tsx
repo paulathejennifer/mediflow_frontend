@@ -173,6 +173,75 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
   )
 }
 
+// FilterDropdown component
+function FilterDropdown({ value, onChange, options, placeholder, disabled = false }: {
+  value: string
+  onChange: (value: string) => void
+  options: { value: string; label: string }[]
+  placeholder: string
+  disabled?: boolean
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const handleToggle = () => {
+    setIsOpen(!isOpen)
+  }
+
+  const selectedOption = options.find(option => option.value === value)
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <Button
+        variant="outline"
+        size="sm"
+        type="button"
+        onClick={handleToggle}
+        disabled={disabled}
+        className="h-8 px-3 text-xs bg-gray-800/50 border-gray-700 text-muted-foreground hover:bg-gray-700 hover:text-foreground focus:border-primary focus:text-foreground w-full justify-start disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {selectedOption?.label || placeholder}
+        <ChevronDown className="h-3 w-3 ml-1" />
+      </Button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-full bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50">
+          <div className="py-1 max-h-60 overflow-y-auto">
+            {options.map(option => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value)
+                  setIsOpen(false)
+                }}
+                className={`w-full px-3 py-2 text-xs text-left hover:bg-gray-800 transition-colors ${
+                  option.value === value ? 'bg-gray-800 text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface ClinicianCreationModalProps {
   isOpen: boolean
   onClose: () => void
