@@ -147,24 +147,30 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       const response = await referralService.refreshAISummary(numericId)
       
       if (response && response.ai_summary) {
-        const newSummary = response.ai_summary?.summary ?? response.ai_summary;
+        const ai = response.ai_summary;
+        
+        // Helper to convert AI bulleted strings into arrays for the UI
+        const parseList = (val: any) => {
+          if (Array.isArray(val)) return val;
+          if (typeof val === 'string') {
+            return val.split('\n')
+              .map(line => line.replace(/^[•\-\*\d\.]+\s*/, '').trim())
+              .filter(line => line.length > 0);
+          }
+          return [];
+        };
         
         setReferral(prev => prev ? ({
           ...prev,
-          aiAnalysis: prev.aiAnalysis 
-            ? {
-                ...prev.aiAnalysis,
-                summary: newSummary
-              } 
-            : {
-                summary: newSummary,
-                key_findings: [],
-                risks: [],
-                missing_info: [],
-                recommendations: [],
-                completeness_score: 0,
-                urgency_level: 'low'
-              }
+          aiAnalysis: {
+            summary: ai.summary || (typeof ai === 'string' ? ai : 'No summary available'),
+            key_findings: parseList(ai.key_findings),
+            risks: parseList(ai.risks),
+            missing_info: parseList(ai.missing_info),
+            recommendations: parseList(ai.next_steps || ai.recommendations),
+            completeness_score: parseInt(ai.completeness_score) || 7,
+            urgency_level: ai.uncertainty_level || 'medium'
+          }
         } as ReferralDetailView) : null)
       }
       toast.success("AI Insights refreshed")
