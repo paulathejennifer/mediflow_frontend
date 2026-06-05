@@ -36,7 +36,7 @@ function Typewriter({ text, speed = 40 }: { text: string; speed?: number }) {
   
   useEffect(() => {
     setDisplayedText('')
-    if (!text) return
+    if (!text || typeof text !== 'string') return
 
     const words = text.split(' ')
     let i = 0
@@ -154,11 +154,30 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     try {
       setIsLoading(true)
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-      // Trigger the manual AI summary refresh endpoint
       const svc: any = referralService
-      await svc.refreshAISummary(numericId)
-      const data = await referralService.getReferralById(numericId)
-      setReferral(mapApiReferralToDetailView(data))
+      const response = await svc.refreshAISummary(numericId)
+      
+      if (response && response.ai_summary) {
+        const newSummary = response.ai_summary?.summary ?? response.ai_summary;
+        
+        setReferral(prev => prev ? ({
+          ...prev,
+          aiAnalysis: prev.aiAnalysis 
+            ? {
+                ...prev.aiAnalysis,
+                summary: newSummary
+              } 
+            : {
+                summary: newSummary,
+                key_findings: [],
+                risks: [],
+                missing_info: [],
+                recommendations: [],
+                completeness_score: 0,
+                urgency_level: 'low'
+              }
+        } as ReferralDetailView) : null)
+      }
       toast.success("AI Insights refreshed")
     } catch (error) {
       toast.error("Failed to refresh AI insights")
@@ -271,21 +290,21 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
   const createdDate = formatDate(referral.date)
 
-  // Priority fields for timeline construction
+  // Explicit fields for timeline construction as requested
+  const createdAt = referral.date
   const submittedAt = (referral as any).submitted_at
   const acceptedAt = (referral as any).accepted_at
   const rejectedAt = (referral as any).rejected_at
   const completedAt = (referral as any).completed_at
 
   // Construct timeline from explicit fields as requested
-  const timelineEvents = (referral.timeline && referral.timeline.length > 0) 
-    ? referral.timeline 
-    : [
-        submittedAt && { id: 'sub', action: 'submitted', timestamp: submittedAt, user: (referral as any).creator || 'System', description: 'Referral submitted at ' + (referral as any).creator_facility },
-        acceptedAt && { id: 'acc', action: 'accepted', timestamp: acceptedAt, user: (referral as any).accepted_by_user || 'Clinician', description: 'Referral accepted by receiving facility' },
-        rejectedAt && { id: 'rej', action: 'rejected', timestamp: rejectedAt, user: (referral as any).rejected_by_user || 'Clinician', description: 'Referral rejected by receiving facility' },
-        completedAt && { id: 'com', action: 'completed', timestamp: completedAt, user: (referral as any).completed_by_user || 'Clinician', description: 'Clinical handover completed' }
-      ].filter(Boolean) as any[];
+  const timelineEvents = [
+    { id: 'cre', action: 'created', timestamp: createdAt, user: (referral as any).creator || 'Clinician', description: 'Referral record created' },
+    (submittedAt || ['submitted', 'accepted', 'completed'].includes(referral.status)) && { id: 'sub', action: 'submitted', timestamp: submittedAt || createdAt, user: (referral as any).creator || 'Clinician', description: 'Referral sent to receiving facility' },
+    (acceptedAt || ['accepted', 'completed'].includes(referral.status)) && { id: 'acc', action: 'accepted', timestamp: acceptedAt || createdAt, user: (referral as any).accepted_by_user || 'Receiving Facility', description: 'Referral accepted for treatment' },
+    rejectedAt && { id: 'rej', action: 'rejected', timestamp: rejectedAt, user: (referral as any).rejected_by_user || 'Receiving Facility', description: 'Referral declined' },
+    (completedAt || referral.status === 'completed') && { id: 'com', action: 'completed', timestamp: completedAt || createdAt, user: (referral as any).completed_by_user || 'Receiving Facility', description: 'Clinical handover completed' }
+  ].filter(Boolean) as any[];
 
   const sortedEvents = [...timelineEvents].sort((a, b) => 
     new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()

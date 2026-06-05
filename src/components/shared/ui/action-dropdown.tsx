@@ -30,6 +30,7 @@ interface ActionDropdownProps {
   onDelete?: () => void
   onAccept?: () => void
   onReject?: () => void
+  onComplete?: () => void
 }
 
 export function ActionDropdown({
@@ -49,7 +50,8 @@ export function ActionDropdown({
   onDownload,
   onDelete,
   onAccept,
-  onReject
+  onReject,
+  onComplete
 }: ActionDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom')
@@ -134,7 +136,13 @@ export function ActionDropdown({
           label: 'Reject Referral',
           icon: XCircle,
           onClick: onReject,
-          show: true
+          show: !!onReject
+        },
+        {
+          label: 'Complete Referral',
+          icon: CheckCircle,
+          onClick: onComplete,
+          show: !!onComplete
         }
       ].filter(action => action.show)
     }
