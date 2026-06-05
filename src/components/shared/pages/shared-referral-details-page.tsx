@@ -144,7 +144,13 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     try {
       setIsLoading(true)
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-      const response = await referralService.refreshAISummary(numericId)
+      const response = await referralService.refreshAISummary(numericId).catch(err => {
+        console.error("AI Refresh Error:", err)
+        if (err.response?.status === 500) {
+          throw new Error("Backend AI service crashed. Check server logs for strftime or async/await errors.")
+        }
+        throw err
+      })
       
       if (response && response.ai_summary) {
         const ai = response.ai_summary;
@@ -174,8 +180,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
         } as ReferralDetailView) : null)
       }
       toast.success("AI Insights refreshed")
-    } catch (error) {
-      toast.error("Failed to refresh AI insights")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to refresh AI insights")
     } finally {
       setIsLoading(false)
     }

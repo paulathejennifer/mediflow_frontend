@@ -136,7 +136,7 @@ export const referralService = {
   },
 
   refreshAISummary: async (referralId: number): Promise<any> => {
-    const response = await apiClient.post(`ai/referral/${referralId}/summarize/`)
+    const response = await apiClient.post(`ai/referral/${referralId}/summarize`)
     return response.data
   }
 }
