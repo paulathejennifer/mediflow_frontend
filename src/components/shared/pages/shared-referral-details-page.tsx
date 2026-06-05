@@ -20,6 +20,7 @@ import {
   Brain,
   Clock,
   Send,
+  RefreshCw,
   Check,
   XCircle
 } from 'lucide-react'
@@ -143,6 +144,24 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       router.push(`/dashboard/${userRole.replace('_', '-')}/referrals`)
     } catch (error) {
       toast.error("Failed to reject referral")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleRefreshAI = async () => {
+    if (!referral) return
+    try {
+      setIsLoading(true)
+      const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
+      // Trigger the manual AI summary refresh endpoint
+      const svc: any = referralService
+      await svc.refreshAISummary(numericId)
+      const data = await referralService.getReferralById(numericId)
+      setReferral(mapApiReferralToDetailView(data))
+      toast.success("AI Insights refreshed")
+    } catch (error) {
+      toast.error("Failed to refresh AI insights")
     } finally {
       setIsLoading(false)
     }
@@ -490,11 +509,22 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
         {/* RIGHT SIDEBAR - AI ANALYSIS PANEL */}
         <div className="lg:col-span-1">
           <Card className="bg-gray-900/60 border-border/50 lg:sticky lg:top-6">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2 text-foreground">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
-                AI Insights
-              </CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">
+                  AI Insights
+                </CardTitle>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                onClick={handleRefreshAI}
+                disabled={isLoading}
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
             </CardHeader>
             <CardContent className="space-y-6">
               {referral.aiAnalysis ? (
@@ -526,7 +556,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                     <div className="text-sm text-muted-foreground leading-relaxed min-h-[4em]">
                       <Typewriter 
                         text={referral.aiAnalysis.summary} 
-                        speed={50} 
+                        speed={30} 
                       />
                     </div>
                   </div>
