@@ -315,7 +315,7 @@ export function ClinicianCreationModal({ isOpen, onClose, onSuccess, preSelected
         last_name: formData.last_name,
         email: formData.email,
         phone: formData.phone,
-        gender: formData.gender, // Use formData.gender directly
+        gender: formData.gender,
         password: formData.password,
         role: 'clinician',
         facility_id: formData.facility_id ? parseInt(formData.facility_id) : undefined,

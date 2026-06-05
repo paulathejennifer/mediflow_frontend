@@ -6,6 +6,7 @@ export interface User {
   last_name: string
   email: string
   phone: string
+  gender?: string
   role: 'super_admin' | 'facility_admin' | 'clinician' | 'patient'
   facility_id?: number
   is_active: boolean
@@ -19,6 +20,7 @@ export interface CreateUserRequest {
   last_name: string
   email: string
   phone: string
+  gender?: string
   password: string
   role: 'super_admin' | 'facility_admin' | 'clinician' | 'patient'
   facility_id?: number
