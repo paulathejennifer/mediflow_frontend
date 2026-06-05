@@ -176,6 +176,7 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
                     isActive={['pending', 'submitted', 'accepted'].includes(referral.status)}
                     onAccept={['pending', 'submitted'].includes(referral.status) ? () => handleAccept(referral.id) : undefined}
                     onReject={['pending', 'submitted'].includes(referral.status) ? () => handleReject(referral.id) : undefined}
+                    onComplete={(referral.status === 'accepted' && isReceivingFacility) ? () => handleComplete(referral.id) : undefined}
                     onViewProfile={() => handleViewDetails(referral.id)}
                   />
                 </td>
