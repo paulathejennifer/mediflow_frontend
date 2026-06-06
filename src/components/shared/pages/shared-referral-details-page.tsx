@@ -92,6 +92,14 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     loadReferral()
   }, [referralId])
 
+  // Auto-trigger AI analysis if it's missing for non-draft referrals
+  useEffect(() => {
+    if (referral && !referral.aiAnalysis && referral.status !== 'draft' && !isLoading) {
+      console.log('🤖 [AI] Analysis missing, auto-triggering...');
+      handleRefreshAI();
+    }
+  }, [referral?.id, referral?.aiAnalysis, referral?.status]);
+
   const isReceivingFacility = user?.facility_id?.toString() === (referral as any)?.toFacilityId?.toString()
 
   const handleAccept = async () => {
@@ -529,7 +537,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
         {/* RIGHT SIDEBAR - AI ANALYSIS PANEL */}
         <div className="lg:col-span-1">
-          <Card className="bg-gray-900/60 border-border/50 lg:sticky lg:top-6">
+          <Card className="bg-gray-900/60 border-primary/20 lg:sticky lg:top-6 shadow-[0_0_40px_-15px_rgba(var(--primary-rgb),0.4)] transition-all duration-500">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
