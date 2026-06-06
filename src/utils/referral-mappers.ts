@@ -181,16 +181,44 @@ export function mapApiReferralToDetailView(r: ApiReferral): ReferralDetailView {
       })),
     },
     timeline,
-    aiAnalysis: r.ai_summary
-      ? {
-          summary: r.ai_summary,
-          key_findings: [],
-          risks: [],
-          missing_info: [],
-          recommendations: [],
-          completeness_score: 7,
-          urgency_level: r.priority === 'emergency' || r.priority === 'high' ? 'High' : 'Medium',
-        }
-      : undefined,
-  }
+  aiAnalysis: (() => {
+    if (!r.ai_summary) return undefined;
+    
+    const safeParseList = (val: any) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === 'string' && val.trim()) {
+        return val.split('\n')
+          .map(line => line.replace(/^[•\-\*\d\.]+\s*/, '').trim())
+          .filter(line => line.length > 0);
+      }
+      return [];
+    };
+
+    try {
+      // Try to parse the summary as JSON (new format)
+      const data = JSON.parse(r.ai_summary);
+      return {
+        // Check for both lowercase and uppercase keys from the AI parser
+        summary: data.summary || data.SUMMARY || (typeof data === 'string' ? data : "No clinical summary available"),
+        key_findings: safeParseList(data.key_findings || data['KEY CLINICAL FINDINGS']),
+        risks: safeParseList(data.risks || data['KEY RISKS']),
+        missing_info: safeParseList(data.missing_info || data['MISSING CRITICAL INFORMATION']),
+        recommendations: safeParseList(data.next_steps || data.recommendations || data['RECOMMENDED NEXT STEPS']),
+        completeness_score: parseInt(data.completeness_score) || 7,
+        urgency_level: data.uncertainty_level || data['UNCERTAINTY LEVEL'] || (r.priority === 'emergency' || r.priority === 'high' ? 'High' : 'Medium'),
+      };
+    } catch (e) {
+      // Fallback for old referrals that just have a raw string
+      return {
+        summary: r.ai_summary,
+        key_findings: [],
+        risks: [],
+        missing_info: [],
+        recommendations: [],
+        completeness_score: 7,
+        urgency_level: r.priority === 'emergency' || r.priority === 'high' ? 'High' : 'Medium',
+      };
+    }
+  })(),
+ }
 }

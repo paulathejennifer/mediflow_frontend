@@ -156,7 +156,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
         const ai = response.ai_summary;
         
         // Helper to convert AI bulleted strings into arrays for the UI
-        const parseList = (val: any) => {
+        const safeParseList = (val: any) => {
           if (Array.isArray(val)) return val;
           if (typeof val === 'string') {
             return val.split('\n')
@@ -169,11 +169,12 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
         setReferral(prev => prev ? ({
           ...prev,
           aiAnalysis: {
-            summary: ai.summary || (typeof ai === 'string' ? ai : 'No summary available'),
-            key_findings: parseList(ai.key_findings),
-            risks: parseList(ai.risks),
-            missing_info: parseList(ai.missing_info),
-            recommendations: parseList(ai.next_steps || ai.recommendations),
+            // Ensure we handle the case where 'ai' might be the whole response or a nested field
+            summary: ai.summary || ai.SUMMARY || (typeof ai === 'string' ? ai : 'No summary available'),
+            key_findings: safeParseList(ai.key_findings || ai['KEY CLINICAL FINDINGS']),
+            risks: safeParseList(ai.risks || ai['KEY RISKS']),
+            missing_info: safeParseList(ai.missing_info || ai['MISSING CRITICAL INFORMATION']),
+            recommendations: safeParseList(ai.next_steps || ai.recommendations || ai['RECOMMENDED NEXT STEPS']),
             completeness_score: parseInt(ai.completeness_score) || 7,
             urgency_level: ai.uncertainty_level || 'medium'
           }
