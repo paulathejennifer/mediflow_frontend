@@ -42,7 +42,10 @@ function Typewriter({ text, speed = 40 }: { text: string; speed?: number }) {
     let i = 0
     
     const intervalId = setInterval(() => {
-      setDisplayedText((prev) => prev + (i === 0 ? '' : ' ') + words[i])
+      const nextWord = words[i];
+      if (nextWord !== undefined) {
+        setDisplayedText((prev) => prev + (i === 0 ? '' : ' ') + nextWord);
+      }
       i++
       if (i >= words.length) clearInterval(intervalId)
     }, speed)
@@ -183,7 +186,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
             risks: safeParseList(ai.risks || ai['KEY RISKS']),
             missing_info: safeParseList(ai.missing_info || ai['MISSING CRITICAL INFORMATION']),
             recommendations: safeParseList(ai.next_steps || ai.recommendations || ai['RECOMMENDED NEXT STEPS']),
-            completeness_score: parseInt(ai.completeness_score) || 7,
+            completeness_score: parseInt(String(ai.completeness_score || ai['COMPLETENESS SCORE'])) || 7,
             urgency_level: ai.uncertainty_level || 'medium'
           }
         } as ReferralDetailView) : null)
@@ -548,7 +551,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-gray-900/30"
                 onClick={handleRefreshAI}
                 disabled={isLoading}
               >
@@ -562,7 +565,11 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <p className="text-sm font-medium text-foreground">Quality Score</p>
-                      <p className={`text-2xl font-bold text-yellow-600`}>
+                      <p className={`text-2xl font-bold ${
+                        referral.aiAnalysis.completeness_score >= 8 ? 'text-green-500' :
+                        referral.aiAnalysis.completeness_score >= 5 ? 'text-yellow-600' :
+                        'text-red-500'
+                      }`}>
                         {referral.aiAnalysis.completeness_score}/10
                       </p>
                     </div>
