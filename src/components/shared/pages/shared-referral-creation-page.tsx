@@ -13,6 +13,7 @@ import { voiceNoteService } from '@/features/voice-notes/services/voice-note.ser
 import { formatTableDate } from '@/utils/date-utils'
 import { PatientCreationModal } from '@/components/modals/patient-creation-modal'
 import { VoiceRecorder } from '@/components/voice-notes/voice-recorder'
+import { useAuthStore } from '@/store/auth-store'
 import { Modal } from '@/components/shared'
 import { toast } from '@/lib/toast'
 
@@ -39,16 +40,10 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
 
   // Filter options based on input
   useEffect(() => {
-    if (inputValue.trim()) {
-      const filtered = options.filter(option =>
-        option.label.toLowerCase().includes(inputValue.toLowerCase())
-      )
-      setFilteredOptions(filtered)
-      setIsOpen(filtered.length > 0)
-    } else {
-      setFilteredOptions([])
-      setIsOpen(false)
-    }
+    const filtered = options.filter(option =>
+      option.label.toLowerCase().includes(inputValue.toLowerCase())
+    )
+    setFilteredOptions(filtered)
   }, [inputValue, options])
 
   // Handle click outside
@@ -119,11 +114,7 @@ function AutocompleteInput({ value, onChange, options, placeholder, disabled = f
         value={inputValue}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (inputValue.trim()) {
-            setIsOpen(true)
-          }
-        }}
+        onFocus={() => setIsOpen(true)}
         disabled={disabled}
         placeholder={placeholder}
         className="w-full px-3 py-2 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
@@ -154,6 +145,7 @@ interface ReferralCreationPageProps {
 
 export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralCreationPageProps) {
   const router = useRouter()
+  const { user } = useAuthStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
@@ -221,10 +213,12 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
   }
 
   // Prepare facility options for autocomplete
-  const facilityOptions = facilities.map(facility => ({
-    value: facility.id,
-    label: `${facility.name} (${facility.facilityCode})`
-  }))
+  const facilityOptions = facilities
+    .filter(facility => facility.id !== user?.facility_id)
+    .map(facility => ({
+      value: facility.id,
+      label: `${facility.name} (${facility.facilityCode})`
+    }))
 
   const urgencyLevels = [
     {
@@ -423,7 +417,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
                 </label>
                 <input
                   type="text"
-                  value="Kenyatta National Hospital (KNH)"
+                  value={facilities.find(f => f.id === user?.facility_id)?.name || 'Loading facility...'}
                   disabled
                   className="w-full px-3 py-2 text-sm bg-gray-800 border border-gray-600 rounded-md text-gray-400 cursor-not-allowed"
                 />

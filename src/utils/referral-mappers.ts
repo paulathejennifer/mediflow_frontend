@@ -73,6 +73,8 @@ export interface ReferralDetailView {
   priority: string
   status: string
   receivingFacility: string
+  receivingFacilityType?: string
+  receivingFacilityAddress?: string
   date: string
   reason?: string
   clinicalNotes?: string
@@ -154,6 +156,8 @@ export function mapApiReferralToDetailView(r: ApiReferral): ReferralDetailView {
     priority: r.priority === 'emergency' ? 'high' : r.priority,
     status: mapStatus(r.status),
     receivingFacility: r.to_facility?.name || 'Unknown facility',
+    receivingFacilityType: 'Healthcare Facility',
+    receivingFacilityAddress: 'Address not provided',
     date: r.created_at,
     reason: r.reason_for_referral,
     clinicalNotes: r.clinical_notes,
