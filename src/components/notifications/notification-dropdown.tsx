@@ -210,7 +210,7 @@ export function NotificationDropdown() {
                                 </p>
 
                                 <p className="text-gray-500 text-xs mt-2">
-                                  {formatRelativeTime(notification.created_at)}
+                                  {formatRelativeTime(notification.created_at || (notification as any).createdAt)}
                                 </p>
                               </div>
                             </div>
