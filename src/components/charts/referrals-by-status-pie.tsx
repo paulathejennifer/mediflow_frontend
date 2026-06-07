@@ -33,11 +33,17 @@ export function ReferralsByStatusPie({ data }: ReferralsByStatusPieProps) {
   const chartData = data || []
 
   // Calculate metrics
-  const submitted = chartData.find(i => i.name.toLowerCase() === 'submitted')?.value || 0;
+  // Total Volume represents all referrals that entered the system (everything except drafts)
+  const totalVolume = chartData
+    .filter(i => i.name.toLowerCase() !== 'draft')
+    .reduce((sum, item) => sum + item.value, 0);
+
   const completed = chartData.find(i => i.name.toLowerCase() === 'completed')?.value || 0;
-  const total = chartData.reduce((sum, item) => sum + item.value, 0);
-  const completionRate = submitted > 0 ? Math.round((completed / submitted) * 100) : 0;
-  const dropOffRate = total > 0 ? Math.round(((total - completed) / total) * 100) : 0;
+  const rejected = chartData.find(i => i.name.toLowerCase() === 'rejected')?.value || 0;
+
+  const completionRate = totalVolume > 0 ? Math.round((completed / totalVolume) * 100) : 0;
+  // Drop-off rate now correctly tracks actual "losses" (rejected/cancelled)
+  const dropOffRate = totalVolume > 0 ? Math.round((rejected / totalVolume) * 100) : 0;
 
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = ({
@@ -117,12 +123,12 @@ export function ReferralsByStatusPie({ data }: ReferralsByStatusPieProps) {
         {chartData.length > 0 && (
           <div className="mt-6 space-y-2 border-t border-border pt-4">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Drop-off rate</span>
-              <span className="text-amber-500 font-semibold">{dropOffRate}% total loss</span>
+              <span className="text-muted-foreground">Rejection Rate</span>
+              <span className="text-amber-500 font-semibold">{dropOffRate}% of volume</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Completion rate</span>
-              <span className="text-emerald-500 font-semibold">{completionRate}% of submitted</span>
+              <span className="text-emerald-500 font-semibold">{completionRate}% of total volume</span>
             </div>
           </div>
         )}
