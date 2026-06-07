@@ -236,7 +236,7 @@ export function NotificationCard({
             <div className="flex items-center gap-2 ml-2">
               <div className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {formatRelativeTime(notification.created_at)}
+                {formatRelativeTime(notification.created_at || (notification as any).createdAt)}
               </div>
               
               {!notification.is_read && (

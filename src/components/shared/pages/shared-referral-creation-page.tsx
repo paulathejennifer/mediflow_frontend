@@ -214,7 +214,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
 
   // Prepare facility options for autocomplete
   const facilityOptions = facilities
-    .filter(facility => facility.id !== user?.facility_id)
+    .filter(facility => String(facility.id) !== String(user?.facility_id))
     .map(facility => ({
       value: facility.id,
       label: `${facility.name} (${facility.facilityCode})`
@@ -417,7 +417,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
                 </label>
                 <input
                   type="text"
-                  value={facilities.find(f => f.id === user?.facility_id)?.name || 'Loading facility...'}
+                  value={facilities.find(f => String(f.id) === String(user?.facility_id))?.name || 'Loading facility...'}
                   disabled
                   className="w-full px-3 py-2 text-sm bg-gray-800 border border-gray-600 rounded-md text-gray-400 cursor-not-allowed"
                 />
