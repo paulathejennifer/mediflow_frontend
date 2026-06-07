@@ -293,8 +293,9 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
       ])
 
       await referralService.submitReferral(referral.id)
-      setCreatedReferralId(referral.id)
-      setShowEnrichmentModal(true)
+      toast.success('Referral created and submitted successfully')
+      // Navigate to the referral details page so the user sees the AI processing
+      router.push(`/dashboard/${userRole.replace('_', '-')}/referrals/${referral.id}`)
     } catch (error) {
       console.error('Failed to create referral:', error)
       toast.error('Failed to create referral. Please try again.')
