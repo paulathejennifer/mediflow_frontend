@@ -540,10 +540,10 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
         {/* RIGHT SIDEBAR - AI ANALYSIS PANEL */}
         <div className="lg:col-span-1">
-          <Card className="bg-gray-900/60 border-primary/20 lg:sticky lg:top-6 shadow-[0_0_40px_-15px_rgba(var(--primary-rgb),0.4)] transition-all duration-500">
+          <Card className="bg-gray-900/60 border-primary/20 lg:sticky lg:top-6 shadow-[0_0_40px_-15px_rgba(var(--primary-rgb),0.4)] transition-all duration-500 hover:shadow-[0_0_50px_-5px_rgba(var(--primary-rgb),0.6)] hover:border-primary/40 group cursor-default">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-primary" />
+                <Brain className="h-5 w-5 text-primary group-hover:scale-110 transition-transform duration-300" />
                 <CardTitle className="text-lg font-semibold text-foreground">
                   AI Insights
                 </CardTitle>
