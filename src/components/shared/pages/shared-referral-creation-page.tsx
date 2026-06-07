@@ -173,12 +173,7 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
         mrn: patient.identifiers?.[0]?.mrn || 'N/A'
       }))
       setPatients(transformedPatients)
-      // Transform facilities data to match expected format
-      const transformedFacilities = facilitiesData.map((facility: any) => ({
-        ...facility,
-        facilityCode: facility.facility_code
-      }))
-      setFacilities(transformedFacilities)
+      setFacilities(facilitiesData)
     } catch (error) {
       console.error('Failed to fetch data:', error)
       setPatients([])
