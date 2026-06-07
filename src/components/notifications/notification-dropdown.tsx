@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Scrollbar } from '@/components/shared';
+import { formatRelativeTime } from '@/utils/date-utils';
 import { DropdownCloseButton } from '@/components/shared';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -209,10 +210,7 @@ export function NotificationDropdown() {
                                 </p>
 
                                 <p className="text-gray-500 text-xs mt-2">
-                                  {new Date(notification.created_at).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
+                                  {formatRelativeTime(notification.created_at)}
                                 </p>
                               </div>
                             </div>

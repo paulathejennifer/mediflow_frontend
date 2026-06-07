@@ -10,6 +10,7 @@ import { AppNotification } from '@/features/notifications/hooks/useNotifications
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { formatRelativeTime } from '@/utils/date-utils';
 import { 
   AlertTriangle, 
   Info, 
@@ -118,22 +119,6 @@ export function NotificationCard({
       return <HardDrive className="h-4 w-4" />;
     }
     return null;
-  };
-
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    
-    return date.toLocaleDateString();
   };
 
   const isExpired = notification.expires_at && new Date(notification.expires_at) < new Date();
@@ -251,7 +236,7 @@ export function NotificationCard({
             <div className="flex items-center gap-2 ml-2">
               <div className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {formatTimestamp(notification.created_at)}
+                {formatRelativeTime(notification.created_at)}
               </div>
               
               {!notification.is_read && (
@@ -319,7 +304,7 @@ export function NotificationCard({
                     <span className="font-medium capitalize text-foreground">
                       {key.replace(/_/g, ' ')}:
                     </span>
-                    <span className="text-muted-foreground max-w-[200px] truncate">
+                    <span className="text-white max-w-[200px] truncate">
                       {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                     </span>
                   </div>
@@ -329,14 +314,14 @@ export function NotificationCard({
               <div className="mt-3 pt-3 border-t border-border">
                 <div className="flex justify-between text-xs">
                   <span className="font-medium text-foreground">Source:</span>
-                  <span className="text-muted-foreground">
+                  <span className="text-white">
                     {notification.backend_source}
                   </span>
                 </div>
                 {notification.roles && (
                   <div className="flex justify-between text-xs mt-1">
                     <span className="font-medium text-foreground">Roles:</span>
-                    <span className="text-muted-foreground">
+                    <span className="text-white">
                       {notification.roles.join(', ')}
                     </span>
                   </div>
