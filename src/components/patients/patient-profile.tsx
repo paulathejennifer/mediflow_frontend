@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/lib/toast'
 import { PatientHeader } from './_components/patient-header'
 import { PatientDetails } from './_components/patient-details'
 import { MedicationsList } from './_components/medications-list'
@@ -131,10 +134,18 @@ const normalizePatient = (raw: any): LocalPatientData => {
 }
 
 export function PatientProfile({ patientId }: PatientProfileProps) {
+  const router = useRouter()
   const [patient, setPatient] = useState<LocalPatientData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [showAllReferrals, setShowAllReferrals] = useState(false)
+
+  const handleViewReferral = (refId: string) => {
+    // Extract numeric ID and determine role path
+    const cleanId = refId.replace('#', '');
+    router.push(`${window.location.pathname.split('/patients')[0]}/referrals/${cleanId}`);
+  }
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -252,7 +263,21 @@ export function PatientProfile({ patientId }: PatientProfileProps) {
         <ChronicConditions chronicConditions={patient.chronicConditions} onChronicConditionsChange={(updated) => setPatient((prev) => prev ? { ...prev, chronicConditions: updated } : prev)} />
       </div>
 
-      <ReferralSummary referrals={patient.referrals} />
+      <div className="space-y-4">
+        <ReferralSummary 
+          referrals={showAllReferrals ? patient.referrals : patient.referrals.slice(0, 5)} 
+          onViewDetails={handleViewReferral}
+        />
+        {patient.referrals.length > 5 && (
+          <Button 
+            variant="outline" 
+            className="w-full bg-gray-900/40 border-border/50 hover:bg-gray-800"
+            onClick={() => setShowAllReferrals(!showAllReferrals)}
+          >
+            {showAllReferrals ? 'Show Less' : `Click to show more (${patient.referrals.length - 5} more)`}
+          </Button>
+        )}
+      </div>
 
       <EditPatientModal
         isOpen={isEditModalOpen}

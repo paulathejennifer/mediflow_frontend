@@ -11,12 +11,12 @@ import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
 
 interface VoiceRecorderProps {
-  onSaveRecording?: (file: File) => void
+  onRecordingComplete?: (file: File) => void
   isStandalone?: boolean
   referralIdOverride?: number | null
 }
 
-export function VoiceRecorder({ onSaveRecording, isStandalone = false, referralIdOverride }: VoiceRecorderProps) {
+export function VoiceRecorder({ onRecordingComplete, isStandalone = false, referralIdOverride }: VoiceRecorderProps) {
   const params = useParams()
   const referralId = referralIdOverride || (params?.id ? Number(params.id) : null)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -49,9 +49,9 @@ export function VoiceRecorder({ onSaveRecording, isStandalone = false, referralI
     }
 
     // If we are in a creation flow, we just pass the file back to the form
-    if (onSaveRecording) {
+    if (onRecordingComplete) {
       const file = new File([audioBlob], `recording_${Date.now()}.webm`, { type: 'audio/webm' })
-      onSaveRecording(file)
+      onRecordingComplete(file)
       toast.success('Recording attached to referral')
       return
     }

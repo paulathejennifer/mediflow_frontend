@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -146,6 +146,7 @@ interface ReferralCreationPageProps {
 
 export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralCreationPageProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuthStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -160,6 +161,14 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Handle pre-selected patient from URL
+  useEffect(() => {
+    const patientIdFromUrl = searchParams.get('patientId')
+    if (patientIdFromUrl && patients.length > 0) {
+      setFormData(prev => ({ ...prev, patientId: patientIdFromUrl }))
+    }
+  }, [searchParams, patients])
 
   const fetchData = async () => {
     try {

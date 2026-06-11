@@ -1,20 +1,28 @@
 import { Badge } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, User, Phone, Calendar } from 'lucide-react'
+import { MoreHorizontal, User, Phone, Calendar, FileText } from 'lucide-react'
 import { UIPatient } from '@/features/patients/hooks/usePatients'
 import { ActionDropdown } from '@/components/shared'
 import { formatTableDate } from '@/utils/date-utils'
+import { useRouter } from 'next/navigation'
 
 interface PatientTableProps {
   patients: UIPatient[]
   userRole: 'super-admin' | 'facility-admin' | 'clinician'
   onViewProfile?: (patient: UIPatient) => void
   onEdit?: (patient: UIPatient) => void
-  onCreateReferral?: (patient: UIPatient) => void
   onTransferFacility?: (patient: UIPatient) => void
 }
 
-export function PatientTable({ patients, userRole, onViewProfile, onEdit, onCreateReferral, onTransferFacility }: PatientTableProps) {
+export function PatientTable({ patients, userRole, onViewProfile, onEdit, onTransferFacility }: PatientTableProps) {
+  const router = useRouter();
+
+  const handleCreateReferral = (patient: UIPatient) => {
+    // Normalize role for URL
+    const rolePath = userRole.replace('_', '-');
+    router.push(`/dashboard/${rolePath}/referrals/create?patientId=${patient.id}`);
+  };
+
   return (
     <div className="w-full overflow-x-auto">
       <table className="text-sm bg-gray-900/60 backdrop-blur-md border border-border" style={{ minWidth: '1000px', borderRadius: '0.5rem' }}>
@@ -87,7 +95,7 @@ export function PatientTable({ patients, userRole, onViewProfile, onEdit, onCrea
                   isActive={patient.status === 'active'}
                   onViewProfile={() => onViewProfile?.(patient)}
                   onEdit={() => onEdit?.(patient)}
-                  onCreateReferral={() => onCreateReferral?.(patient)}
+                  onCreateReferral={() => handleCreateReferral(patient)}
                   onTransferFacility={() => onTransferFacility?.(patient)}
                 />
               </td>

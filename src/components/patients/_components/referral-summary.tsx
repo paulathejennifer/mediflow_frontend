@@ -14,9 +14,10 @@ interface ReferralData {
 
 interface ReferralSummaryProps {
   referrals: ReferralData[]
+  onViewDetails?: (refId: string) => void
 }
 
-export function ReferralSummary({ referrals }: ReferralSummaryProps) {
+export function ReferralSummary({ referrals, onViewDetails }: ReferralSummaryProps) {
   return (
     <Card className="bg-gray-900/60 backdrop-blur-md border border-border rounded-2xl">
       <CardHeader>
@@ -50,7 +51,11 @@ export function ReferralSummary({ referrals }: ReferralSummaryProps) {
           {referrals.length > 0 ? (
             <div className="space-y-3">
               {referrals.map((referral, index) => (
-                <div key={referral.id} className="flex items-start justify-between p-4 bg-gray-800/30 rounded-lg hover:bg-gray-700/50 cursor-pointer transition-colors">
+                <div 
+                  key={referral.id} 
+                  className="flex items-start justify-between p-4 bg-gray-800/30 rounded-lg hover:bg-gray-700/50 cursor-pointer transition-colors"
+                  onClick={() => onViewDetails?.(referral.id)}
+                >
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{referral.condition}</p>
                     <p className="text-sm text-muted-foreground">To: {referral.to}</p>

@@ -8,6 +8,7 @@ export interface ReferralSummary {
   to_facility_name: string
   status: string
   priority: string
+  reason_for_referral?: string
   created_at: string
 }
 
