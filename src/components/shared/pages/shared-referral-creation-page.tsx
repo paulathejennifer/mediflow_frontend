@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Upload, Mic, FileText, AlertCircle, Clock, Zap, Shield } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { ArrowLeft, Upload, Mic, FileText, AlertCircle, Clock, Zap, Shield, XCircle } from 'lucide-react'
 import { patientService } from '@/features/patients/services/patient.service'
 import { facilityService } from '@/features/facilities/services/facility.service'
 import { referralService } from '@/features/referrals/services/referral.service'
@@ -496,6 +497,102 @@ export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralC
                 ))}
               </div>
               {errors.urgency && <p className="mt-1 text-sm text-red-500">{errors.urgency}</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Attachments */}
+        <Card className="bg-gray-900/60 border-border/50">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              Attachments
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Document Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Upload Documents (Lab Reports, Imaging, etc.)
+              </label>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileUpload}
+                className="block w-full text-sm text-gray-400
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-primary/10 file:text-primary
+                  hover:file:bg-primary/20"
+              />
+              <p className="mt-2 text-xs text-gray-400">Max file size: 10MB per file. Supported formats: PDF, JPG, PNG.</p>
+              {formData.attachments.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {formData.attachments.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 border border-gray-700 rounded-md bg-gray-800">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-foreground">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeAttachment(index)}
+                        className="text-red-500 hover:bg-red-500/10"
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Voice Note Upload/Record */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Voice Notes (Clinical Assessment)
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="file"
+                  accept="audio/*"
+                  multiple
+                  onChange={handleVoiceNoteUpload}
+                  className="block w-full text-sm text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-primary/10 file:text-primary
+                    hover:file:bg-primary/20"
+                />
+                <VoiceRecorder onRecordingComplete={handleRecordingComplete} />
+              </div>
+              <p className="mt-2 text-xs text-gray-400">Record or upload audio notes for AI transcription.</p>
+              {formData.voiceNotes.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {formData.voiceNotes.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 border border-gray-700 rounded-md bg-gray-800">
+                      <div className="flex items-center gap-2">
+                        <Mic className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-foreground">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeVoiceNote(index)}
+                        className="text-red-500 hover:bg-red-500/10"
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

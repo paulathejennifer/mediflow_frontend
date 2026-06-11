@@ -668,7 +668,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       </div>
 
       {/* BOTTOM ACTION SECTION */}
-      {['pending', 'submitted'].includes(referral.status) && !acceptedAt && userRole !== ROLES.SUPER_ADMIN && (
+      {['pending', 'submitted'].includes(referral.status) && !acceptedAt && userRole !== ROLES.SUPER_ADMIN && isReceivingFacility && (
         <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50">
           <div className="flex flex-row gap-4">
             <Button 
