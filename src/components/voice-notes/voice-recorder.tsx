@@ -149,7 +149,7 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
         {/* Control Buttons */}
         <div className="flex items-center gap-3">
           {!isRecording && !audioBlob && (
-            <Button size="lg" className="gap-2 bg-primary/90 hover:bg-primary/80" onClick={startRecording}>
+            <Button type="button" size="lg" className="gap-2 bg-primary/90 hover:bg-primary/80" onClick={startRecording}>
               <Mic className="h-5 w-5" />
               Start Recording
             </Button>
@@ -160,6 +160,7 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
+                    type="button"
                     variant="outline" 
                     size="icon" 
                     className="h-12 w-12 text-foreground"
@@ -177,6 +178,7 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
+                    type="button"
                     variant="destructive" 
                     size="icon" 
                     className="h-12 w-12"
@@ -198,6 +200,7 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
+                    type="button"
                     variant="outline" 
                     size="icon" 
                     className="h-12 w-12 text-foreground"
@@ -213,6 +216,7 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
               </Tooltip>
               
               <Button 
+                type="button"
                 size="lg" 
                 className="gap-2 bg-primary/90 hover:bg-primary/80"
                 disabled={isProcessing}
@@ -264,6 +268,7 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
             {isEditingTranscription && (
               <div className="flex gap-2">
                 <Button
+                  type="button"
                   size="sm"
                   className="bg-primary/90 hover:bg-primary/80"
                   onClick={confirmTranscription}
@@ -272,6 +277,7 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
                   Confirm
                 </Button>
                 <Button
+                  type="button"
                   size="sm"
                   variant="outline"
                   className="text-foreground"
