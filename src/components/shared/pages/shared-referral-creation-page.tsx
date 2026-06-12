@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -144,7 +144,15 @@ interface ReferralCreationPageProps {
   userRole?: string
 }
 
-export function SharedReferralCreationPage({ userRole = 'clinician' }: ReferralCreationPageProps) {
+export function SharedReferralCreationPage(props: ReferralCreationPageProps) {
+  return (
+    <Suspense fallback={<div className="p-6 max-w-4xl mx-auto text-muted-foreground">Loading...</div>}>
+      <ReferralCreationForm {...props} />
+    </Suspense>
+  )
+}
+
+function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPageProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuthStore()
