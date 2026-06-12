@@ -310,7 +310,7 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
         ),
       ])
 
-      await referralService.submitReferral(referral.id)
+      // Auto-submit removed. The referral stays as a 'draft' so the clinician can review AI insights.
       toast.success('Referral created and submitted successfully')
       // Navigate to the referral details page so the user sees the AI processing
       router.push(`/dashboard/${userRole.replace('_', '-')}/referrals/${referral.id}`)
@@ -574,18 +574,20 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
                 Voice Notes (Clinical Assessment)
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="file"
-                  accept="audio/*"
-                  multiple
-                  onChange={handleVoiceNoteUpload}
-                  className="block w-full text-sm text-gray-400
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-primary/10 file:text-primary
-                    hover:file:bg-primary/20"
-                />
+                <div className="relative flex-1 group">
+                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg p-6 bg-gray-800/20 group-hover:bg-gray-800/40 group-hover:border-primary/50 transition-all">
+                    <Upload className="h-8 w-8 text-gray-500 mb-2 group-hover:text-primary group-hover:scale-110 transition-transform" />
+                    <p className="text-xs text-gray-400 font-medium">Drag & Drop Audio Files</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">or click to browse</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    multiple
+                    onChange={handleVoiceNoteUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                </div>
                 <VoiceRecorder onRecordingComplete={handleRecordingComplete} />
               </div>
               <p className="mt-2 text-xs text-gray-400">Record or upload audio notes for AI transcription.</p>
