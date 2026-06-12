@@ -244,7 +244,7 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
         )}
 
         {/* Transcription Display */}
-        {(transcription || editedTranscription) && (
+        {(transcription || (editedTranscription && editedTranscription.length > 0)) && (
           <div className="w-full max-w-lg border rounded-lg bg-gray-900 p-4 space-y-4 transition-all duration-300 border-primary/40 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_12px_30px_-12px_hsl(var(--primary)/0.35)] hover:-translate-y-1">
             <label className="text-sm font-medium text-muted-foreground mb-2 block">
               Transcription
