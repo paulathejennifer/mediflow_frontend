@@ -68,10 +68,15 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
         return
       }
 
+      if (referralId === null) {
+        toast.error('Cannot save: Referral ID not found.')
+        return
+      }
+
       // 1. Upload the voice note
       const voiceNote = await voiceNoteService.uploadVoiceNote({
         referral_id: referralId,
-        audio_file: new File([audioBlob], 'recording.webm', { type: 'audio/webm' })
+        audio_file: audioFile
       })
 
       // 2. Trigger real transcription
