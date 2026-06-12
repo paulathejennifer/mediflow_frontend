@@ -48,21 +48,26 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
       return
     }
 
-    // If we are in a creation flow, we just pass the file back to the form
-    if (onRecordingComplete) {
-      const file = new File([audioBlob], `recording_${Date.now()}.webm`, { type: 'audio/webm' })
-      onRecordingComplete(file)
-      toast.success('Recording attached to referral')
-      return
-    }
-
-    if (!audioBlob || !referralId) {
+    if (!audioBlob || (!referralId && !onRecordingComplete)) {
       toast.error('Cannot save: Referral ID not found. Please save the referral first.')
       return
     }
 
     setIsProcessing(true)
     try {
+      const audioFile = new File([audioBlob], `recording_${Date.now()}.webm`, { type: 'audio/webm' })
+
+      // If in creation flow, use the raw transcription preview endpoint
+      if (onRecordingComplete) {
+        const result = await voiceNoteService.transcribeRawAudio(audioFile)
+        if (result.transcript) {
+          setEditedTranscription(result.transcript)
+          setIsEditingTranscription(true)
+          toast.success('Transcription complete - Please review')
+        }
+        return
+      }
+
       // 1. Upload the voice note
       const voiceNote = await voiceNoteService.uploadVoiceNote({
         referral_id: referralId,
@@ -91,7 +96,12 @@ export function VoiceRecorder({ onRecordingComplete, isStandalone = false, refer
 
   // Confirm transcription
   const confirmTranscription = () => {
-    setEditedTranscription(editedTranscription)
+    if (onRecordingComplete && audioBlob) {
+       const file = new File([audioBlob], `recording_${Date.now()}.webm`, { type: 'audio/webm' })
+       // Pass both the file and the finalized transcript
+       onRecordingComplete(file)
+       toast.success('Approved recording attached')
+    }
     setIsEditingTranscription(false)
   }
 

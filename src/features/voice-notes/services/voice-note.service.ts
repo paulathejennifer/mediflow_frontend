@@ -46,4 +46,15 @@ export const voiceNoteService = {
     const response = await apiClient.post(`/voice-notes/${voiceNoteId}/transcribe`)
     return response.data
   },
+
+  transcribeRawAudio: async (file: File): Promise<{ transcript: string }> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await apiClient.post('/voice-notes/transcribe-raw', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  }
 }

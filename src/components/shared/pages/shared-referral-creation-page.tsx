@@ -574,11 +574,10 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
                 Voice Notes (Clinical Assessment)
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1 group">
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg p-6 bg-gray-800/20 group-hover:bg-gray-800/40 group-hover:border-primary/50 transition-all">
+                <div className="relative flex-1 group min-h-[120px]">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg bg-gray-800/20 group-hover:bg-gray-800/40 group-hover:border-primary/50 transition-all">
                     <Upload className="h-8 w-8 text-gray-500 mb-2 group-hover:text-primary group-hover:scale-110 transition-transform" />
-                    <p className="text-xs text-gray-400 font-medium">Drag & Drop Audio Files</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">or click to browse</p>
+                    <p className="text-xs text-gray-400 font-medium text-center px-4">Drag & Drop Audio Files or Click to Browse</p>
                   </div>
                   <input
                     type="file"
