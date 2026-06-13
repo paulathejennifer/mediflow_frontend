@@ -310,10 +310,10 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
   // Explicit fields for timeline construction as requested
   const createdAt = referral.date
-  const submittedAt = (referral as any).submitted_at
-  const acceptedAt = (referral as any).accepted_at
-  const rejectedAt = (referral as any).rejected_at
-  const completedAt = (referral as any).completed_at
+  const submittedAt = referral.submittedAt
+  const acceptedAt = referral.acceptedAt
+  const rejectedAt = referral.rejectedAt
+  const completedAt = referral.completedAt
 
   // Construct timeline from explicit fields as requested
   const timelineEvents = [

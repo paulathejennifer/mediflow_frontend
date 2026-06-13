@@ -31,6 +31,9 @@ interface ActionDropdownProps {
   onAccept?: () => void
   onReject?: () => void
   onComplete?: () => void
+  referralToId?: string | number
+  currentFacilityId?: string | number
+  referralStatus?: string
 }
 
 export function ActionDropdown({
@@ -51,7 +54,10 @@ export function ActionDropdown({
   onDelete,
   onAccept,
   onReject,
-  onComplete
+  onComplete,
+  referralToId,
+  currentFacilityId,
+  referralStatus
 }: ActionDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom')
@@ -119,6 +125,14 @@ export function ActionDropdown({
     }
 
     if (type === 'referral') {
+      // Strict rule: Only clinicians belonging to the receiving facility can act on a referral
+      const isReceivingFacility = !!currentFacilityId && !!referralToId && 
+                                 String(currentFacilityId) === String(referralToId);
+      
+      const status = referralStatus?.toLowerCase() || '';
+      const isPending = ['pending', 'submitted'].includes(status);
+      const isAccepted = status === 'accepted';
+
       return [
         {
           label: 'View Details',
@@ -130,19 +144,19 @@ export function ActionDropdown({
           label: 'Accept Referral',
           icon: Check,
           onClick: onAccept,
-          show: userRole !== 'super-admin' && isActive // Only clinicians/facility admins can accept
+          show: !!onAccept && isReceivingFacility && isPending
         },
         {
           label: 'Reject Referral',
           icon: XCircle,
           onClick: onReject,
-          show: !!onReject
+          show: !!onReject && isReceivingFacility && isPending
         },
         {
           label: 'Complete Referral',
           icon: CheckCircle,
           onClick: onComplete,
-          show: !!onComplete
+          show: !!onComplete && isReceivingFacility && isAccepted
         }
       ].filter(action => action.show)
     }

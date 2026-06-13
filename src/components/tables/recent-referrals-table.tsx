@@ -116,10 +116,7 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
         </thead>
         <tbody>
           {displayedReferrals.map((referral) => {
-            // Fallback to true if IDs aren't available to ensure action visibility during testing
-            const referralToId = (referral as any).toFacilityId || (referral as any).to_facility_id;
-            const isReceivingFacility = !user?.facility_id || !referralToId || 
-                                       user.facility_id.toString() === referralToId.toString();
+            const referralToId = referral.toFacilityId || (referral as any).to_facility_id;
             
             return (
               <tr key={referral.id} className="border-b border-gray-800 hover:bg-gray-900">
@@ -180,10 +177,12 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
                   <ActionDropdown
                     type="referral"
                     userRole={userRole}
-                    isActive={isReceivingFacility && ['pending', 'submitted', 'accepted', 'completed'].includes(referral.status)}
-                    onAccept={isReceivingFacility && ['pending', 'submitted'].includes(referral.status) ? () => handleAccept(referral.id) : undefined}
-                    onReject={isReceivingFacility && ['pending', 'submitted'].includes(referral.status) ? () => handleReject(referral.id) : undefined}
-                    onComplete={isReceivingFacility && referral.status === 'accepted' ? () => handleComplete(referral.id) : undefined}
+                    referralStatus={referral.status}
+                    referralToId={referralToId}
+                    currentFacilityId={user?.facility_id}
+                    onAccept={() => handleAccept(referral.id)}
+                    onReject={() => handleReject(referral.id)}
+                    onComplete={() => handleComplete(referral.id)}
                     onViewProfile={() => handleViewDetails(referral.id)}
                   />
                 </td>

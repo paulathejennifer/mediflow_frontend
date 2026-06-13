@@ -109,6 +109,10 @@ export interface ReferralDetailView {
     timestamp: string
     user: string
   }>
+  submittedAt?: string
+  acceptedAt?: string
+  rejectedAt?: string
+  completedAt?: string
   aiAnalysis?: {
     summary: string
     key_findings: string[]
@@ -168,6 +172,10 @@ export function mapApiReferralToDetailView(r: ApiReferral): ReferralDetailView {
       department: 'Clinical',
       facility: r.from_facility?.name || 'Referring facility',
     },
+    submittedAt: r.submitted_at,
+    acceptedAt: r.accepted_at,
+    rejectedAt: r.rejected_at,
+    completedAt: r.completed_at,
     attachments: {
       documents: (r.documents || []).map((doc) => ({
         id: String(doc.id),
