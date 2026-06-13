@@ -36,6 +36,7 @@ interface NotificationCardProps {
   onAction: (id: number, action: string) => Promise<any>;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
+  onClick?: () => void;
 }
 
 export function NotificationCard({
@@ -43,7 +44,8 @@ export function NotificationCard({
   onMarkAsRead,
   onAction,
   isExpanded = false,
-  onToggleExpand
+  onToggleExpand,
+  onClick
 }: NotificationCardProps) {
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(isExpanded);
@@ -123,7 +125,8 @@ export function NotificationCard({
 
   const isExpired = notification.expires_at && new Date(notification.expires_at) < new Date();
 
-  const handleAction = async (action: string) => {
+  const handleAction = async (e: React.MouseEvent, action: string) => {
+    e.stopPropagation();
     setIsActionLoading(action);
     try {
       await onAction(notification.id, action);
@@ -137,7 +140,8 @@ export function NotificationCard({
     }
   };
 
-  const handleMarkAsRead = async () => {
+  const handleMarkAsRead = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!notification.is_read) {
       await onMarkAsRead(notification.id);
     }
@@ -207,7 +211,8 @@ export function NotificationCard({
           notification.is_read ? 'opacity-75' : ''
         } ${isExpired ? 'opacity-50' : ''} ${
           notification.type === 'critical' ? 'critical-bar' : ''
-        }`}
+        } ${onClick ? 'cursor-pointer hover:bg-gray-800/40' : ''}`}
+        onClick={onClick}
       >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
@@ -261,7 +266,7 @@ export function NotificationCard({
                   key={index}
                   variant="outline"
                   size="sm"
-                  onClick={() => handleAction(action)}
+                  onClick={(e) => handleAction(e, action)}
                   disabled={isActionLoading === action}
                   className="text-xs border-primary text-primary hover:bg-primary hover:text-secondary"
                 >
@@ -282,7 +287,10 @@ export function NotificationCard({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowDetails(!showDetails)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetails(!showDetails);
+              }}
             className="text-xs p-0 h-auto text-foreground hover:text-secondary hover:bg-transparent"
 
             >
