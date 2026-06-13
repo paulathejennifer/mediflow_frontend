@@ -29,6 +29,12 @@ export interface Referral {
   notes: string | null
   created_at: string
   updated_at: string
+  submitted_at?: string
+  accepted_at?: string
+  rejected_at?: string
+  completed_at?: string
+  accepted_by?: number
+  completed_by?: number
   patient?: {
     id: number
     first_name: string
