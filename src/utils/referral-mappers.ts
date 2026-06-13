@@ -8,13 +8,17 @@ export interface ReferralTableRow {
   status: 'draft' | 'pending' | 'accepted' | 'in_progress' | 'completed' | 'rejected' | 'cancelled'
   receivingFacility: string
   date: string
+  toFacilityId: string
+  fromFacilityId: string
 }
 
 export interface ReferralSummaryApi {
   id: number
   patient_name: string
   from_facility_name: string
+  from_facility_id: number
   to_facility_name: string
+  to_facility_id: number
   status: string
   priority: string
   created_at: string
@@ -48,20 +52,16 @@ function mapStatus(status: string): ReferralTableRow['status'] {
 }
 
 export function mapReferralSummaryToTableRow(r: ReferralSummaryApi): ReferralTableRow {
-  const truncateCondition = (text?: string) => {
-    if (!text) return 'General Consultation'
-    const words = text.split(' ')
-    return words.length > 4 ? words.slice(0, 4).join(' ') + '...' : text
-  }
-
   return {
     id: `#${r.id}`,
     patient: r.patient_name,
-    condition: truncateCondition(r.reason_for_referral),
+    condition: r.reason_for_referral || 'No reason provided',
     priority: mapPriority(r.priority),
     status: mapStatus(r.status),
     receivingFacility: r.to_facility_name,
     date: r.created_at,
+    toFacilityId: String(r.to_facility_id),
+    fromFacilityId: String(r.from_facility_id),
   }
 }
 
@@ -73,6 +73,7 @@ export interface ReferralDetailView {
   priority: string
   status: string
   receivingFacility: string
+  toFacilityId: string
   receivingFacilityType?: string
   receivingFacilityAddress?: string
   date: string
@@ -156,6 +157,7 @@ export function mapApiReferralToDetailView(r: ApiReferral): ReferralDetailView {
     priority: r.priority === 'emergency' ? 'high' : r.priority,
     status: mapStatus(r.status),
     receivingFacility: r.to_facility?.name || 'Unknown facility',
+    toFacilityId: String(r.to_facility_id),
     receivingFacilityType: 'Healthcare Facility',
     receivingFacilityAddress: 'Address not provided',
     date: r.created_at,

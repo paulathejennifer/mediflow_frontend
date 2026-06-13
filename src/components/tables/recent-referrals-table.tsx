@@ -30,6 +30,12 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
   // Only slice to 5 items if we are in "Recent" mode (dashboard)
   const displayedReferrals = onViewMore ? referrals.slice(0, 5) : referrals
 
+  const truncateCondition = (text: string) => {
+    const words = text.split(' ')
+    if (words.length <= 3) return text
+    return words.slice(0, 3).join(' ') + '...'
+  }
+
   const handleViewDetails = (referralId: string) => {
     if (!referralId) {
       console.warn('⚠️ [NAVIGATION] Missing referral ID');
@@ -131,7 +137,9 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
                     <div className="text-xs text-muted-foreground">MRN: {referral.id.slice(-6)}</div>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-foreground">{referral.condition}</td>
+                <td className="px-4 py-3 text-sm text-foreground" title={referral.condition}>
+                  {truncateCondition(referral.condition)}
+                </td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                     referral.priority === 'low' ? 'bg-green-600/10 text-green-600 border-green-600/20'
@@ -172,10 +180,10 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
                   <ActionDropdown
                     type="referral"
                     userRole={userRole}
-                    isActive={['pending', 'submitted', 'accepted', 'completed'].includes(referral.status)}
-                    onAccept={['pending', 'submitted'].includes(referral.status) ? () => handleAccept(referral.id) : undefined}
-                    onReject={['pending', 'submitted'].includes(referral.status) ? () => handleReject(referral.id) : undefined}
-                    onComplete={referral.status === 'accepted' ? () => handleComplete(referral.id) : undefined}
+                    isActive={isReceivingFacility && ['pending', 'submitted', 'accepted', 'completed'].includes(referral.status)}
+                    onAccept={isReceivingFacility && ['pending', 'submitted'].includes(referral.status) ? () => handleAccept(referral.id) : undefined}
+                    onReject={isReceivingFacility && ['pending', 'submitted'].includes(referral.status) ? () => handleReject(referral.id) : undefined}
+                    onComplete={isReceivingFacility && referral.status === 'accepted' ? () => handleComplete(referral.id) : undefined}
                     onViewProfile={() => handleViewDetails(referral.id)}
                   />
                 </td>

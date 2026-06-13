@@ -10,6 +10,7 @@
 import { useState, useMemo } from 'react';
 import { useNotificationContext } from '@/features/notifications/hooks/NotificationProvider';
 import { NotificationCard } from './notification-card';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +35,7 @@ interface NotificationCenterProps {
 }
 
 export function NotificationCenter({ className }: NotificationCenterProps) {
+  const router = useRouter();
   const {
     notifications,
     stats,
@@ -47,6 +49,15 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
     filters,
     setFilters
   } = useNotificationContext();
+
+  const handleNotificationClick = (notification: any) => {
+    const referralId = notification.details?.referral_id;
+    if (referralId) {
+      // Determine role path (clinician/facility-admin)
+      const rolePath = window.location.pathname.includes('clinician') ? 'clinician' : 'facility-admin';
+      router.push(`/dashboard/${rolePath}/referrals/${referralId}`);
+    }
+  };
 
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedNotifications, setExpandedNotifications] = useState<Set<number>>(new Set());
@@ -294,6 +305,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
                     onAction={handleAction}
                     isExpanded={expandedNotifications.has(notification.id)}
                     onToggleExpand={() => toggleExpand(notification.id)}
+                    onClick={() => handleNotificationClick(notification)}
                   />
                 ))}
               </div>

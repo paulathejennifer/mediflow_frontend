@@ -22,13 +22,16 @@ import {
   Send,
   RefreshCw,
   Check,
-  XCircle
+  XCircle,
+  Plus
 } from 'lucide-react'
 import { referralService } from '@/features/referrals/services/referral.service'
 import { mapApiReferralToDetailView, ReferralDetailView } from '@/utils/referral-mappers'
 import { useAuthStore } from '@/store/auth-store'
 import { toast } from '@/lib/toast'
 import { ROLES, UserRole } from '@/constants/roles'
+import { DocumentUpload } from '@/components/documents/document-upload'
+import { VoiceRecorder } from '@/components/voice-notes/voice-recorder'
 
 // A simple Typewriter component to handle the "cool" word-by-word typing effect
 function Typewriter({ text, speed = 40 }: { text: string; speed?: number }) {
@@ -68,6 +71,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const [referral, setReferral] = useState<ReferralDetailView | null>(null)
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAddingDoc, setIsAddingDoc] = useState(false)
+  const [isAddingVoice, setIsAddingVoice] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
@@ -103,7 +108,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     }
   }, [referral?.id, referral?.aiAnalysis, referral?.status]);
 
-  const isReceivingFacility = user?.facility_id?.toString() === (referral as any)?.toFacilityId?.toString()
+  const isReceivingFacility = user?.facility_id?.toString() === referral?.toFacilityId
 
   const handleAccept = async () => {
     if (!referral) return
@@ -448,17 +453,42 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
             <CardContent>
               <Tabs defaultValue="documents" className="w-full">
                 <TabsList className="mb-4 bg-gray-800/60 border border-border/50">
-                  <TabsTrigger value="documents" className="flex items-center gap-2">
+                  <TabsTrigger value="documents" className="flex items-center gap-2 group">
                     <FileText className="h-4 w-4" />
                     Documents ({referral.attachments?.documents.length || 0})
+                    <Plus 
+                      className="h-3.5 w-3.5 ml-1 opacity-50 group-hover:opacity-100 hover:text-primary transition-all" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsAddingDoc(!isAddingDoc);
+                        setIsAddingVoice(false);
+                      }}
+                    />
                   </TabsTrigger>
-                  <TabsTrigger value="voiceNotes" className="flex items-center gap-2">
+                  <TabsTrigger value="voiceNotes" className="flex items-center gap-2 group">
                     <Mic className="h-4 w-4" />
                     Voice Notes ({referral.attachments?.voiceNotes.length || 0})
+                    <Plus 
+                      className="h-3.5 w-3.5 ml-1 opacity-50 group-hover:opacity-100 hover:text-primary transition-all" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsAddingVoice(!isAddingVoice);
+                        setIsAddingDoc(false);
+                      }}
+                    />
                   </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="documents" className="mt-0">
+                  {isAddingDoc && (
+                    <div className="mb-6 p-4 border border-primary/20 rounded-lg bg-primary/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-sm font-medium">Upload New Document</h4>
+                        <Button variant="ghost" size="sm" onClick={() => setIsAddingDoc(false)}><XCircle className="h-4 w-4" /></Button>
+                      </div>
+                      <DocumentUpload onUploadComplete={() => window.location.reload()} />
+                    </div>
+                  )}
                   {(!referral.attachments?.documents || referral.attachments.documents.length === 0) ? (
                     <div className="py-4 text-center text-sm text-muted-foreground">
                       No documents attached
@@ -487,6 +517,14 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                 </TabsContent>
                 
                 <TabsContent value="voiceNotes" className="mt-0">
+                  {isAddingVoice && (
+                    <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                       <VoiceRecorder 
+                         referralIdOverride={parseInt(referral.id.replace(/\D/g, ''))} 
+                         onRecordingComplete={() => window.location.reload()} 
+                       />
+                    </div>
+                  )}
                   <div className="py-4 text-center text-sm text-muted-foreground">
                     No voice notes attached
                   </div>
