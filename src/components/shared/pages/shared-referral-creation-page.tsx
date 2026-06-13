@@ -294,7 +294,7 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
         reason_for_referral: formData.reason,
         clinical_notes: formData.clinicalNotes || formData.reason,
       })
-      
+      // Update state to show we are now working on attachments
       setCreatedReferralId(referral.id)
 
       // Use allSettled so one bad file doesn't crash the whole process
