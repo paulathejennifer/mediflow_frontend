@@ -297,13 +297,13 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
       // Update state to show we are now working on attachments
       setCreatedReferralId(referral.id)
 
-      // Use allSettled so one bad file doesn't crash the whole process
-      const results = await Promise.allSettled([
+      // Use allSettled so the user gets the referral even if one upload fails
+      const uploadResults = await Promise.allSettled([
         ...formData.attachments.map((att) =>
           documentService.uploadDocument({
             file: att.file,
             referral_id: referral.id,
-            document_type: att.type,
+            document_type: att.type || 'lab_report',
           })
         ),
         ...formData.voiceNotes.map((file) =>
@@ -314,18 +314,18 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
         ),
       ])
 
-      const failures = results.filter(r => r.status === 'rejected')
+      const failedCount = uploadResults.filter(r => r.status === 'rejected').length
       
-      if (failures.length > 0) {
-        toast.warning(`Referral created, but ${failures.length} attachment(s) failed to upload.`)
+      if (failedCount > 0) {
+        toast.warning(`Referral created, but ${failedCount} file(s) failed to upload. You can add them later.`)
       } else {
-        toast.success('Referral created successfully')
+        toast.success('Referral and attachments created successfully')
       }
 
       router.push(`/dashboard/${userRole.replace('_', '-')}/referrals/${referral.id}`)
     } catch (error) {
       console.error('Failed to create referral:', error)
-      toast.error('Connection error. Please check if the referral was saved in your list before retrying.')
+      toast.error('Connection error. Please check your referral list before retrying to avoid duplicates.')
     } finally {
       setIsSubmitting(false)
     }
