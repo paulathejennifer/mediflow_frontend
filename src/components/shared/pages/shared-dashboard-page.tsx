@@ -11,7 +11,7 @@ import { RecentReferralsTable } from '@/components/tables/recent-referrals-table
 import { usePagination } from '@/hooks/usePagination'
 import { useDashboard } from '@/features/analytics/hooks/useDashboard'
 import { referralService } from '@/features/referrals/services/referral.service'
-import { mapReferralSummaryToTableRow } from '@/utils/referral-mappers'
+import { mapReferralSummaryToTableRow, ReferralTableRow } from '@/utils/referral-mappers'
 import { ROLES, UserRole } from '@/constants/roles'
 import { calculateTrend, getDateRange, getPreviousDateRange } from '@/utils/trend-calculator'
 
@@ -22,9 +22,9 @@ interface SharedDashboardPageProps {
 export function SharedDashboardPage({ userRole }: SharedDashboardPageProps) {
   const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
-  const [referrals, setReferrals] = useState<any[]>([])
+  const [referrals, setReferrals] = useState<ReferralTableRow[]>([])
   const [referralsLoading, setReferralsLoading] = useState(true)
-  const [previousReferrals, setPreviousReferrals] = useState<any[]>([])
+  const [previousReferrals, setPreviousReferrals] = useState<ReferralTableRow[]>([])
 
   useEffect(() => {
     setIsMounted(true)

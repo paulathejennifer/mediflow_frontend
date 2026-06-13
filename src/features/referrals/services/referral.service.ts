@@ -5,7 +5,9 @@ export interface ReferralSummary {
   id: number
   patient_name: string
   from_facility_name: string
+  from_facility_id: number
   to_facility_name: string
+  to_facility_id: number
   status: string
   priority: string
   reason_for_referral?: string
