@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, Upload, Mic, FileText, AlertCircle, Clock, Zap, Shield, XCircle } from 'lucide-react'
@@ -207,7 +208,7 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
     reason: '',
     clinicalNotes: '',
     urgency: 'medium',
-    attachments: [] as File[],
+    attachments: [] as { file: File; type: string }[],
     voiceNotes: [] as File[]
   })
 
@@ -293,13 +294,16 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
         reason_for_referral: formData.reason,
         clinical_notes: formData.clinicalNotes || formData.reason,
       })
+      
+      setCreatedReferralId(referral.id)
 
-      await Promise.all([
-        ...formData.attachments.map((file) =>
+      // Use allSettled so one bad file doesn't crash the whole process
+      const results = await Promise.allSettled([
+        ...formData.attachments.map((att) =>
           documentService.uploadDocument({
-            file,
+            file: att.file,
             referral_id: referral.id,
-            document_type: 'lab_report',
+            document_type: att.type,
           })
         ),
         ...formData.voiceNotes.map((file) =>
@@ -310,13 +314,18 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
         ),
       ])
 
-      // Auto-submit removed. The referral stays as a 'draft' so the clinician can review AI insights.
-      toast.success('Referral created and submitted successfully')
-      // Navigate to the referral details page so the user sees the AI processing
+      const failures = results.filter(r => r.status === 'rejected')
+      
+      if (failures.length > 0) {
+        toast.warning(`Referral created, but ${failures.length} attachment(s) failed to upload.`)
+      } else {
+        toast.success('Referral created successfully')
+      }
+
       router.push(`/dashboard/${userRole.replace('_', '-')}/referrals/${referral.id}`)
     } catch (error) {
       console.error('Failed to create referral:', error)
-      toast.error('Failed to create referral. Please try again.')
+      toast.error('Connection error. Please check if the referral was saved in your list before retrying.')
     } finally {
       setIsSubmitting(false)
     }
@@ -324,9 +333,10 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
+    const newAttachments = files.map(f => ({ file: f, type: 'lab_report' }))
     setFormData(prev => ({
       ...prev,
-      attachments: [...prev.attachments, ...files]
+      attachments: [...prev.attachments, ...newAttachments]
     }))
   }
 
@@ -545,21 +555,36 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
               <p className="mt-2 text-xs text-gray-400">Max file size: 10MB per file. Supported formats: PDF, JPG, PNG.</p>
               {formData.attachments.length > 0 && (
                 <div className="mt-3 space-y-2">
-                  {formData.attachments.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 border border-gray-700 rounded-md bg-gray-800">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-foreground">{file.name}</span>
-                        <span className="text-xs text-muted-foreground">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                  {formData.attachments.map((att, index) => (
+                    <div key={index} className="flex flex-col p-3 border border-gray-700 rounded-md bg-gray-800 gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-primary" />
+                          <span className="text-sm text-foreground truncate max-w-[200px]">{att.file.name}</span>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => removeAttachment(index)} className="text-red-500 h-6 w-6 p-0">
+                          <XCircle className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeAttachment(index)}
-                        className="text-red-500 hover:bg-red-500/10"
+                      <Select 
+                        value={att.type} 
+                        onValueChange={(val) => {
+                          const updated = [...formData.attachments]
+                          updated[index].type = val
+                          setFormData(prev => ({ ...prev, attachments: updated }))
+                        }}
                       >
-                        <XCircle className="h-4 w-4" />
-                      </Button>
+                        <SelectTrigger className="h-8 bg-gray-900 border-gray-700 text-xs">
+                          <SelectValue placeholder="Select document type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="lab_report">Lab Report</SelectItem>
+                          <SelectItem value="imaging">Imaging (X-Ray/MRI)</SelectItem>
+                          <SelectItem value="discharge_summary">Discharge Summary</SelectItem>
+                          <SelectItem value="prescription">Prescription</SelectItem>
+                          <SelectItem value="referral_letter">Referral Letter</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   ))}
                 </div>
