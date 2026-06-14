@@ -54,11 +54,12 @@ export const useNotifications = () => {
     if (!token || wsRef.current?.readyState === WebSocket.OPEN) return;
 
     // Respect NEXT_PUBLIC_WS_URL from env if available, otherwise derive from API URL
+    const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL 
       ? `${process.env.NEXT_PUBLIC_WS_URL}?token=${token}` 
       : (() => {
           const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-          const apiHost = process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, '');
+          const apiHost = cleanApiUrl.replace(/^https?:\/\//, '');
           return `${protocol}//${apiHost}/websocket/notifications?token=${token}`;
         })();
 
