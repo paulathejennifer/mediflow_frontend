@@ -71,6 +71,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const [referral, setReferral] = useState<ReferralDetailView | null>(null)
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAiLoading, setIsAiLoading] = useState(false)
   const [isAddingDoc, setIsAddingDoc] = useState(false)
   const [isAddingVoice, setIsAddingVoice] = useState(false)
 
@@ -158,7 +159,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const handleRefreshAI = async () => {
     if (!referral) return
     try {
-      setIsLoading(true)
+      setIsAiLoading(true)
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
       const response = await referralService.refreshAISummary(numericId).catch(err => {
         console.error("AI Refresh Error:", err)
@@ -200,7 +201,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     } catch (error: any) {
       toast.error(error.message || "Failed to refresh AI insights")
     } finally {
-      setIsLoading(false)
+      setIsAiLoading(false)
     }
   }
 
@@ -593,11 +594,16 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                 onClick={handleRefreshAI}
                 disabled={isLoading}
               >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${isAiLoading ? 'animate-spin' : ''}`} />
               </Button>
             </CardHeader>
             <CardContent className="space-y-6">
-              {referral.aiAnalysis ? (
+              {isAiLoading ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <p className="text-sm text-muted-foreground">AI is analyzing context...</p>
+                </div>
+              ) : referral.aiAnalysis ? (
                 <>
                   {/* QUALITY SCORE */}
                   <div className="space-y-2">
