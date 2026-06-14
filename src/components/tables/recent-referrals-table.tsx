@@ -31,7 +31,8 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
   const displayedReferrals = onViewMore ? referrals.slice(0, 5) : referrals
 
   const truncateCondition = (text: string) => {
-    const words = text.split(' ')
+    if (!text) return 'No reason provided'
+    const words = text.trim().split(/\s+/)
     if (words.length <= 3) return text
     return words.slice(0, 3).join(' ') + '...'
   }
@@ -116,9 +117,7 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
         </thead>
         <tbody>
           {displayedReferrals.map((referral) => {
-            const referralToId = referral.toFacilityId || (referral as any).to_facility_id
-            const currentFacilityId = user?.facility_id
-
+            const referralToId = referral.toFacilityId || (referral as any).to_facility_id;
             return (
               <tr key={referral.id} className="border-b border-gray-800 hover:bg-gray-900">
                 <td className="px-4 py-3 text-sm text-muted-foreground font-mono">
@@ -180,7 +179,7 @@ export function RecentReferralsTable({ referrals, userRole, onViewMore, onAction
                     userRole={userRole}
                     referralStatus={referral.status}
                     referralToId={referralToId}
-                    currentFacilityId={currentFacilityId}
+                    currentFacilityId={user?.facility_id}
                     onAccept={() => handleAccept(referral.id)}
                     onReject={() => handleReject(referral.id)}
                     onComplete={() => handleComplete(referral.id)}
