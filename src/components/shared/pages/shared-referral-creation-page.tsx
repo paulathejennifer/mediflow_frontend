@@ -220,7 +220,13 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
 
   // Handle patient creation success
   const handlePatientCreated = (newPatient: any) => {
-    setPatients(prev => [...prev, newPatient])
+    // Transform raw API response to match the local state structure (adding name and mrn)
+    const transformedPatient = {
+      ...newPatient,
+      name: `${newPatient.first_name} ${newPatient.last_name}`,
+      mrn: newPatient.identifiers?.[0]?.mrn || 'N/A'
+    }
+    setPatients(prev => [...prev, transformedPatient])
     // Auto-select the newly created patient
     setFormData(prev => ({ ...prev, patientId: newPatient.id }))
     setIsPatientModalOpen(false)
