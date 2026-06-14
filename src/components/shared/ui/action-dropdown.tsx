@@ -126,11 +126,11 @@ export function ActionDropdown({
 
     if (type === 'referral') {
       // Strict rule: Only clinicians belonging to the receiving facility can act on a referral
-      const isReceivingFacility = currentFacilityId !== undefined && referralToId !== undefined && 
+      const isReceivingFacility = currentFacilityId !== undefined && referralToId !== null && 
                                  String(currentFacilityId) === String(referralToId)
       
       const status = referralStatus?.toLowerCase() || '';
-      const isPending = ['pending', 'submitted'].includes(status)
+      const isPending = ['pending', 'submitted', 'draft'].includes(status)
       const isAccepted = status === 'accepted';
 
       return [

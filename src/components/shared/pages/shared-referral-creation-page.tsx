@@ -314,12 +314,15 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
         ),
       ])
 
+      // FINAL STEP: Submit the referral to move it from 'draft' to 'submitted'
+      await referralService.submitReferral(referral.id)
+
       const failedCount = uploadResults.filter(r => r.status === 'rejected').length
       
       if (failedCount > 0) {
-        toast.warning(`Referral created, but ${failedCount} file(s) failed to upload. You can add them later.`)
+        toast.warning(`Referral submitted, but ${failedCount} file(s) failed to upload. You can add them later.`)
       } else {
-        toast.success('Referral and attachments created successfully')
+        toast.success('Referral created and submitted successfully')
       }
 
       router.push(`/dashboard/${userRole.replace('_', '-')}/referrals/${referral.id}`)

@@ -100,9 +100,9 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     loadReferral()
   }, [referralId])
 
-  // Auto-trigger AI analysis if it's missing for non-draft referrals
+  // Auto-trigger AI analysis if it's missing
   useEffect(() => {
-    if (referral && !referral.aiAnalysis && referral.status !== 'draft' && !isLoading) {
+    if (referral && !referral.aiAnalysis && !isLoading) {
       console.log('🤖 [AI] Analysis missing, auto-triggering...');
       handleRefreshAI();
     }
