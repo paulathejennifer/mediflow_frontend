@@ -55,7 +55,7 @@ export function mapReferralSummaryToTableRow(r: ReferralSummaryApi): ReferralTab
   return {
     id: `#${r.id}`,
     patient: r.patient_name,
-    condition: r.reason_for_referral || 'No reason provided',
+    condition: r.reason_for_referral || (r as any).clinical_notes || 'No reason provided',
     priority: mapPriority(r.priority),
     status: mapStatus(r.status),
     receivingFacility: r.to_facility_name,
