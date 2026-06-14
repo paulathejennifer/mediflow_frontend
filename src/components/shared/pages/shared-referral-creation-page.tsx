@@ -571,7 +571,11 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
                           <FileText className="h-4 w-4 text-primary" />
                           <span className="text-sm text-foreground truncate max-w-[200px]">{att.file.name}</span>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => removeAttachment(index)} className="text-red-500 h-6 w-6 p-0">
+                        <Button 
+                          type="button"
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => removeAttachment(index)} className="text-red-500 h-6 w-6 p-0">
                           <XCircle className="h-4 w-4" />
                         </Button>
                       </div>
@@ -634,6 +638,7 @@ function ReferralCreationForm({ userRole = 'clinician' }: ReferralCreationPagePr
                         <span className="text-xs text-muted-foreground">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
                       </div>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => removeVoiceNote(index)}

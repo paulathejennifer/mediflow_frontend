@@ -26,6 +26,8 @@ import {
   Plus
 } from 'lucide-react'
 import { referralService } from '@/features/referrals/services/referral.service'
+import { documentService } from '@/features/documents/services/document.service'
+import { voiceNoteService } from '@/features/voice-notes/services/voice-note.service'
 import { mapApiReferralToDetailView, ReferralDetailView } from '@/utils/referral-mappers'
 import { useAuthStore } from '@/store/auth-store'
 import { toast } from '@/lib/toast'
@@ -487,7 +489,29 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                         <h4 className="text-sm font-medium">Upload New Document</h4>
                         <Button variant="ghost" size="sm" onClick={() => setIsAddingDoc(false)}><XCircle className="h-4 w-4" /></Button>
                       </div>
-                      <DocumentUpload onUploadComplete={() => window.location.reload()} />
+                      <DocumentUpload onUploadComplete={async (files) => {
+                        if (!referral) return
+                        try {
+                          setIsLoading(true)
+                          const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
+                          
+                          // Perform actual backend upload
+                          await Promise.all(
+                            files.map(f => documentService.uploadDocument({
+                              file: f.file,
+                              referral_id: numericId,
+                              document_type: f.documentType || 'other'
+                            }))
+                          )
+                          
+                          toast.success("Documents uploaded. Updating AI insights...")
+                          await handleRefreshAI()
+                          window.location.reload()
+                        } catch (error) {
+                          toast.error("Failed to upload documents")
+                          setIsLoading(false)
+                        }
+                      }} />
                     </div>
                   )}
                   {(!referral.attachments?.documents || referral.attachments.documents.length === 0) ? (
@@ -521,8 +545,23 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                   {isAddingVoice && (
                     <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
                        <VoiceRecorder 
-                         referralIdOverride={parseInt(referral.id.replace(/\D/g, ''))} 
-                         onRecordingComplete={() => window.location.reload()} 
+                         onRecordingComplete={async (file) => {
+                           if (!referral) return
+                           try {
+                             setIsLoading(true)
+                             const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
+                             await voiceNoteService.uploadVoiceNote({
+                               audio_file: file,
+                               referral_id: numericId
+                             })
+                             toast.success("Voice note uploaded. Updating AI insights...")
+                             await handleRefreshAI()
+                             window.location.reload()
+                           } catch (error) {
+                             toast.error("Failed to upload voice note")
+                             setIsLoading(false)
+                           }
+                         }} 
                        />
                     </div>
                   )}
