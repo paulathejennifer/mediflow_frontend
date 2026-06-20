@@ -15,3 +15,4 @@ export interface Facility {
   updated_at: string
   facilityCode?: string
 }
+
