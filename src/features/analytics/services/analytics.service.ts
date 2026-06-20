@@ -285,7 +285,7 @@ export const analyticsService = {
     return response.data
   },
   async askQuestion(question: string): Promise<AskAIQueryResponse> {
-    const response = await apiClient.post<AskAIQueryResponse>('/v1/analytics/ask', {
+    const response = await apiClient.post<AskAIQueryResponse>('/analytics/ask', {
       user_question: question,
     });
     return response.data;
@@ -296,7 +296,7 @@ export const analyticsService = {
    */
   async runReferralIntelligence(referralId: number): Promise<ReferralIntelligenceResponse> {
     const response = await apiClient.post<ReferralIntelligenceResponse>(
-      `/v1/analytics/referrals/${referralId}/intelligence`
+      `/analytics/referrals/${referralId}/intelligence`
     );
     return response.data;
   },
