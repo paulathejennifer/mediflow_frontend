@@ -67,49 +67,40 @@ export default function AskAIPage() {
   }
 
   return (
-    /* Removed custom background colors here so it safely inherits from your master layout */
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full">
       {/* Main Chat Interface Panel */}
-      <div className="flex-1 flex flex-col h-full border-r border-gray-800 min-w-0">
+      <div className="flex-1 flex flex-col h-full border-r border-gray-800 min-w-0 relative">
         
-        {/* Header Bar */}
-        <div className="h-16 border-b border-gray-800 px-6 flex items-center justify-between bg-gray-900/40 backdrop-blur shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
-              <Sparkles className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-sm font-semibold tracking-wide text-gray-100">AskMediFlow Operational AI</h1>
-              <p className="text-xs text-muted-foreground">Natural Language DB Core translation engine</p>
-            </div>
-          </div>
-          {messages.length > 0 && (
+        {/* Clear Logs floating trigger (since top header is removed) */}
+        {messages.length > 0 && (
+          <div className="absolute top-4 right-6 z-20">
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={clearConversation} 
-              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 bg-gray-900/80 backdrop-blur border border-gray-800"
             >
               <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear Logs
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Conversation Stream Frame */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 pb-24">
           {messages.length === 0 ? (
-            <div className="max-w-2xl mx-auto pt-12 space-y-8">
+            <div className="max-w-2xl mx-auto pt-20 space-y-8">
               
-              {/* Restored Dark Hero Card and Text Visibility */}
-              <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-xl p-10 text-center space-y-4 shadow-xl">
+              {/* Dark Hero Unit with 360-degree Rotating Glow Background */}
+              <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-xl p-10 text-center space-y-4 shadow-xl relative overflow-hidden">
                 <div className="relative inline-block">
-                  <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+                  {/* Slow 360-degree rotating layout element */}
+                  <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full animate-[spin_10s_linear_infinite]" style={{ transformOrigin: 'center' }} />
                   <Sparkles className="h-12 w-12 text-primary relative z-10 animate-pulse" />
                 </div>
-                <h2 className="text-xl font-bold tracking-tight text-gray-100">Ask Mediflow AI</h2>
+                <h2 className="text-xl font-bold tracking-tight text-gray-100 relative z-10">Ask Mediflow AI</h2>
               </div>
 
-              {/* Restored Dark Suggested Action Prompt Cards */}
+              {/* Dark Suggested Action Prompt Cards */}
               <div className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Suggested Analytical Inquiries</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -130,7 +121,6 @@ export default function AskAIPage() {
               {messages.map((msg, index) => {
                 const isLatest = index === messages.length - 1
                 return (
-                  /* Restored Dark Message Container Cards */
                   <div
                     key={msg.id}
                     className={`flex gap-4 p-4 rounded-xl border transition-all ${
@@ -161,7 +151,7 @@ export default function AskAIPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-6 text-[10px] px-2 bg-gray-950 border-gray-800 text-gray-400 hover:text-white"
+                            className="h-6 text-[10px] px-2 bg-gray-950 border-gray-800 text-gray-400 hover:bg-white hover:text-black transition-colors"
                             onClick={() => setInspectingData({ sql: msg.metadata?.generatedSql, raw: msg.metadata?.rawData })}
                           >
                             <Terminal className="h-3 w-3 mr-1" /> View SQL Engine Details
@@ -186,8 +176,8 @@ export default function AskAIPage() {
           )}
         </div>
 
-        {/* Sticky Prompt Input Form Tray with Clean Transparent/Dark Blend */}
-        <div className="p-4 border-t border-gray-800 bg-gray-900/40 backdrop-blur sticky bottom-0 z-10 shrink-0 shadow-md">
+        {/* Guaranteed Sticky Prompt Input Form Box Tray */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800 bg-gray-950/95 backdrop-blur z-30 shrink-0 shadow-xl">
           <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto relative flex items-center">
             <input
               type="text"
@@ -211,7 +201,7 @@ export default function AskAIPage() {
 
       {/* Database Metadata Inspection Drawer Context Panel */}
       {inspectingData && (
-        <div className="w-80 h-full bg-gray-900 border-l border-gray-800 flex flex-col animate-in slide-in-from-right duration-200 shrink-0">
+        <div className="w-80 h-full bg-gray-900 border-l border-gray-800 flex flex-col animate-in slide-in-from-right duration-200 shrink-0 z-40">
           <div className="h-16 px-4 border-b border-gray-800 flex items-center justify-between bg-gray-950/20">
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-300">
               <Database className="h-4 w-4 text-primary" />
