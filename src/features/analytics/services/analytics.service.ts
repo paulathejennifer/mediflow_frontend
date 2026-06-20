@@ -1,4 +1,5 @@
 import apiClient from '@/lib/axios'
+import { AskAIQueryResponse, ReferralIntelligenceResponse } from '../types/analytics.types';
 
 export interface SystemActivityData {
   month: string
@@ -102,7 +103,7 @@ export interface FacilityPerformanceData {
   completion_rate: number
   avg_turnaround_days: number
 }
-  // New interface for FacilityData to match backend response
+// New interface for FacilityData to match backend response
 export interface FacilityData {
   name: string
   referrals: number
@@ -122,7 +123,7 @@ export const analyticsService = {
   getDashboardKpis: async (): Promise<AnalyticsMetrics> => {
     const response = await apiClient.get('/analytics/dashboard')
     const data = response.data
-    
+
     // Map backend snake_case to frontend camelCase for consistency across all pages
     return {
       totalPatients: data.total_patients || 0,
@@ -252,7 +253,7 @@ export const analyticsService = {
     // Backend now returns an array of objects directly
     return response.data.data || []
   },
-  
+
 
   // Get facility performance (super admin only)
   getFacilityPerformance: async (limit: number = 10): Promise<FacilityPerformanceData[]> => {
@@ -282,5 +283,31 @@ export const analyticsService = {
       params: { days }
     })
     return response.data
-  }
+  },
+  async askQuestion(question: string): Promise<AskAIQueryResponse> {
+    const response = await apiClient.post<AskAIQueryResponse>('/v1/analytics/ask', {
+      user_question: question,
+    });
+    return response.data;
+  },
+
+  /**
+   * Evaluates unstructured clinical documentation on a specific referral 
+   */
+  async runReferralIntelligence(referralId: number): Promise<ReferralIntelligenceResponse> {
+    const response = await apiClient.post<ReferralIntelligenceResponse>(
+      `/v1/analytics/referrals/${referralId}/intelligence`
+    );
+    return response.data;
+  },
 }
+
+// src/features/super-admin/services/analytics.service.ts
+// Replace with your actual Axios instance path
+
+
+
+/**
+ * Executes a natural language query against the database using Groq + Llama 3.1 Text-to-SQL
+ */
+

@@ -4,15 +4,15 @@ import { useState, useEffect, useRef } from 'react'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Sparkles, AlertTriangle, UserCheck } from 'lucide-react'
 import { patientService } from '@/features/patients/services/patient.service'
+import { toast } from 'sonner'
 
 interface PatientCreationModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: (patient: any) => void
 }
-import { toast } from 'sonner'
 
 // FilterDropdown component
 function FilterDropdown({ value, onChange, options, placeholder, disabled = false, dataField }: {
@@ -114,6 +114,10 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
   const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
 
+  // Duplicate check state
+  const [duplicateWarning, setDuplicateWarning] = useState<{ isDuplicate: boolean; matches: any[] } | null>(null)
+  const [bypassDuplicate, setBypassDuplicate] = useState(false)
+
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -136,9 +140,10 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
       })
       setErrors({})
       setShowSuccess(false)
+      setDuplicateWarning(null)
+      setBypassDuplicate(false)
     }
   }, [isOpen])
-
 
   const clearFieldError = (field: string) => {
     if (errors[field]) {
@@ -188,7 +193,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
       newErrors.chronic_conditions = 'Chronic conditions must be less than 1000 characters'
     }
 
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -206,6 +210,28 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
         }
       }
       return
+    }
+
+// Duplicate Check Step
+    if (!bypassDuplicate) {
+      try {
+        const check = await patientService.checkDuplicate({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          date_of_birth: formData.date_of_birth,
+          email: formData.email
+        })
+        if (check.duplicate_detected) {
+          setDuplicateWarning({
+            isDuplicate: check.duplicate_detected,
+            matches: check.matches.map(m => m.patient) // Maps matches array to raw patients for your warning card list
+          })
+          toast.warning('Potential duplicate records detected.')
+          return
+        }
+      } catch (err) {
+        console.error('Duplicate verification skipped due to error', err)
+      }
     }
 
     try {
@@ -237,7 +263,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
   }
 
   const handleClose = () => {
-    onClose() // This will close the modal
+    onClose()
   }
 
   if (!isOpen) return null
@@ -252,6 +278,63 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     >
       {!showSuccess ? (
         <div className="space-y-6">
+          {/* AskMediFlow Panel */}
+          <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 border border-primary/20 rounded-xl p-4 flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-primary mt-0.5 animate-pulse flex-shrink-0" />
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium text-white flex items-center gap-1.5">
+                AskMediFlow Auto-Fill Assistant
+              </h4>
+              <p className="text-xs text-muted-foreground">
+                Have unstructured voice logs or referral PDFs? Let AskMediFlow populate this form automatically.
+              </p>
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="text-primary text-xs p-0 h-auto font-medium hover:text-primary/80"
+                onClick={() => toast.info('AskMediFlow AI extraction drawer opening...')}
+              >
+                Launch AI Intake Processor →
+              </Button>
+            </div>
+          </div>
+
+          {/* Duplicate Match Warning Prompt */}
+          {duplicateWarning?.isDuplicate && (
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 space-y-3 animate-in fade-in slide-in-from-top-1">
+              <div className="flex items-center gap-2 text-amber-400">
+                <AlertTriangle className="h-5 w-5" />
+                <h4 className="text-sm font-semibold">Possible Existing Patient Found</h4>
+              </div>
+              <p className="text-xs text-gray-300">
+                The database flagged existing records matching this name and DOB profile:
+              </p>
+              <div className="bg-gray-950/40 rounded-lg p-2.5 space-y-1.5 border border-gray-800">
+                {duplicateWarning.matches.map((p: any, idx: number) => (
+                  <div key={idx} className="text-xs text-muted-foreground flex justify-between">
+                    <span>{p.first_name} {p.last_name} ({p.gender})</span>
+                    <span className="text-gray-500">DOB: {p.date_of_birth} • Phone: {p.phone}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 justify-end pt-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs h-7 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                  onClick={() => {
+                    setBypassDuplicate(true)
+                    setDuplicateWarning(null)
+                    toast.success("Overridden duplicate checks. Ready to save.")
+                  }}
+                >
+                  Ignore & Save Anyway
+                </Button>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6 pb-20">
             {/* Personal Information */}
             <div className="space-y-4">
@@ -300,7 +383,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Email <span className="text-red-500">*</span>
+                    Email
                   </label>
                   <input
                     type="email"
@@ -362,22 +445,22 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Gender <span className="text-red-500">*</span>
                   </label>
-                <FilterDropdown
-                  value={formData.gender}
-                  onChange={(value) => {
-                    setFormData(prev => ({ ...prev, gender: value }))
-                    clearFieldError('gender')
-                  }}
-                  options={[
-                    { value: '', label: 'Select Gender' },
-                    { value: 'male', label: 'Male' },
-                    { value: 'female', label: 'Female' },
-                    { value: 'other', label: 'Other' }
-                  ]}
-                  placeholder="Select Gender"
-                  disabled={isSubmitting}
-                  data-field="gender"
-                />
+                  <FilterDropdown
+                    value={formData.gender}
+                    onChange={(value) => {
+                      setFormData(prev => ({ ...prev, gender: value }))
+                      clearFieldError('gender')
+                    }}
+                    options={[
+                      { value: '', label: 'Select Gender' },
+                      { value: 'male', label: 'Male' },
+                      { value: 'female', label: 'Female' },
+                      { value: 'other', label: 'Other' }
+                    ]}
+                    placeholder="Select Gender"
+                    disabled={isSubmitting}
+                    data-field="gender"
+                  />
                   {errors.gender && <p className="mt-1 text-sm text-red-500">{errors.gender}</p>}
                 </div>
               </div>
@@ -430,6 +513,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                     placeholder="Emergency contact phone"
                     disabled={isSubmitting}
                   />
+                  {errors.emergency_contact_phone && <p className="mt-1 text-sm text-red-500">{errors.emergency_contact_phone}</p>}
                 </div>
               </div>
 
@@ -446,6 +530,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                   rows={3}
                   disabled={isSubmitting}
                 />
+                {errors.medical_history && <p className="mt-1 text-sm text-red-500">{errors.medical_history}</p>}
               </div>
 
               {/* Allergies */}
@@ -461,6 +546,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                   rows={2}
                   disabled={isSubmitting}
                 />
+                {errors.allergies && <p className="mt-1 text-sm text-red-500">{errors.allergies}</p>}
               </div>
 
               {/* Medications */}
@@ -476,6 +562,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                   rows={2}
                   disabled={isSubmitting}
                 />
+                {errors.medications && <p className="mt-1 text-sm text-red-500">{errors.medications}</p>}
               </div>
 
               {/* Chronic Conditions */}
@@ -491,35 +578,33 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                   rows={2}
                   disabled={isSubmitting}
                 />
+                {errors.chronic_conditions && <p className="mt-1 text-sm text-red-500">{errors.chronic_conditions}</p>}
               </div>
             </div>
 
-                      
-          <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="px-4 py-2 border-none bg-transparent text-gray-300 hover:text-foreground hover:bg-transparent"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="px-4 py-2 bg-primary/90 text-primary-foreground hover:bg-primary/80"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Creating...' : 'Create Patient'}
-            </Button>
-          </div>
-        </form>
+            <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="px-4 py-2 border-none bg-transparent text-gray-300 hover:text-foreground hover:bg-transparent"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="px-4 py-2 bg-primary/90 text-primary-foreground hover:bg-primary/80"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Create Patient'}
+              </Button>
+            </div>
+          </form>
         </div>
       ) : (
         <div className="text-center py-8">
           <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <UserCheck className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">Patient Created Successfully!</h3>
           <p className="text-gray-400 mb-6">

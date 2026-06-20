@@ -58,9 +58,20 @@ export interface UpdatePatientRequest {
   medications?: string
   chronic_conditions?: string
 }
+export interface DuplicateMatch {
+  patient: Patient
+  similarity_score: number
+  matched_fields: string[]
+}
+
+export interface DuplicateCheckResponse {
+  duplicate_detected: boolean
+  highest_score: number
+  matches: DuplicateMatch[]
+}
 
 export const patientService = {
-  createPatient: async (data: CreatePatientRequest): Promise<Patient> => {
+  createPatient: async (data: CreatePatientRequest & { force_save?: boolean }): Promise<Patient> => {
     const response = await apiClient.post('/patients', data)
     return response.data
   },
@@ -91,4 +102,16 @@ export const patientService = {
     const response = await apiClient.put(`/patients/${patientId}`, data)
     return response.data
   },
+
+  checkDuplicate: async (params: {
+    first_name?: string
+    last_name?: string
+    date_of_birth?: string
+    phone?: string
+    email?: string
+  }): Promise<DuplicateCheckResponse> => {
+    const response = await apiClient.get('/patients/check-duplicates', { params })
+    return response.data
+  },
+
 }

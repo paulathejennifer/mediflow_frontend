@@ -23,6 +23,7 @@ export const ROUTES = {
     REFERRALS: '/dashboard/super-admin/referrals',
     AUDIT_LOGS: '/dashboard/super-admin/audit-logs',
     ANALYTICS: '/dashboard/super-admin/analytics',
+    ASK_AI: '/dashboard/super-admin/ask-ai',
     NOTIFICATIONS: '/dashboard/super-admin/notifications',
     SETTINGS: '/dashboard/super-admin/settings'
   },

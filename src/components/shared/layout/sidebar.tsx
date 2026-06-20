@@ -20,13 +20,15 @@ import {
   Bell,
   User,
   FileAudio,
-  ChevronRight
+  ChevronRight,
+  Brain
 } from 'lucide-react'
 
 const navigationItems = {
   [ROLES.SUPER_ADMIN]: [
     { name: 'Dashboard', href: ROUTES.SUPER_ADMIN.DASHBOARD + '/dashboard', icon: LayoutDashboard },
     { name: 'Analytics', href: ROUTES.SUPER_ADMIN.ANALYTICS, icon: BarChart3 },
+    { name: 'Ask AI', href: ROUTES.SUPER_ADMIN.ASK_AI, icon: Brain },
     { name: 'Staff', href: ROUTES.SUPER_ADMIN.STAFF, icon: Users },
     { name: 'Patients', href: ROUTES.SUPER_ADMIN.PATIENTS, icon: User },
     { name: 'Facilities', href: ROUTES.SUPER_ADMIN.FACILITIES, icon: Building2 },
