@@ -68,6 +68,19 @@ export default function AskAIPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full">
+      {/* Injecting localized keyframe sweep for left-to-right radiant glow shifting */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes glowSweep {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animate-glow-sweep {
+          background-size: 200% 200%;
+          animation: glowSweep 6s ease infinite;
+        }
+      `}} />
+
       {/* Main Chat Interface Panel */}
       <div className="flex-1 flex flex-col h-full border-r border-gray-800 min-w-0 relative">
         
@@ -131,7 +144,7 @@ export default function AskAIPage() {
                   >
                     <div className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 text-xs font-bold ${
                       msg.role === 'user' 
-                        ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' 
+                        ? 'bg-gray-800 text-gray-300 border border-gray-700' 
                         : 'bg-primary/10 text-primary border border-primary/20'
                     }`}>
                       {msg.role === 'user' ? 'SA' : 'AI'}
@@ -179,22 +192,25 @@ export default function AskAIPage() {
         {/* Guaranteed Sticky Prompt Input Form Box Tray */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800 bg-gray-950/95 backdrop-blur z-30 shrink-0 shadow-xl">
           <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto relative flex items-center">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything (e.g., 'How many critical referrals were rejected this week?')..."
-              disabled={isLoading}
-              className="w-full h-11 bg-gray-900/90 border border-gray-800 rounded-xl pl-4 pr-12 text-xs focus:outline-none focus:border-primary text-gray-100 placeholder:text-gray-500"
-            />
-            <Button
-              type="submit"
-              size="icon"
-              disabled={isLoading || !input.trim()}
-              className="absolute right-1.5 top-1.5 h-8 w-8 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              <Send className="h-3.5 w-3.5" />
-            </Button>
+            {/* The outer container wrapper generates the sweeping primary glow ring frame */}
+            <div className="w-full relative rounded-xl p-[1px] bg-gradient-to-r from-primary/10 via-primary/50 to-primary/10 animate-glow-sweep focus-within:from-primary/30 focus-within:via-primary focus-within:to-primary/30 transition-all duration-300">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask anything (e.g., 'How many critical referrals were rejected this week?')...."
+                disabled={isLoading}
+                className="w-full h-11 bg-gray-950 rounded-xl pl-4 pr-12 text-xs focus:outline-none text-gray-100 placeholder:text-gray-500"
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={isLoading || !input.trim()}
+                className="absolute right-1.5 top-1.5 h-8 w-8 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors z-10"
+              >
+                <Send className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           </form>
         </div>
       </div>
@@ -227,8 +243,8 @@ export default function AskAIPage() {
               </div>
             </div>
 
-            <div className="bg-blue-950/20 border border-blue-900/40 rounded-lg p-3 flex gap-2 text-[11px] text-blue-300/90">
-              <ShieldAlert className="h-4 w-4 shrink-0 text-blue-400" />
+            <div className="bg-gray-950 border border-gray-800 rounded-lg p-3 flex gap-2 text-[11px] text-gray-400">
+              <ShieldAlert className="h-4 w-4 shrink-0 text-primary" />
               <p>Queries are executed using read-only database connections contextually limited by transactional bounds.</p>
             </div>
           </div>
