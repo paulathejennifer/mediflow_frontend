@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAskAI } from '@/features/analytics/hooks/useAskAI'
 import { Button } from '@/components/ui/button'
-import { Send, Database, Terminal, Trash2, ShieldAlert, FileJson, Brain, X } from 'lucide-react'
+import { Send, Database, Terminal, ShieldAlert, Brain } from 'lucide-react'
 
 const SUGGESTED_PROMPTS = [
   "Which facility has received the most referrals this month?",
@@ -72,7 +72,7 @@ export default function AskAIPage() {
   const [input, setInput] = useState('')
   const { messages, isLoading, sendMessage, clearConversation } = useAskAI()
   const [inspectingData, setInspectingData] = useState<{ sql?: string; raw?: any[] } | null>(null)
-  
+ 
   const chatBottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -88,66 +88,21 @@ export default function AskAIPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950 rounded-3xl border border-gray-800 shadow-2xl mx-3 my-3">
-      {/* Custom Keyframes */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes glowSweep {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes blobFloat1 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(25px, -30px) rotate(8deg); }
-        }
-        @keyframes blobFloat2 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(-35px, 25px) rotate(-12deg); }
-        }
-        .animate-glow-sweep {
-          background-size: 300% 300%;
-          animation: glowSweep 8s ease infinite;
-        }
-        .animate-blob-1 { animation: blobFloat1 18s infinite ease-in-out; }
-        .animate-blob-2 { animation: blobFloat2 22s infinite ease-in-out; }
-      `}} />
-
-      {/* Floating Background Blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob-1" />
-        <div className="absolute bottom-40 right-10 w-[28rem] h-[28rem] bg-purple-500/10 rounded-full blur-3xl animate-blob-2" />
-      </div>
-
       {/* Main Chat Interface */}
       <div className="flex-1 flex flex-col h-full min-w-0 relative">
-        
-        {/* Clear button - Moved to top-left to avoid collision */}
-        {messages.length > 0 && (
-          <div className="absolute top-6 left-6 z-30">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={clearConversation} 
-              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 bg-gray-900/90 backdrop-blur border border-gray-800 flex items-center gap-1.5"
-            >
-              <X className="h-3.5 w-3.5" />
-              Clear
-            </Button>
-          </div>
-        )}
 
-        {/* Conversation Area - Reduced top padding */}
-        <div className="flex-1 overflow-y-auto p-6 pt-20 pb-32 space-y-8">
+        {/* Conversation Area */}
+        <div className="flex-1 overflow-y-auto p-6 pt-16 pb-32 space-y-8">
           {messages.length === 0 ? (
             <div className="max-w-3xl mx-auto pt-8 space-y-12">
               {/* Premium Hero */}
               <div className="relative text-center">
                 <div className="mx-auto relative inline-flex items-center justify-center mb-8">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-purple-500/20 to-transparent rounded-full blur-3xl" />
                   <div className="relative flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-950 border border-primary/30 shadow-2xl">
                     <Brain className="h-14 w-14 text-primary animate-[spin_25s_linear_infinite]" />
                   </div>
                 </div>
-                
+               
                 <h1 className="text-5xl font-semibold tracking-tighter text-white mb-3">Mediflow AI</h1>
                 <p className="text-lg text-gray-400 max-w-md mx-auto">
                   Ask anything about your referrals, patients, and facility data
@@ -180,14 +135,18 @@ export default function AskAIPage() {
                     className={`group flex gap-5 transition-all duration-300 ${msg.role === 'user' ? 'justify-end' : ''}`}
                   >
                     {msg.role === 'assistant' && (
-                      <div className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 flex items-center justify-center shrink-0 mt-1">
+                      <button 
+                        onClick={clearConversation}
+                        className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 flex items-center justify-center shrink-0 mt-1 hover:bg-primary/20 transition-colors cursor-pointer"
+                        title="Clear conversation"
+                      >
                         <Brain className="h-4 w-4 text-primary" />
-                      </div>
+                      </button>
                     )}
-                    
+                   
                     <div className={`max-w-[85%] rounded-3xl px-6 py-4 transition-all duration-300 ${
-                      msg.role === 'user' 
-                        ? 'bg-primary/90 text-primary-foreground rounded-br-none shadow-md' 
+                      msg.role === 'user'
+                        ? 'bg-primary/80 text-primary-foreground rounded-br-none shadow-md' 
                         : 'bg-gray-900/90 border border-gray-800/80 backdrop-blur-xl rounded-bl-none'
                     }`}>
                       {msg.role === 'user' ? (
@@ -203,9 +162,9 @@ export default function AskAIPage() {
                           variant="ghost"
                           size="sm"
                           className="mt-4 h-7 text-[10px] px-3 bg-gray-950/70 hover:bg-gray-800 border border-gray-700 text-gray-400 hover:text-white"
-                          onClick={() => setInspectingData({ 
-                            sql: msg.metadata?.generatedSql, 
-                            raw: msg.metadata?.rawData 
+                          onClick={() => setInspectingData({
+                            sql: msg.metadata?.generatedSql,
+                            raw: msg.metadata?.rawData
                           })}
                         >
                           <Terminal className="h-3 w-3 mr-1.5" />
@@ -238,7 +197,7 @@ export default function AskAIPage() {
           <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto">
             <div className="relative w-full">
               <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-purple-500/40 to-primary/30 rounded-3xl animate-glow-sweep" />
-              
+             
               <div className="relative bg-gray-950 border border-gray-700 rounded-3xl focus-within:border-primary/60 transition-all overflow-hidden">
                 <input
                   type="text"
@@ -248,7 +207,7 @@ export default function AskAIPage() {
                   disabled={isLoading}
                   className="w-full h-14 bg-transparent pl-6 pr-16 text-sm placeholder:text-gray-500 focus:outline-none text-gray-100 rounded-3xl"
                 />
-                
+               
                 <Button
                   type="submit"
                   disabled={isLoading || !input.trim()}
@@ -273,7 +232,7 @@ export default function AskAIPage() {
                 <div className="text-[10px] text-gray-500">Read-only execution log</div>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setInspectingData(null)}
               className="text-gray-400 hover:text-white text-xl leading-none"
             >
