@@ -88,14 +88,43 @@ export default function AskAIPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950 rounded-3xl border border-gray-800 shadow-2xl mx-4 my-4">
+      {/* Custom Keyframes + Colorful Floating Blobs */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes glowSweep {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes blobFloat1 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(25px, -30px) rotate(8deg); }
+        }
+        @keyframes blobFloat2 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(-35px, 25px) rotate(-12deg); }
+        }
+        .animate-glow-sweep {
+          background-size: 300% 300%;
+          animation: glowSweep 8s ease infinite;
+        }
+        .animate-blob-1 { animation: blobFloat1 18s infinite ease-in-out; }
+        .animate-blob-2 { animation: blobFloat2 22s infinite ease-in-out; }
+      `}} />
+
+      {/* Floating Animated Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob-1" />
+        <div className="absolute bottom-40 right-10 w-[28rem] h-[28rem] bg-purple-500/10 rounded-full blur-3xl animate-blob-2" />
+      </div>
+
       {/* Main Chat Interface */}
       <div className="flex-1 flex flex-col h-full min-w-0 relative">
 
-        {/* Conversation Area - Pushed upwards with less top padding */}
-        <div className="flex-1 overflow-y-auto p-6 pt-12 pb-32 space-y-8">
+        {/* Conversation Area - Further adjusted for more space at bottom */}
+        <div className="flex-1 overflow-y-auto p-6 pt-12 pb-28 space-y-8">
           {messages.length === 0 ? (
             <div className="max-w-3xl mx-auto pt-6 space-y-10">
-              {/* Premium Hero - More compact */}
+              {/* Compact Hero */}
               <div className="relative text-center">
                 <div className="mx-auto relative inline-flex items-center justify-center mb-6">
                   <div className="relative flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-950 border border-primary/30 shadow-2xl">
@@ -192,7 +221,7 @@ export default function AskAIPage() {
           )}
         </div>
 
-        {/* Sticky Input */}
+        {/* Sticky Input - Adjusted positioning */}
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-800 bg-gradient-to-t from-gray-950 via-gray-950 to-transparent z-30">
           <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto">
             <div className="relative w-full">
