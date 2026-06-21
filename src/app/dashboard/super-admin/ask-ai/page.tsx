@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAskAI } from '@/features/analytics/hooks/useAskAI'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Send, Database, Terminal, Trash2, ShieldAlert, FileJson, Brain } from 'lucide-react'
+import { Send, Database, Terminal, Trash2, ShieldAlert, FileJson, Brain } from 'lucide-react'
 
 const SUGGESTED_PROMPTS = [
   "How many referrals are currently marked as emergency?",
@@ -87,7 +87,7 @@ export default function AskAIPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950 rounded-3xl border border-gray-800 mx-4 my-4 shadow-2xl overflow-hidden">
       {/* Custom Keyframes */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes glowSweep {
@@ -118,18 +118,18 @@ export default function AskAIPage() {
       </div>
 
       {/* Main Chat Interface */}
-      <div className="flex-1 flex flex-col h-full border-r border-gray-800 min-w-0 relative">
+      <div className="flex-1 flex flex-col h-full min-w-0 relative">
         
-        {/* Clear button */}
+        {/* Clear button - repositioned to avoid collision */}
         {messages.length > 0 && (
           <div className="absolute top-6 right-6 z-30">
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={clearConversation} 
-              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 bg-gray-900/80 backdrop-blur border border-gray-800"
+              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 bg-gray-900/90 backdrop-blur border border-gray-800"
             >
-              <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear
+              <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear Logs
             </Button>
           </div>
         )}
@@ -186,7 +186,7 @@ export default function AskAIPage() {
                     
                     <div className={`max-w-[85%] rounded-3xl px-6 py-4 glassmorphism transition-all duration-300 ${
                       msg.role === 'user' 
-                        ? 'bg-primary text-primary-foreground rounded-br-none' 
+                        ? 'bg-primary/90 text-primary-foreground rounded-br-none shadow-md' 
                         : 'bg-gray-900/90 border border-gray-800/80 backdrop-blur-xl rounded-bl-none'
                     }`}>
                       {msg.role === 'user' ? (
@@ -233,20 +233,20 @@ export default function AskAIPage() {
           )}
         </div>
 
-        {/* Sticky Input */}
+        {/* Sticky Input - Improved rounded corners */}
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-800 bg-gradient-to-t from-gray-950 via-gray-950 to-transparent z-30">
           <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto">
             <div className="relative w-full">
               <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-purple-500/40 to-primary/30 rounded-3xl animate-glow-sweep" />
               
-              <div className="relative bg-gray-950 border border-gray-700 rounded-3xl focus-within:border-primary/60 transition-all">
+              <div className="relative bg-gray-950 border border-gray-700 rounded-3xl focus-within:border-primary/60 transition-all overflow-hidden">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask Mediflow AI anything about your data..."
                   disabled={isLoading}
-                  className="w-full h-14 bg-transparent pl-6 pr-16 text-sm placeholder:text-gray-500 focus:outline-none text-gray-100"
+                  className="w-full h-14 bg-transparent pl-6 pr-16 text-sm placeholder:text-gray-500 focus:outline-none text-gray-100 rounded-3xl"
                 />
                 
                 <Button
