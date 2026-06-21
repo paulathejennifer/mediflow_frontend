@@ -8,7 +8,7 @@ import { SystemActivityTrend } from '@/components/charts/system-activity-trend'
 import { ReferralTrends } from '@/components/charts/referral-trends'
 import { ReferralsByStatusPie } from '@/components/charts/referrals-by-status-pie'
 import { TurnaroundTimeTrend } from '@/components/charts/turnaround-time-trend'
-import { ReferralsBySpecialty } from '@/components/charts/referrals-by-specialty'   // ← Updated
+import { ReferralsBySpecialty } from '@/components/charts/referrals-by-specialty'
 import { FacilityPerformance } from '@/components/charts/facility-performance'
 import { TopReferringFacilities } from '@/components/tables/top-referring-facilities'
 import { 
@@ -23,7 +23,8 @@ import {
   ApiRequestsData, 
   FacilityData 
 } from '@/features/analytics/services/analytics.service'
-import { Building2, Users, Activity, Zap } from 'lucide-react'
+import { Building2, Users, Activity, Zap, Brain } from 'lucide-react'
+import Link from 'next/link'
 
 export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true)
@@ -33,7 +34,7 @@ export default function AnalyticsPage() {
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null)
   const [statusData, setStatusData] = useState<StatusData[]>([])
   const [turnaroundData, setTurnaroundData] = useState<TurnaroundData[]>([])
-  const [specialtyData, setSpecialtyData] = useState<ReasonData[]>([])        // ← Changed
+  const [specialtyData, setSpecialtyData] = useState<ReasonData[]>([])
   const [facilityPerformance, setFacilityPerformance] = useState<FacilityPerformanceData[]>([])
   const [topFacilities, setTopFacilities] = useState<FacilityData[]>([])
   const [referralTrendData, setReferralTrendData] = useState<{ month: string; total: number; completed: number }[]>([])
@@ -50,7 +51,7 @@ export default function AnalyticsPage() {
         metricsData,
         statusResult,
         turnaroundResult,
-        specialtyResult,           // ← Changed
+        specialtyResult,
         performanceResult,
         topFacilitiesResult,
         referralTrendResult,
@@ -62,7 +63,7 @@ export default function AnalyticsPage() {
         analyticsService.getAnalyticsMetrics(),
         analyticsService.getReferralsByStatus(),
         analyticsService.getTurnaroundTimeTrend(4),
-        analyticsService.getReferralsBySpecialty(),     // ← Changed to Specialty
+        analyticsService.getReferralsBySpecialty(),
         analyticsService.getFacilityPerformance(10),
         analyticsService.getTopReferringFacilities(10),
         analyticsService.getReferralTrend(30),
@@ -75,13 +76,12 @@ export default function AnalyticsPage() {
       setMetrics({ ...(metricsData || {}), ...(kpiData || {}) })
       setStatusData(statusResult)
       setTurnaroundData(turnaroundResult)
-      setSpecialtyData(specialtyResult)                    // ← Updated
+      setSpecialtyData(specialtyResult)
       setFacilityPerformance(performanceResult)
       setTopFacilities(topFacilitiesResult)
       setSystemHealth(systemHealthResult)
       setApiRequests(apiRequestsResult)
 
-      // Transform trend data
       const transformedTrend = (referralTrendResult?.labels || []).map((label: string, index: number) => ({
         month: label || 'Unknown',
         total: Number(referralTrendResult?.data?.[index]) || 0,
@@ -159,40 +159,60 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <div className="container mx-auto px-4 py-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Analytics</h1>
           <p className="text-muted-foreground">System analytics and insights</p>
         </div>
-
+        
         <div className="mt-8">
           <OverviewCards data={analyticsOverviewData} />
         </div>
-
+        
         {/* Row 1 */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ReferralTrends data={referralTrendData} />
           <ReferralsByStatusPie data={statusData} />
         </div>
-
+        
         {/* Row 2 */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TurnaroundTimeTrend data={turnaroundData} />
-          <ReferralsBySpecialty data={specialtyData} />     {/* ← Updated */}
+          <ReferralsBySpecialty data={specialtyData} />
         </div>
-
+        
         {/* Row 3 */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SystemActivityTrend data={systemActivityTrend} isLoading={false} />
           <FacilityPerformance data={facilityPerformance} />
         </div>
-
-        {/* Top Referring Facilities */}
+        
+        {/* Top Referring Facilities Table */}
         <div className="mt-8">
           <TopReferringFacilities data={topFacilities} />
         </div>
       </div>
+
+      {/* Floating Ask AI Button - Bottom Right */}
+      <Link
+        href="/dashboard/super-admin/ask-ai"
+        className="fixed bottom-8 right-8 z-50 group"
+      >
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary via-purple-600 to-indigo-600 shadow-2xl shadow-primary/50 hover:scale-110 active:scale-95 transition-all duration-300">
+          <Brain className="h-8 w-8 text-white animate-[spin_25s_linear_infinite]" />
+          
+          {/* Pulse rings */}
+          <div className="absolute inset-0 rounded-full border-4 border-primary/30 animate-ping" />
+          <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-ping" style={{ animationDelay: '400ms' }} />
+        </div>
+
+        {/* Tooltip */}
+        <div className="absolute bottom-20 right-1/2 translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-xl">
+          Ask Mediflow AI
+          <div className="absolute -bottom-1 right-6 w-3 h-3 bg-gray-900 rotate-45" />
+        </div>
+      </Link>
     </div>
   )
 }
