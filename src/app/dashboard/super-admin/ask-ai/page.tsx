@@ -14,7 +14,13 @@ const SUGGESTED_PROMPTS = [
  * Custom typewriter text with clean markdown stripping
  */
 function TypewriterText({ text, isAnimated = true }: { text: string; isAnimated?: boolean }) {
-  const cleanText = text.replace(/\*\*/g, '')
+  const cleanText = text
+    .replace(/\*\*/g, '')
+    .replace(/Smmary:/g, 'Summary:')
+    .replace(/smmary:/g, 'Summary:')
+    .replace(/Smmry:/g, 'Summary:')
+    .replace(/Summarry:/g, 'Summary:')
+    .replace(/Summary\:/g, 'Summary:')
   const [displayedText, setDisplayedText] = useState(isAnimated ? '' : cleanText)
 
   useEffect(() => {
@@ -72,7 +78,7 @@ export default function AskAIPage() {
   const [input, setInput] = useState('')
   const { messages, isLoading, sendMessage, clearConversation } = useAskAI()
   const [inspectingData, setInspectingData] = useState<{ sql?: string; raw?: any[] } | null>(null)
- 
+
   const chatBottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -89,7 +95,8 @@ export default function AskAIPage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950 rounded-3xl border border-gray-800 shadow-2xl mx-4 my-4">
       {/* Custom Keyframes + Colorful Floating Blobs */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes glowSweep {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
@@ -114,7 +121,7 @@ export default function AskAIPage() {
       {/* Floating Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob-1" />
-<div className="absolute bottom-40 right-10 w-[28rem] h-[28rem] bg-secondary/10 rounded-full blur-3xl animate-blob-2" />
+        <div className="absolute bottom-40 right-10 w-[28rem] h-[28rem] bg-secondary/10 rounded-full blur-3xl animate-blob-2" />
       </div>
 
       {/* Main Chat Interface */}
@@ -131,7 +138,7 @@ export default function AskAIPage() {
                     <Brain className="h-12 w-12 text-primary animate-[spin_25s_linear_infinite]" />
                   </div>
                 </div>
-               
+
                 <h1 className="text-4xl font-semibold tracking-tighter text-white mb-2">Mediflow AI</h1>
                 <p className="text-md text-gray-400 max-w-md mx-auto">
                   Ask anything about your referrals, patients, and facility data
@@ -164,21 +171,20 @@ export default function AskAIPage() {
                     className={`group flex gap-5 transition-all duration-300 ${msg.role === 'user' ? 'justify-end' : ''}`}
                   >
                     {msg.role === 'assistant' && (
-                      <button 
+                      <button
                         onClick={clearConversation}
-className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-1 hover:bg-primary/20 transition-colors cursor-pointer"
+                        className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-1 hover:bg-primary/20 transition-colors cursor-pointer"
                         title="Clear conversation"
                       >
                         <Brain className="h-4 w-4 text-primary" />
                       </button>
                     )}
-                   
-                    <div className={`max-w-[85%] rounded-3xl px-6 py-4 transition-all duration-300 ${
-                      msg.role === 'user'
 
-                        ? 'bg-primary/80 text-primary-foreground rounded-br-none shadow-md' 
+                    <div className={`max-w-[85%] rounded-3xl px-6 py-4 transition-all duration-300 ${msg.role === 'user'
+
+                        ? 'bg-primary/80 text-primary-foreground rounded-br-none shadow-md'
                         : 'bg-gray-900/90 border border-gray-800/80 backdrop-blur-xl rounded-bl-none'
-                    }`}>
+                      }`}>
                       {msg.role === 'user' ? (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">
                           {msg.content}
@@ -208,7 +214,7 @@ className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10
 
               {isLoading && (
                 <div className="flex gap-5">
-<div className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-1">
+                  <div className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-1">
                     <Brain className="h-4 w-4 text-primary" />
                   </div>
                   <div className="bg-gray-900/90 border border-gray-800/80 backdrop-blur-xl rounded-3xl px-6 py-4 rounded-bl-none">
@@ -226,8 +232,8 @@ className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-800 bg-gradient-to-t from-gray-950 via-gray-950 to-transparent z-30">
           <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto">
             <div className="relative w-full">
-<div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 to-secondary/30 rounded-3xl animate-glow-sweep" />
-             
+              <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 to-secondary/30 rounded-3xl animate-glow-sweep" />
+
               <div className="relative bg-gray-950 border border-gray-700 rounded-3xl focus-within:border-primary/60 transition-all overflow-hidden">
                 <input
                   type="text"
@@ -237,7 +243,7 @@ className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10
                   disabled={isLoading}
                   className="w-full h-14 bg-transparent pl-6 pr-16 text-sm placeholder:text-gray-500 focus:outline-none text-gray-100 rounded-3xl"
                 />
-               
+
                 <Button
                   type="submit"
                   disabled={isLoading || !input.trim()}
