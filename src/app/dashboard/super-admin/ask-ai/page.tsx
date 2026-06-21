@@ -133,7 +133,7 @@ export default function AskAIPage() {
                 </div>
                
                 <h1 className="text-4xl font-semibold tracking-tighter text-white mb-2">Mediflow AI</h1>
-                <p className="text-lg text-gray-400 max-w-md mx-auto">
+                <p className="text-md text-gray-400 max-w-md mx-auto">
                   Ask anything about your referrals, patients, and facility data
                 </p>
               </div>
