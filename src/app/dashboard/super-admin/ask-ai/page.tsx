@@ -3,11 +3,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAskAI } from '@/features/analytics/hooks/useAskAI'
 import { Button } from '@/components/ui/button'
-import { Send, Database, Terminal, Trash2, ShieldAlert, FileJson, Brain } from 'lucide-react'
+import { Send, Database, Terminal, Trash2, ShieldAlert, FileJson, Brain, X } from 'lucide-react'
 
 const SUGGESTED_PROMPTS = [
   "How many referrals are currently marked as emergency?",
-  "Which facility has received the most referrals this month?"
+  "Which facility has received the most referrals this month?",
+  "Show me the duplicate patient pairs that are still flagged.",
+  "List patients born after 2000 who have completed status referrals."
 ]
 
 /**
@@ -87,7 +89,7 @@ export default function AskAIPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950 rounded-3xl border border-gray-800 mx-4 my-4 shadow-2xl overflow-hidden">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950 rounded-3xl border border-gray-800 shadow-2xl mx-3 my-3">
       {/* Custom Keyframes */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes glowSweep {
@@ -120,25 +122,26 @@ export default function AskAIPage() {
       {/* Main Chat Interface */}
       <div className="flex-1 flex flex-col h-full min-w-0 relative">
         
-        {/* Clear button - repositioned to avoid collision */}
+        {/* Clear button - Moved to top-left to avoid collision */}
         {messages.length > 0 && (
-          <div className="absolute top-6 right-6 z-30">
+          <div className="absolute top-6 left-6 z-30">
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={clearConversation} 
-              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 bg-gray-900/90 backdrop-blur border border-gray-800"
+              className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 bg-gray-900/90 backdrop-blur border border-gray-800 flex items-center gap-1.5"
             >
-              <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear Logs
+              <X className="h-3.5 w-3.5" />
+              Clear
             </Button>
           </div>
         )}
 
-        {/* Conversation Area */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-8 pb-32">
+        {/* Conversation Area - Reduced top padding */}
+        <div className="flex-1 overflow-y-auto p-6 pt-20 pb-32 space-y-8">
           {messages.length === 0 ? (
-            <div className="max-w-3xl mx-auto pt-16 space-y-12">
-              {/* Premium ChatGPT-style Hero */}
+            <div className="max-w-3xl mx-auto pt-8 space-y-12">
+              {/* Premium Hero */}
               <div className="relative text-center">
                 <div className="mx-auto relative inline-flex items-center justify-center mb-8">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-purple-500/20 to-transparent rounded-full blur-3xl" />
@@ -148,7 +151,7 @@ export default function AskAIPage() {
                 </div>
                 
                 <h1 className="text-5xl font-semibold tracking-tighter text-white mb-3">Mediflow AI</h1>
-                <p className="text-xl text-gray-400 max-w-md mx-auto">
+                <p className="text-lg text-gray-400 max-w-md mx-auto">
                   Ask anything about your referrals, patients, and facility data
                 </p>
               </div>
@@ -184,7 +187,7 @@ export default function AskAIPage() {
                       </div>
                     )}
                     
-                    <div className={`max-w-[85%] rounded-3xl px-6 py-4 glassmorphism transition-all duration-300 ${
+                    <div className={`max-w-[85%] rounded-3xl px-6 py-4 transition-all duration-300 ${
                       msg.role === 'user' 
                         ? 'bg-primary/90 text-primary-foreground rounded-br-none shadow-md' 
                         : 'bg-gray-900/90 border border-gray-800/80 backdrop-blur-xl rounded-bl-none'
@@ -197,7 +200,6 @@ export default function AskAIPage() {
                         <TypewriterText text={msg.content} isAnimated={isLatest} />
                       )}
 
-                      {/* SQL Inspector Button */}
                       {msg.role === 'assistant' && msg.metadata?.generatedSql && (
                         <Button
                           variant="ghost"
@@ -233,7 +235,7 @@ export default function AskAIPage() {
           )}
         </div>
 
-        {/* Sticky Input - Improved rounded corners */}
+        {/* Sticky Input */}
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-800 bg-gradient-to-t from-gray-950 via-gray-950 to-transparent z-30">
           <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto">
             <div className="relative w-full">
@@ -262,7 +264,7 @@ export default function AskAIPage() {
         </div>
       </div>
 
-      {/* Polished SQL Drawer */}
+      {/* SQL Drawer */}
       {inspectingData && (
         <div className="w-96 h-full bg-gray-950 border-l border-gray-800 flex flex-col z-50 animate-in slide-in-from-right-2 duration-300">
           <div className="h-16 border-b border-gray-800 flex items-center justify-between px-6 bg-gray-900/70 backdrop-blur">
@@ -282,7 +284,6 @@ export default function AskAIPage() {
           </div>
 
           <div className="flex-1 overflow-auto p-6 space-y-8 text-sm">
-            {/* SQL */}
             <div>
               <div className="uppercase text-xs tracking-widest text-gray-500 mb-3">Generated SQL</div>
               <div className="p-5 bg-black/60 border border-gray-800 rounded-2xl font-mono text-xs text-emerald-400 overflow-auto max-h-80">
@@ -290,7 +291,6 @@ export default function AskAIPage() {
               </div>
             </div>
 
-            {/* Results */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="uppercase text-xs tracking-widest text-gray-500">Result Rows</div>
