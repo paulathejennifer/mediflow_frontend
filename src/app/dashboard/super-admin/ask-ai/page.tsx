@@ -87,24 +87,24 @@ export default function AskAIPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950 rounded-3xl border border-gray-800 shadow-2xl mx-4 my-4">
       {/* Main Chat Interface */}
       <div className="flex-1 flex flex-col h-full min-w-0 relative">
 
-        {/* Conversation Area */}
-        <div className="flex-1 overflow-y-auto p-6 pt-16 pb-32 space-y-8">
+        {/* Conversation Area - Pushed upwards with less top padding */}
+        <div className="flex-1 overflow-y-auto p-6 pt-12 pb-32 space-y-8">
           {messages.length === 0 ? (
-            <div className="max-w-3xl mx-auto pt-8 space-y-12">
-              {/* Premium Hero */}
+            <div className="max-w-3xl mx-auto pt-6 space-y-10">
+              {/* Premium Hero - More compact */}
               <div className="relative text-center">
-                <div className="mx-auto relative inline-flex items-center justify-center mb-8">
-                  <div className="relative flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-950 border border-primary/30 shadow-2xl">
-                    <Brain className="h-14 w-14 text-primary animate-[spin_25s_linear_infinite]" />
+                <div className="mx-auto relative inline-flex items-center justify-center mb-6">
+                  <div className="relative flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-950 border border-primary/30 shadow-2xl">
+                    <Brain className="h-12 w-12 text-primary animate-[spin_25s_linear_infinite]" />
                   </div>
                 </div>
                
-                <h1 className="text-5xl font-semibold tracking-tighter text-white mb-3">Mediflow AI</h1>
-                <p className="text-md text-gray-400 max-w-md mx-auto">
+                <h1 className="text-4xl font-semibold tracking-tighter text-white mb-2">Mediflow AI</h1>
+                <p className="text-lg text-gray-400 max-w-md mx-auto">
                   Ask anything about your referrals, patients, and facility data
                 </p>
               </div>
