@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAskAI } from '@/features/analytics/hooks/useAskAI'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Send, Database, Terminal, Trash2, ShieldAlert, FileJson } from 'lucide-react'
+import { Sparkles, Send, Database, Terminal, Trash2, ShieldAlert, FileJson, Brain } from 'lucide-react'
 
 const SUGGESTED_PROMPTS = [
   "How many referrals are currently marked as emergency?",
@@ -13,8 +13,7 @@ const SUGGESTED_PROMPTS = [
 ]
 
 /**
- * Custom text presenter that strips raw markdown characters (like **)
- * and outputs smooth character streaming mimicking real-time typing.
+ * Custom typewriter text with clean markdown stripping
  */
 function TypewriterText({ text, isAnimated = true }: { text: string; isAnimated?: boolean }) {
   const cleanText = text.replace(/\*\*/g, '')
@@ -36,15 +35,38 @@ function TypewriterText({ text, isAnimated = true }: { text: string; isAnimated?
       } else {
         clearInterval(timer)
       }
-    }, 7)
+    }, 6)
 
     return () => clearInterval(timer)
   }, [cleanText, isAnimated])
 
   return (
-    <p className="text-xs leading-relaxed text-gray-200 whitespace-pre-wrap">
+    <p className="text-sm leading-relaxed text-gray-200 whitespace-pre-wrap">
       {displayedText}
     </p>
+  )
+}
+
+/**
+ * Animated typing dots for loading state
+ */
+function TypingDots() {
+  const [dots, setDots] = useState('')
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => (prev.length < 3 ? prev + '.' : ''))
+    }, 400)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="flex items-center gap-1 text-primary">
+      <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+      <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+      <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+      <span className="text-xs text-gray-400 ml-1">thinking{dots}</span>
+    </div>
   )
 }
 
@@ -67,61 +89,81 @@ export default function AskAIPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full">
-      {/* Injecting localized keyframe sweep for left-to-right radiant glow shifting */}
-      <style dangerouslySetInnerHTML={{__html: `
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950">
+      {/* Custom Keyframes */}
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes glowSweep {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-        .animate-glow-sweep {
-          background-size: 200% 200%;
-          animation: glowSweep 6s ease infinite;
+        @keyframes blobFloat1 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(25px, -30px) rotate(8deg); }
         }
+        @keyframes blobFloat2 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(-35px, 25px) rotate(-12deg); }
+        }
+        .animate-glow-sweep {
+          background-size: 300% 300%;
+          animation: glowSweep 8s ease infinite;
+        }
+        .animate-blob-1 { animation: blobFloat1 18s infinite ease-in-out; }
+        .animate-blob-2 { animation: blobFloat2 22s infinite ease-in-out; }
       `}} />
 
-      {/* Main Chat Interface Panel */}
+      {/* Floating Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob-1" />
+        <div className="absolute bottom-40 right-10 w-[28rem] h-[28rem] bg-purple-500/10 rounded-full blur-3xl animate-blob-2" />
+      </div>
+
+      {/* Main Chat Interface */}
       <div className="flex-1 flex flex-col h-full border-r border-gray-800 min-w-0 relative">
         
-        {/* Clear Logs floating trigger (since top header is removed) */}
+        {/* Clear button */}
         {messages.length > 0 && (
-          <div className="absolute top-4 right-6 z-20">
+          <div className="absolute top-6 right-6 z-30">
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={clearConversation} 
               className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 bg-gray-900/80 backdrop-blur border border-gray-800"
             >
-              <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear Logs
+              <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear
             </Button>
           </div>
         )}
 
-        {/* Conversation Stream Frame */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 pb-24">
+        {/* Conversation Area */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-8 pb-32">
           {messages.length === 0 ? (
-            <div className="max-w-2xl mx-auto pt-20 space-y-8">
-              
-              {/* Dark Hero Unit with 360-degree Rotating Glow Background */}
-              <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-xl p-10 text-center space-y-4 shadow-xl relative overflow-hidden">
-                <div className="relative inline-block">
-                  {/* Slow 360-degree rotating layout element */}
-                  <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full animate-[spin_10s_linear_infinite]" style={{ transformOrigin: 'center' }} />
-                  <Sparkles className="h-12 w-12 text-primary relative z-10 animate-pulse" />
+            <div className="max-w-3xl mx-auto pt-16 space-y-12">
+              {/* Premium ChatGPT-style Hero */}
+              <div className="relative text-center">
+                <div className="mx-auto relative inline-flex items-center justify-center mb-8">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-purple-500/20 to-transparent rounded-full blur-3xl" />
+                  <div className="relative flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-950 border border-primary/30 shadow-2xl">
+                    <Brain className="h-14 w-14 text-primary animate-[spin_25s_linear_infinite]" />
+                  </div>
                 </div>
-                <h2 className="text-xl font-bold tracking-tight text-gray-100 relative z-10">Ask Mediflow AI</h2>
+                
+                <h1 className="text-5xl font-semibold tracking-tighter text-white mb-3">Mediflow AI</h1>
+                <p className="text-xl text-gray-400 max-w-md mx-auto">
+                  Ask anything about your referrals, patients, and facility data
+                </p>
               </div>
 
-              {/* Dark Suggested Action Prompt Cards */}
-              <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Suggested Analytical Inquiries</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Suggested Prompts */}
+              <div className="space-y-4">
+                <p className="text-xs font-medium uppercase tracking-[2px] text-gray-500 text-center">Try asking...</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
                   {SUGGESTED_PROMPTS.map((prompt, i) => (
                     <button
                       key={i}
                       onClick={() => sendMessage(prompt)}
-                      className="text-left text-xs p-3.5 bg-gray-900/50 hover:bg-gray-800/80 border border-gray-800/80 rounded-xl transition-all hover:border-primary/40 text-gray-300 shadow-sm"
+                      className="group text-left p-5 bg-gray-900/70 hover:bg-gray-800/80 border border-gray-800 hover:border-primary/50 rounded-2xl transition-all duration-300 hover:shadow-xl text-sm text-gray-300 hover:text-white"
                     >
                       {prompt}
                     </button>
@@ -130,122 +172,140 @@ export default function AskAIPage() {
               </div>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto space-y-4">
+            <div className="max-w-4xl mx-auto space-y-6">
               {messages.map((msg, index) => {
-                const isLatest = index === messages.length - 1
+                const isLatest = index === messages.length - 1 && msg.role === 'assistant'
                 return (
                   <div
                     key={msg.id}
-                    className={`flex gap-4 p-4 rounded-xl border transition-all ${
-                      msg.role === 'user'
-                        ? 'bg-gray-900/20 border-gray-800/60 ml-12'
-                        : 'bg-gray-900/70 border-gray-800/90 mr-12'
-                    }`}
+                    className={`group flex gap-5 transition-all duration-300 ${msg.role === 'user' ? 'justify-end' : ''}`}
                   >
-                    <div className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 text-xs font-bold ${
+                    {msg.role === 'assistant' && (
+                      <div className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 flex items-center justify-center shrink-0 mt-1">
+                        <Brain className="h-4 w-4 text-primary" />
+                      </div>
+                    )}
+                    
+                    <div className={`max-w-[85%] rounded-3xl px-6 py-4 glassmorphism transition-all duration-300 ${
                       msg.role === 'user' 
-                        ? 'bg-gray-800 text-gray-300 border border-gray-700' 
-                        : 'bg-primary/10 text-primary border border-primary/20'
+                        ? 'bg-primary text-primary-foreground rounded-br-none' 
+                        : 'bg-gray-900/90 border border-gray-800/80 backdrop-blur-xl rounded-bl-none'
                     }`}>
-                      {msg.role === 'user' ? 'SA' : 'AI'}
-                    </div>
-                    <div className="flex-1 space-y-3 overflow-hidden">
                       {msg.role === 'user' ? (
-                        <p className="text-xs leading-relaxed text-gray-200 whitespace-pre-wrap">
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
                           {msg.content}
                         </p>
                       ) : (
                         <TypewriterText text={msg.content} isAnimated={isLatest} />
                       )}
-                      
-                      {/* Action Triggers for AI SQL Drawer */}
+
+                      {/* SQL Inspector Button */}
                       {msg.role === 'assistant' && msg.metadata?.generatedSql && (
-                        <div className="flex gap-2 pt-2 border-t border-gray-800/50">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-6 text-[10px] px-2 bg-gray-950 border-gray-800 text-gray-400 hover:bg-white hover:text-black transition-colors"
-                            onClick={() => setInspectingData({ sql: msg.metadata?.generatedSql, raw: msg.metadata?.rawData })}
-                          >
-                            <Terminal className="h-3 w-3 mr-1" /> View SQL Engine Details
-                          </Button>
-                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="mt-4 h-7 text-[10px] px-3 bg-gray-950/70 hover:bg-gray-800 border border-gray-700 text-gray-400 hover:text-white"
+                          onClick={() => setInspectingData({ 
+                            sql: msg.metadata?.generatedSql, 
+                            raw: msg.metadata?.rawData 
+                          })}
+                        >
+                          <Terminal className="h-3 w-3 mr-1.5" />
+                          Inspect Query
+                        </Button>
                       )}
                     </div>
                   </div>
                 )
               })}
+
               {isLoading && (
-                <div className="bg-gray-900/40 border border-gray-800 rounded-xl p-4 mr-12 flex gap-4 animate-pulse">
-                  <div className="h-7 w-7 rounded-md bg-gray-800 shrink-0" />
-                  <div className="space-y-2 flex-1">
-                    <div className="h-3 bg-gray-800 rounded w-1/3" />
-                    <div className="h-3 bg-gray-800 rounded w-3/4" />
+                <div className="flex gap-5">
+                  <div className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 flex items-center justify-center shrink-0 mt-1">
+                    <Brain className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="bg-gray-900/90 border border-gray-800/80 backdrop-blur-xl rounded-3xl px-6 py-4 rounded-bl-none">
+                    <TypingDots />
                   </div>
                 </div>
               )}
+
               <div ref={chatBottomRef} />
             </div>
           )}
         </div>
 
-        {/* Guaranteed Sticky Prompt Input Form Box Tray */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800 bg-gray-950/95 backdrop-blur z-30 shrink-0 shadow-xl">
-          <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto relative flex items-center">
-            {/* The outer container wrapper generates the sweeping primary glow ring frame */}
-            <div className="w-full relative rounded-xl p-[1px] bg-gradient-to-r from-primary/10 via-primary/50 to-primary/10 animate-glow-sweep focus-within:from-primary/30 focus-within:via-primary focus-within:to-primary/30 transition-all duration-300">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask anything (e.g., 'How many critical referrals were rejected this week?')...."
-                disabled={isLoading}
-                className="w-full h-11 bg-gray-950 rounded-xl pl-4 pr-12 text-xs focus:outline-none text-gray-100 placeholder:text-gray-500"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                disabled={isLoading || !input.trim()}
-                className="absolute right-1.5 top-1.5 h-8 w-8 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors z-10"
-              >
-                <Send className="h-3.5 w-3.5" />
-              </Button>
+        {/* Sticky Input */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-800 bg-gradient-to-t from-gray-950 via-gray-950 to-transparent z-30">
+          <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto">
+            <div className="relative w-full">
+              <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-purple-500/40 to-primary/30 rounded-3xl animate-glow-sweep" />
+              
+              <div className="relative bg-gray-950 border border-gray-700 rounded-3xl focus-within:border-primary/60 transition-all">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask Mediflow AI anything about your data..."
+                  disabled={isLoading}
+                  className="w-full h-14 bg-transparent pl-6 pr-16 text-sm placeholder:text-gray-500 focus:outline-none text-gray-100"
+                />
+                
+                <Button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg shadow-primary/30 hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </form>
         </div>
       </div>
 
-      {/* Database Metadata Inspection Drawer Context Panel */}
+      {/* Polished SQL Drawer */}
       {inspectingData && (
-        <div className="w-80 h-full bg-gray-900 border-l border-gray-800 flex flex-col animate-in slide-in-from-right duration-200 shrink-0 z-40">
-          <div className="h-16 px-4 border-b border-gray-800 flex items-center justify-between bg-gray-950/20">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-300">
-              <Database className="h-4 w-4 text-primary" />
-              <span>Query Execution Inspect Log</span>
+        <div className="w-96 h-full bg-gray-950 border-l border-gray-800 flex flex-col z-50 animate-in slide-in-from-right-2 duration-300">
+          <div className="h-16 border-b border-gray-800 flex items-center justify-between px-6 bg-gray-900/70 backdrop-blur">
+            <div className="flex items-center gap-3">
+              <Database className="h-5 w-5 text-primary" />
+              <div>
+                <div className="font-semibold text-sm">Query Inspection</div>
+                <div className="text-[10px] text-gray-500">Read-only execution log</div>
+              </div>
             </div>
-            <button onClick={() => setInspectingData(null)} className="text-xs text-gray-500 hover:text-white">✕</button>
+            <button 
+              onClick={() => setInspectingData(null)}
+              className="text-gray-400 hover:text-white text-xl leading-none"
+            >
+              ✕
+            </button>
           </div>
-          
-          <div className="flex-1 overflow-y-auto p-4 space-y-5">
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Generated Expression</span>
-              <div className="p-3 bg-gray-950 rounded-lg border border-gray-800 font-mono text-[11px] text-emerald-400 overflow-x-auto whitespace-pre">
+
+          <div className="flex-1 overflow-auto p-6 space-y-8 text-sm">
+            {/* SQL */}
+            <div>
+              <div className="uppercase text-xs tracking-widest text-gray-500 mb-3">Generated SQL</div>
+              <div className="p-5 bg-black/60 border border-gray-800 rounded-2xl font-mono text-xs text-emerald-400 overflow-auto max-h-80">
                 {inspectingData.sql}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block flex items-center gap-1">
-                <FileJson className="h-3 w-3" /> Database Rows ({inspectingData.raw?.length || 0})
-              </span>
-              <div className="p-3 bg-gray-950 rounded-lg border border-gray-800 font-mono text-[11px] text-blue-400 max-h-80 overflow-y-auto">
+            {/* Results */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="uppercase text-xs tracking-widest text-gray-500">Result Rows</div>
+                <div className="text-xs text-gray-400">({inspectingData.raw?.length || 0} rows)</div>
+              </div>
+              <div className="bg-black/60 border border-gray-800 rounded-2xl p-5 font-mono text-xs text-blue-300 overflow-auto max-h-[420px]">
                 <pre>{JSON.stringify(inspectingData.raw, null, 2)}</pre>
               </div>
             </div>
 
-            <div className="bg-gray-950 border border-gray-800 rounded-lg p-3 flex gap-2 text-[11px] text-gray-400">
-              <ShieldAlert className="h-4 w-4 shrink-0 text-primary" />
-              <p>Queries are executed using read-only database connections contextually limited by transactional bounds.</p>
+            <div className="bg-amber-950/50 border border-amber-900/50 rounded-2xl p-4 text-xs text-amber-400 flex gap-3">
+              <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" />
+              All queries run in a read-only sandbox with strict row limits.
             </div>
           </div>
         </div>
