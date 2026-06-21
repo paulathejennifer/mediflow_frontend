@@ -26,6 +26,7 @@ import {
 import { Building2, Users, Activity, Zap, Brain } from 'lucide-react'
 import Link from 'next/link'
 
+
 export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -41,10 +42,12 @@ export default function AnalyticsPage() {
   const [systemHealth, setSystemHealth] = useState<SystemHealthData | null>(null)
   const [apiRequests, setApiRequests] = useState<ApiRequestsData | null>(null)
 
+
   const fetchAnalyticsData = async () => {
     try {
       setIsLoading(true)
       setError(null)
+
 
       const [
         trendData,
@@ -72,6 +75,7 @@ export default function AnalyticsPage() {
         analyticsService.getDashboardKpis()
       ])
 
+
       setSystemActivityTrend(trendData)
       setMetrics({ ...(metricsData || {}), ...(kpiData || {}) })
       setStatusData(statusResult)
@@ -82,12 +86,14 @@ export default function AnalyticsPage() {
       setSystemHealth(systemHealthResult)
       setApiRequests(apiRequestsResult)
 
+
       const transformedTrend = (referralTrendResult?.labels || []).map((label: string, index: number) => ({
         month: label || 'Unknown',
         total: Number(referralTrendResult?.data?.[index]) || 0,
         completed: Math.floor((Number(referralTrendResult?.data?.[index]) || 0) * 0.75)
       }))
       setReferralTrendData(transformedTrend)
+
 
     } catch (err) {
       console.error(err)
@@ -97,9 +103,11 @@ export default function AnalyticsPage() {
     }
   }
 
+
   useEffect(() => {
     fetchAnalyticsData()
   }, [])
+
 
   // KPI Cards
   const totalFacilitiesCount = Number(metrics?.total_facilities || facilityPerformance?.length || 0)
@@ -107,12 +115,14 @@ export default function AnalyticsPage() {
   const healthScoreValue = Number(systemHealth?.healthScore || 100)
   const totalApiRequestsCount = Number(apiRequests?.totalRequests || 0)
 
+
   const formatApiRequests = (num: number): string => {
     const n = Math.max(0, Number(num) || 0)
     if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
     if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
     return n.toLocaleString()
   }
+
 
   const analyticsOverviewData: KPICardData[] = [
     {
@@ -141,9 +151,11 @@ export default function AnalyticsPage() {
     }
   ]
 
+
   if (isLoading) {
     return <SkeletonLoadingSection />
   }
+
 
   if (error) {
     return (
@@ -157,6 +169,7 @@ export default function AnalyticsPage() {
       </div>
     )
   }
+
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -194,18 +207,20 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
+
       {/* Floating Ask AI Button - Bottom Right */}
       <Link
         href="/dashboard/super-admin/ask-ai"
         className="fixed bottom-8 right-8 z-50 group"
       >
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary via-purple-600 to-indigo-600 shadow-2xl shadow-primary/50 hover:scale-110 active:scale-95 transition-all duration-300">
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary shadow-2xl shadow-primary/50 hover:scale-110 active:scale-95 transition-all duration-300">
           <Brain className="h-8 w-8 text-white animate-[spin_25s_linear_infinite]" />
           
           {/* Pulse rings */}
           <div className="absolute inset-0 rounded-full border-4 border-primary/30 animate-ping" />
           <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-ping" style={{ animationDelay: '400ms' }} />
         </div>
+
 
         {/* Tooltip */}
         <div className="absolute bottom-20 right-1/2 translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-xl">
