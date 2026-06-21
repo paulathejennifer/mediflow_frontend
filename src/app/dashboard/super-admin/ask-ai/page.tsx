@@ -6,9 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Send, Database, Terminal, Trash2, ShieldAlert, FileJson, Brain, X } from 'lucide-react'
 
 const SUGGESTED_PROMPTS = [
-  "How many referrals are currently marked as emergency?",
   "Which facility has received the most referrals this month?",
-  "Show me the duplicate patient pairs that are still flagged.",
   "List patients born after 2000 who have completed status referrals."
 ]
 
