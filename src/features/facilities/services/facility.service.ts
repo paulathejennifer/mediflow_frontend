@@ -13,7 +13,7 @@ export interface Facility {
   performance: number
   joined: string
   status: 'active' | 'inactive'
-  isActive: boolean
+  isActive: boolean          // camelCase for frontend
   referrals?: number
   trend?: {
     is_positive: boolean
@@ -45,22 +45,18 @@ interface ApiFacilitySummary {
   email?: string
   created_at?: string
   performance_score?: number
-  is_active?: boolean
+  is_active?: boolean          // snake_case from backend
   performance_trend?: {
     is_positive: boolean
     percentage_change: number
   }
 }
 
-interface ApiFacilityResponse extends ApiFacilitySummary {
-  address?: string
-  phone?: string
-  email?: string
-  is_active?: boolean
-}
+interface ApiFacilityResponse extends ApiFacilitySummary {}
 
 function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
   const levelNum = parseInt(String(f?.level || '').replace(/\D/g, ''), 10) || 1
+
   return {
     id: String(f.id),
     name: f.name,
@@ -71,7 +67,7 @@ function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
     level: levelNum,
     county: f.county,
     address: f.address || '',
-    performance: f.performance_score ?? 0,
+    performance: f.performance_score ?? 65,
     joined: f.created_at || new Date().toISOString(),
     status: f.is_active === false ? 'inactive' : 'active',
     isActive: f.is_active !== false,
@@ -116,7 +112,6 @@ export const facilityService = {
     return mapResponseToFacility(data)
   },
 
-
   updateFacility: async (id: string, data: Partial<CreateFacilityRequest>): Promise<Facility> => {
     const response = await apiClient.put<ApiFacilityResponse>(`/facilities/${id}`, data)
     return mapResponseToFacility(response.data)
@@ -128,7 +123,6 @@ export const facilityService = {
   },
 
   createFacility: async (data: CreateFacilityRequest): Promise<Facility> => {
-    // Clean the level (strip "level_" prefix) to ensure backend validation passes
     const payload = {
       name: data.name,
       facility_code: data.facility_code || undefined,
@@ -138,8 +132,9 @@ export const facilityService = {
       address: data.address,
       phone: data.phone,
       email: data.email,
-      is_active: data.is_active ?? true,
+      is_active: data.is_active ?? true,   // Ensure new facilities are active
     }
+
     const response = await apiClient.post<ApiFacilityResponse>('/facilities/', payload)
     return mapResponseToFacility(response.data)
   },

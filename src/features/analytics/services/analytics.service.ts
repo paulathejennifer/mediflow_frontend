@@ -233,6 +233,17 @@ export const analyticsService = {
       value: data[index] || 0
     }))
   },
+    // Get referrals grouped by specialty (AI-extracted)
+  getReferralsBySpecialty: async (): Promise<ReasonData[]> => {
+    const response = await apiClient.get('/analytics/referrals/by-specialty')
+    const labels = response.data.labels || []
+    const values = response.data.data || []
+    
+    return labels.map((label: string, index: number) => ({
+      name: label,
+      value: values[index] || 0
+    }))
+  },
 
   // Get referral trend (daily over specified period)
   getReferralTrend: async (days: number = 30): Promise<{ labels: string[]; data: number[] }> => {

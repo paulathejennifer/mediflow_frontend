@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
-import { Eye, EyeOff, Check, ChevronDown } from 'lucide-react'
+import { Eye, EyeOff, ChevronDown } from 'lucide-react'
 import { userService } from '@/features/users/services/user.service'
 
 // FilterDropdown component
@@ -86,8 +86,10 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
     first_name: '',
     last_name: '',
     email: '',
-    gender: '', // Add gender to formData state
+    phone: '',
+    gender: '',
     password: '',
+    confirm_password: '',
     role: 'facility_admin',
     facility_id: facilityData?.id || '',
     is_active: true
@@ -97,6 +99,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
   const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   // Reset form when modal opens
   useEffect(() => {
@@ -105,8 +108,10 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
         first_name: '',
         last_name: '',
         email: '',
+        phone: '',
         gender: '',
         password: '',
+        confirm_password: '',
         role: 'facility_admin',
         facility_id: facilityData?.id || '',
         is_active: true
@@ -114,6 +119,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
       setErrors({})
       setShowSuccess(false)
       setShowPassword(false)
+      setShowConfirmPassword(false)
     }
   }, [isOpen, facility])
 
@@ -142,6 +148,7 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
     if (!formData.last_name.trim()) newErrors.last_name = 'Last name is required'
     if (!formData.email.trim()) newErrors.email = 'Email is required'
     if (!formData.password.trim()) newErrors.password = 'Password is required'
+    if (!formData.confirm_password.trim()) newErrors.confirm_password = 'Confirm password is required'
 
     // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -158,6 +165,11 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
       else if (!requirements.hasSpecial) newErrors.password = 'Password must contain special character'
     }
 
+    // Confirm password validation
+    if (formData.password && formData.confirm_password && formData.password !== formData.confirm_password) {
+      newErrors.confirm_password = 'Passwords do not match'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -166,7 +178,6 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
     e.preventDefault()
 
     if (!validateForm()) {
-      // Scroll to first error
       const firstErrorField = Object.keys(errors)[0]
       if (firstErrorField) {
         const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)
@@ -178,12 +189,11 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
     }
 
     await execute(async () => {
-      // Call the backend API to create the admin
       const newAdmin = await userService.createUser({
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
-        phone: '',
+        phone: formData.phone,
         gender: formData.gender,
         password: formData.password,
         role: formData.role as 'facility_admin' | 'clinician',
@@ -199,8 +209,10 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
         first_name: '',
         last_name: '',
         email: '',
+        phone: '',
+        gender: '',
         password: '',
-        gender: '', // Reset gender
+        confirm_password: '',
         role: 'facility_admin',
         facility_id: facilityData?.id || '',
         is_active: true
@@ -241,8 +253,9 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Enter first name"
                   disabled={isSubmitting}
+                  data-field="first_name"
                 />
-                {errors.first_name && <p className="mt-1 text-sm text-red-500" data-field="first_name">{errors.first_name}</p>}
+                {errors.first_name && <p className="mt-1 text-sm text-red-500">{errors.first_name}</p>}
               </div>
 
               {/* Last Name */}
@@ -260,8 +273,9 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Enter last name"
                   disabled={isSubmitting}
+                  data-field="last_name"
                 />
-                {errors.last_name && <p className="mt-1 text-sm text-red-500" data-field="last_name">{errors.last_name}</p>}
+                {errors.last_name && <p className="mt-1 text-sm text-red-500">{errors.last_name}</p>}
               </div>
 
               {/* Email */}
@@ -279,8 +293,25 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Enter email address"
                   disabled={isSubmitting}
+                  data-field="email"
                 />
-                {errors.email && <p className="mt-1 text-sm text-red-500" data-field="email">{errors.email}</p>}
+                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="e.g., +254 712 345678"
+                  disabled={isSubmitting}
+                  data-field="phone"
+                />
               </div>
 
               {/* Gender */}
@@ -324,14 +355,75 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 focus:outline-none"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
                 {errors.password && <p className="mt-1 text-sm text-red-500" data-field="password">{errors.password}</p>}
+
+                {/* Real-time password requirements */}
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center text-xs">
+                    <span className={`mr-2 ${getPasswordRequirements(formData.password).minLength ? 'text-primary' : 'text-gray-600'}`}>
+                      {getPasswordRequirements(formData.password).minLength ? '✓' : '○'}
+                    </span>
+                    <span className={`${getPasswordRequirements(formData.password).minLength ? 'text-primary' : 'text-gray-400'}`}>At least 8 characters</span>
+                  </div>
+                  <div className="flex items-center text-xs">
+                    <span className={`mr-2 ${getPasswordRequirements(formData.password).hasUpper ? 'text-primary' : 'text-gray-600'}`}>
+                      {getPasswordRequirements(formData.password).hasUpper ? '✓' : '○'}
+                    </span>
+                    <span className={`${getPasswordRequirements(formData.password).hasUpper ? 'text-primary' : 'text-gray-400'}`}>One uppercase letter</span>
+                  </div>
+                  <div className="flex items-center text-xs">
+                    <span className={`mr-2 ${getPasswordRequirements(formData.password).hasLower ? 'text-primary' : 'text-gray-600'}`}>
+                      {getPasswordRequirements(formData.password).hasLower ? '✓' : '○'}
+                    </span>
+                    <span className={`${getPasswordRequirements(formData.password).hasLower ? 'text-primary' : 'text-gray-400'}`}>One lowercase letter</span>
+                  </div>
+                  <div className="flex items-center text-xs">
+                    <span className={`mr-2 ${getPasswordRequirements(formData.password).hasNumber ? 'text-primary' : 'text-gray-600'}`}>
+                      {getPasswordRequirements(formData.password).hasNumber ? '✓' : '○'}
+                    </span>
+                    <span className={`${getPasswordRequirements(formData.password).hasNumber ? 'text-primary' : 'text-gray-400'}`}>One number</span>
+                  </div>
+                  <div className="flex items-center text-xs">
+                    <span className={`mr-2 ${getPasswordRequirements(formData.password).hasSpecial ? 'text-primary' : 'text-gray-600'}`}>
+                      {getPasswordRequirements(formData.password).hasSpecial ? '✓' : '○'}
+                    </span>
+                    <span className={`${getPasswordRequirements(formData.password).hasSpecial ? 'text-primary' : 'text-gray-400'}`}>One special character</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Confirm Password <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={formData.confirm_password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirm_password: e.target.value }))}
+                    className="w-full px-2 py-1.5 pr-10 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Confirm your password"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    style={{
+                      WebkitTextSecurity: 'none',
+                      MozTextSecurity: 'none'
+                    } as React.CSSProperties}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 focus:outline-none"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirm_password && <p className="mt-1 text-sm text-red-500" data-field="confirm_password">{errors.confirm_password}</p>}
               </div>
             </div>
 
@@ -349,7 +441,6 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                 ]}
                 placeholder="Select Role"
               />
-              {errors.role && <p className="mt-1 text-sm text-red-500" data-field="role">{errors.role}</p>}
             </div>
 
             {/* Facility Info */}
@@ -393,25 +484,25 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                 </label>
               </div>
             </div>
-          
-          <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="px-4 py-2 border-none bg-transparent text-gray-300 hover:text-foreground hover:bg-transparent"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="px-4 py-2 bg-primary/90 text-primary-foreground hover:bg-primary/80"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Creating...' : 'Create Admin'}
-            </Button>
-          </div>
-        </form>
+
+            <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="px-4 py-2 border-none bg-transparent text-gray-300 hover:text-foreground hover:bg-transparent"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="px-4 py-2 bg-primary/90 text-primary-foreground hover:bg-primary/80"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Create Admin'}
+              </Button>
+            </div>
+          </form>
         </div>
       ) : (
         <div className="text-center py-8">
