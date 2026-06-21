@@ -87,7 +87,7 @@ export default function AskAIPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full bg-gray-950 rounded-3xl border border-gray-800 shadow-2xl mx-3 my-3">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative w-full">
       {/* Main Chat Interface */}
       <div className="flex-1 flex flex-col h-full min-w-0 relative">
 
@@ -104,7 +104,7 @@ export default function AskAIPage() {
                 </div>
                
                 <h1 className="text-5xl font-semibold tracking-tighter text-white mb-3">Mediflow AI</h1>
-                <p className="text-lg text-gray-400 max-w-md mx-auto">
+                <p className="text-md text-gray-400 max-w-md mx-auto">
                   Ask anything about your referrals, patients, and facility data
                 </p>
               </div>
