@@ -35,7 +35,7 @@ export interface UpdateUserRequest {
 
 export const userService = {
   createUser: async (data: CreateUserRequest): Promise<User> => {
-    const response = await apiClient.post('/users/', data)
+    const response = await apiClient.post('/users', data)
     return response.data
   },
 
