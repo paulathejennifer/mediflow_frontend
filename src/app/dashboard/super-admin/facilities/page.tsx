@@ -117,49 +117,80 @@ export default function FacilitiesPage() {
     }
   }
 
-  const activeFacilities = facilitiesData.filter(f => f.status === 'active').length
-  const totalFacilities = kpis?.total_facilities ?? facilitiesData.length
-  const avgPerformance = facilitiesData.length > 0
-    ? Math.round(facilitiesData.reduce((sum, f) => sum + (f.performance ?? 0), 0) / facilitiesData.length)
-    : 0
+  const now = new Date()
+const currentMonth = now.getMonth()
+const currentYear = now.getFullYear()
+const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
+const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear
 
-  const newThisMonth = facilitiesData.filter(f => {
-    const joined = new Date(f.joined)
-    const now = new Date()
-    return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear()
-  }).length
+const newThisMonth = facilitiesData.filter(f => {
+  const d = new Date(f.joined)
+  return d.getMonth() === currentMonth && d.getFullYear() === currentYear
+}).length
 
-  const facilitiesOverviewData: KPICardData[] = [
-    {
-      title: 'Total Facilities',
-      value: totalFacilities,
-      trend: { value: '+0%', isPositive: true },
-      icon: <Building className="h-5 w-5" />
+const newLastMonth = facilitiesData.filter(f => {
+  const d = new Date(f.joined)
+  return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear
+}).length
+
+const newThisMonthTrend = newLastMonth > 0
+  ? Math.round(((newThisMonth - newLastMonth) / newLastMonth) * 100)
+  : newThisMonth > 0 ? 100 : 0
+
+const activeFacilities = facilitiesData.filter(f => f.status === 'active').length
+const inactiveFacilities = facilitiesData.filter(f => f.status === 'inactive').length
+const totalFacilities = kpis?.total_facilities ?? facilitiesData.length
+
+const avgPerformance = facilitiesData.length > 0
+  ? Math.round(facilitiesData.reduce((sum, f) => sum + (f.performance ?? 0), 0) / facilitiesData.length)
+  : 0
+
+const facilitiesOverviewData: KPICardData[] = [
+  {
+    title: 'Total Facilities',
+    value: totalFacilities,
+    trend: {
+      value: `${activeFacilities} active, ${inactiveFacilities} inactive`,
+      isPositive: activeFacilities >= inactiveFacilities
     },
-    {
-      title: 'Active Facilities',
-      value: activeFacilities,
-      trend: {
-        value: totalFacilities > 0
-          ? `${Math.round((activeFacilities / totalFacilities) * 100)}% active`
-          : '0% active',
-        isPositive: true
-      },
-      icon: <Activity className="h-5 w-5" />
+    icon: <Building className="h-5 w-5" />
+  },
+  {
+    title: 'Active Facilities',
+    value: activeFacilities,
+    trend: {
+      value: totalFacilities > 0
+        ? `${Math.round((activeFacilities / totalFacilities) * 100)}% of total`
+        : '0% of total',
+      isPositive: activeFacilities > inactiveFacilities
     },
-    {
-      title: 'New This Month',
-      value: newThisMonth,
-      trend: { value: 'this month', isPositive: true },
-      icon: <Plus className="h-5 w-5" />
+    icon: <Activity className="h-5 w-5" />
+  },
+  {
+    title: 'New This Month',
+    value: newThisMonth,
+    trend: {
+      value: newLastMonth > 0
+        ? `${newThisMonthTrend >= 0 ? '+' : ''}${newThisMonthTrend}% vs last month`
+        : newThisMonth > 0 ? 'first this period' : 'none last month',
+      isPositive: newThisMonthTrend >= 0
     },
-    {
-      title: 'Avg Performance',
-      value: `${avgPerformance}%`,
-      trend: { value: 'based on referrals', isPositive: avgPerformance >= 50 },
-      icon: <TrendingUp className="h-5 w-5" />
-    }
-  ]
+    icon: <Plus className="h-5 w-5" />
+  },
+  {
+    title: 'Avg Performance',
+    value: `${avgPerformance}%`,
+    trend: {
+      value: avgPerformance >= 70
+        ? 'Good — above 70%'
+        : avgPerformance >= 40
+        ? 'Fair — above 40%'
+        : 'Low — needs attention',
+      isPositive: avgPerformance >= 50
+    },
+    icon: <TrendingUp className="h-5 w-5" />
+  }
+]
 
   if (!isMounted || isLoading) {
     return (
