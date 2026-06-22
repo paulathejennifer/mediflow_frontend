@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'
@@ -32,19 +32,9 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
         setIsOpen(false)
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside)
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  const handleToggle = () => {
-    if (!disabled) {
-      setIsOpen(!isOpen)
-    }
-  }
 
   const selectedOption = options.find(option => option.value === value)
 
@@ -54,7 +44,7 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
         variant="outline"
         size="sm"
         type="button"
-        onClick={handleToggle}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className="w-full h-8 px-3 text-xs bg-gray-800/50 border-gray-700 text-muted-foreground hover:bg-gray-700 hover:text-foreground focus:border-primary focus:text-foreground"
         {...(dataField && { 'data-field': dataField })}
@@ -109,7 +99,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     chronic_conditions: '',
     is_active: true
   })
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
@@ -117,6 +107,8 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
   // Duplicate check state
   const [duplicateWarning, setDuplicateWarning] = useState<{ isDuplicate: boolean; matches: any[] } | null>(null)
   const [bypassDuplicate, setBypassDuplicate] = useState(false)
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false)
+  const duplicateCheckTimer = useRef<NodeJS.Timeout | null>(null)
 
   // Reset form when modal opens
   useEffect(() => {
@@ -142,8 +134,62 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
       setShowSuccess(false)
       setDuplicateWarning(null)
       setBypassDuplicate(false)
+      setIsCheckingDuplicate(false)
     }
   }, [isOpen])
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (duplicateCheckTimer.current) {
+        clearTimeout(duplicateCheckTimer.current)
+      }
+    }
+  }, [])
+
+  // Real-time debounced duplicate check
+  const triggerDuplicateCheck = useCallback((data: typeof formData) => {
+    // Need at least first + last name to bother checking
+    if (!data.first_name.trim() || !data.last_name.trim()) {
+      setDuplicateWarning(null)
+      setIsCheckingDuplicate(false)
+      return
+    }
+
+    // Clear previous pending check
+    if (duplicateCheckTimer.current) {
+      clearTimeout(duplicateCheckTimer.current)
+    }
+
+    // Show scanning indicator immediately
+    setIsCheckingDuplicate(true)
+
+    // Debounce 800ms after user stops typing
+    duplicateCheckTimer.current = setTimeout(async () => {
+      try {
+        const results = await patientService.preCheckDuplicate({
+          first_name: data.first_name,
+          last_name: data.last_name,
+          date_of_birth: data.date_of_birth || undefined,
+          phone: data.phone || undefined,
+          email: data.email || undefined,
+        })
+
+        if (results.length > 0) {
+          setDuplicateWarning({ isDuplicate: true, matches: results })
+          // Reset bypass if new matches are found after a field change
+          setBypassDuplicate(false)
+        } else {
+          setDuplicateWarning(null)
+        }
+      } catch {
+        // Silently fail — don't block the form for a check error
+        setDuplicateWarning(null)
+      } finally {
+        setIsCheckingDuplicate(false)
+      }
+    }, 800)
+  }, [])
 
   const clearFieldError = (field: string) => {
     if (errors[field]) {
@@ -154,41 +200,30 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    // Required fields validation
     if (!formData.first_name.trim()) newErrors.first_name = 'First name is required'
     if (!formData.last_name.trim()) newErrors.last_name = 'Last name is required'
     if (!formData.phone.trim()) newErrors.phone = 'Phone is required'
     if (!formData.date_of_birth.trim()) newErrors.date_of_birth = 'Date of birth is required'
     if (!formData.gender.trim()) newErrors.gender = 'Gender is required'
 
-    // Phone validation
     if (formData.phone && !/^\+?[\d\s\-\(\)]+$/.test(formData.phone)) {
       newErrors.phone = 'Invalid phone number format'
     }
-
-    // Emergency contact validation (if provided)
     if (formData.emergency_contact_phone && !/^\+?[\d\s\-\(\)]+$/.test(formData.emergency_contact_phone)) {
       newErrors.emergency_contact_phone = 'Invalid emergency phone format'
     }
-
-    // Address validation (if provided)
     if (formData.address && formData.address.length > 500) {
       newErrors.address = 'Address must be less than 500 characters'
     }
-
-    // Medical field validation (if provided)
     if (formData.medical_history && formData.medical_history.length > 2000) {
       newErrors.medical_history = 'Medical history must be less than 2000 characters'
     }
-
     if (formData.allergies && formData.allergies.length > 500) {
       newErrors.allergies = 'Allergies must be less than 500 characters'
     }
-
     if (formData.medications && formData.medications.length > 1000) {
       newErrors.medications = 'Medications must be less than 1000 characters'
     }
-
     if (formData.chronic_conditions && formData.chronic_conditions.length > 1000) {
       newErrors.chronic_conditions = 'Chronic conditions must be less than 1000 characters'
     }
@@ -201,7 +236,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     e.preventDefault()
 
     if (!validateForm()) {
-      console.log('Frontend Validation Failed:', errors)
       const firstErrorField = Object.keys(errors)[0]
       if (firstErrorField) {
         const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)
@@ -212,26 +246,16 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
       return
     }
 
-// Duplicate Check Step
-    if (!bypassDuplicate) {
-      try {
-        const check = await patientService.checkDuplicate({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          date_of_birth: formData.date_of_birth,
-          email: formData.email
-        })
-        if (check.duplicate_detected) {
-          setDuplicateWarning({
-            isDuplicate: check.duplicate_detected,
-            matches: check.matches.map(m => m.patient) // Maps matches array to raw patients for your warning card list
-          })
-          toast.warning('Potential duplicate records detected.')
-          return
-        }
-      } catch (err) {
-        console.error('Duplicate verification skipped due to error', err)
-      }
+    // Block submit if duplicate warning is showing and not bypassed
+    if (duplicateWarning?.isDuplicate && !bypassDuplicate) {
+      toast.warning('Please review the potential duplicate records above before saving.')
+      return
+    }
+
+    // Also block if still scanning
+    if (isCheckingDuplicate) {
+      toast.info('Duplicate scan in progress, please wait a moment.')
+      return
     }
 
     try {
@@ -262,19 +286,15 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     }
   }
 
-  const handleClose = () => {
-    onClose()
-  }
-
   if (!isOpen) return null
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       title={showSuccess ? "Patient Created" : "Create New Patient"}
       size="lg"
-      footer={showSuccess ? null : null}
+      footer={null}
     >
       {!showSuccess ? (
         <div className="space-y-6">
@@ -282,9 +302,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
           <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 border border-primary/20 rounded-xl p-4 flex items-start gap-3">
             <Sparkles className="h-5 w-5 text-primary mt-0.5 animate-pulse flex-shrink-0" />
             <div className="space-y-1">
-              <h4 className="text-sm font-medium text-white flex items-center gap-1.5">
-                AskMediFlow Auto-Fill Assistant
-              </h4>
+              <h4 className="text-sm font-medium text-white">AskMediFlow Auto-Fill Assistant</h4>
               <p className="text-xs text-muted-foreground">
                 Have unstructured voice logs or referral PDFs? Let AskMediFlow populate this form automatically.
               </p>
@@ -300,21 +318,38 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
             </div>
           </div>
 
-          {/* Duplicate Match Warning Prompt */}
-          {duplicateWarning?.isDuplicate && (
+          {/* Real-time scanning indicator */}
+          {isCheckingDuplicate && !duplicateWarning && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground px-1 py-2">
+              <div className="animate-spin h-3 w-3 border border-primary border-t-transparent rounded-full flex-shrink-0" />
+              Scanning for duplicate records...
+            </div>
+          )}
+
+          {/* Duplicate Match Warning */}
+          {duplicateWarning?.isDuplicate && !bypassDuplicate && (
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 space-y-3 animate-in fade-in slide-in-from-top-1">
               <div className="flex items-center gap-2 text-amber-400">
-                <AlertTriangle className="h-5 w-5" />
+                <AlertTriangle className="h-5 w-5 flex-shrink-0" />
                 <h4 className="text-sm font-semibold">Possible Existing Patient Found</h4>
+                {isCheckingDuplicate && (
+                  <div className="animate-spin h-3 w-3 border border-amber-400 border-t-transparent rounded-full ml-auto flex-shrink-0" />
+                )}
               </div>
               <p className="text-xs text-gray-300">
-                The database flagged existing records matching this name and DOB profile:
+                The system found existing records that may match this patient. Please review before saving:
               </p>
-              <div className="bg-gray-950/40 rounded-lg p-2.5 space-y-1.5 border border-gray-800">
-                {duplicateWarning.matches.map((p: any, idx: number) => (
-                  <div key={idx} className="text-xs text-muted-foreground flex justify-between">
-                    <span>{p.first_name} {p.last_name} ({p.gender})</span>
-                    <span className="text-gray-500">DOB: {p.date_of_birth} • Phone: {p.phone}</span>
+              <div className="bg-gray-950/40 rounded-lg p-2.5 space-y-2 border border-gray-800">
+                {duplicateWarning.matches.map((m: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-white">{m.existing_patient_name}</span>
+                    <span className={`font-mono font-semibold px-2 py-0.5 rounded-full text-xs ${
+                      m.combined_score >= 0.90
+                        ? 'bg-red-500/20 text-red-400'
+                        : 'bg-amber-500/20 text-amber-400'
+                    }`}>
+                      {Math.round(m.combined_score * 100)}% match
+                    </span>
                   </div>
                 ))}
               </div>
@@ -326,7 +361,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                   onClick={() => {
                     setBypassDuplicate(true)
                     setDuplicateWarning(null)
-                    toast.success("Overridden duplicate checks. Ready to save.")
+                    toast.success("Duplicate check bypassed. Ready to save.")
                   }}
                 >
                   Ignore & Save Anyway
@@ -340,6 +375,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">Personal Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 {/* First Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -349,8 +385,10 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                     type="text"
                     value={formData.first_name}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, first_name: e.target.value }))
+                      const updated = { ...formData, first_name: e.target.value }
+                      setFormData(updated)
                       clearFieldError('first_name')
+                      triggerDuplicateCheck(updated)
                     }}
                     className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="e.g., John"
@@ -369,8 +407,10 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                     type="text"
                     value={formData.last_name}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, last_name: e.target.value }))
+                      const updated = { ...formData, last_name: e.target.value }
+                      setFormData(updated)
                       clearFieldError('last_name')
+                      triggerDuplicateCheck(updated)
                     }}
                     className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="e.g., Doe"
@@ -382,15 +422,15 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Email
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, email: e.target.value }))
+                      const updated = { ...formData, email: e.target.value }
+                      setFormData(updated)
                       clearFieldError('email')
+                      triggerDuplicateCheck(updated)
                     }}
                     className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="e.g., john@example.com"
@@ -409,8 +449,10 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, phone: e.target.value }))
+                      const updated = { ...formData, phone: e.target.value }
+                      setFormData(updated)
                       clearFieldError('phone')
+                      triggerDuplicateCheck(updated)
                     }}
                     className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="e.g., +1234567890"
@@ -429,8 +471,10 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                     type="date"
                     value={formData.date_of_birth}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, date_of_birth: e.target.value }))
+                      const updated = { ...formData, date_of_birth: e.target.value }
+                      setFormData(updated)
                       clearFieldError('date_of_birth')
+                      triggerDuplicateCheck(updated)
                     }}
                     className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer [&::-webkit-calendar-picker-indicator]:text-white [&::-webkit-calendar-picker-indicator]:hover:text-primary [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                     disabled={isSubmitting}
@@ -459,7 +503,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                     ]}
                     placeholder="Select Gender"
                     disabled={isSubmitting}
-                    data-field="gender"
+                    dataField="gender"
                   />
                   {errors.gender && <p className="mt-1 text-sm text-red-500">{errors.gender}</p>}
                 </div>
@@ -467,9 +511,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
 
               {/* Address */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Address
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Address</label>
                 <textarea
                   value={formData.address}
                   onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
@@ -484,13 +526,11 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
             {/* Medical Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">Medical Information</h3>
-              
+
               {/* Emergency Contact */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Emergency Contact Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Emergency Contact Name</label>
                   <input
                     type="text"
                     value={formData.emergency_contact_name}
@@ -500,11 +540,8 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                     disabled={isSubmitting}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Emergency Contact Phone
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Emergency Contact Phone</label>
                   <input
                     type="tel"
                     value={formData.emergency_contact_phone}
@@ -519,9 +556,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
 
               {/* Medical History */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Medical History
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Medical History</label>
                 <textarea
                   value={formData.medical_history}
                   onChange={(e) => setFormData(prev => ({ ...prev, medical_history: e.target.value }))}
@@ -535,9 +570,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
 
               {/* Allergies */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Allergies
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Allergies</label>
                 <textarea
                   value={formData.allergies}
                   onChange={(e) => setFormData(prev => ({ ...prev, allergies: e.target.value }))}
@@ -551,9 +584,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
 
               {/* Medications */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Medications
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Medications</label>
                 <textarea
                   value={formData.medications}
                   onChange={(e) => setFormData(prev => ({ ...prev, medications: e.target.value }))}
@@ -567,9 +598,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
 
               {/* Chronic Conditions */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Chronic Conditions
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Chronic Conditions</label>
                 <textarea
                   value={formData.chronic_conditions}
                   onChange={(e) => setFormData(prev => ({ ...prev, chronic_conditions: e.target.value }))}
@@ -585,7 +614,8 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
             <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
               <Button
                 variant="outline"
-                onClick={handleClose}
+                onClick={onClose}
+                type="button"
                 className="px-4 py-2 border-none bg-transparent text-gray-300 hover:text-foreground hover:bg-transparent"
                 disabled={isSubmitting}
               >
@@ -594,9 +624,13 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
               <Button
                 type="submit"
                 className="px-4 py-2 bg-primary/90 text-primary-foreground hover:bg-primary/80"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isCheckingDuplicate}
               >
-                {isSubmitting ? 'Creating...' : 'Create Patient'}
+                {isSubmitting
+                  ? 'Creating...'
+                  : isCheckingDuplicate
+                  ? 'Scanning...'
+                  : 'Create Patient'}
               </Button>
             </div>
           </form>
@@ -611,7 +645,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
             {formData.first_name} {formData.last_name} has been added to the system.
           </p>
           <Button
-            onClick={handleClose}
+            onClick={onClose}
             className="px-6 py-2 bg-primary/80 text-primary-foreground hover:bg-primary/70"
           >
             Done

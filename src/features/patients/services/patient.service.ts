@@ -113,5 +113,21 @@ export const patientService = {
     const response = await apiClient.get('/patients/check-duplicates', { params })
     return response.data
   },
+  preCheckDuplicate: async (params: {
+  first_name?: string
+  last_name?: string
+  date_of_birth?: string
+  phone?: string
+  email?: string
+}): Promise<Array<{
+  existing_patient_id: number
+  existing_patient_name: string
+  combined_score: number
+  fuzzy_ratio: number
+  tfidf_similarity: number
+}>> => {
+  const response = await apiClient.post('/duplicates/pre-check', params)
+  return response.data
+},
 
 }
