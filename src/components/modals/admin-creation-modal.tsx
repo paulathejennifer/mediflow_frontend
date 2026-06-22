@@ -7,7 +7,6 @@ import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 import { Eye, EyeOff, ChevronDown } from 'lucide-react'
 import { userService } from '@/features/users/services/user.service'
 
-// FilterDropdown component
 function FilterDropdown({ value, onChange, options, placeholder, disabled = false }: {
   value: string
   onChange: (value: string) => void
@@ -24,7 +23,6 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
         setIsOpen(false)
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
@@ -37,7 +35,7 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between`}
+        className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between"
       >
         <span className={selectedOption ? 'text-white' : 'text-gray-400'}>
           {selectedOption ? selectedOption.label : placeholder}
@@ -81,7 +79,6 @@ interface AdminCreationModalProps {
 }
 
 export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: AdminCreationModalProps) {
-  const facilityData = facility
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -91,17 +88,18 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
     password: '',
     confirm_password: '',
     role: 'facility_admin',
-    facility_id: facilityData?.id || '',
     is_active: true
   })
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { isLoading: isSubmitting, execute } = useAsyncOperation()
   const [showSuccess, setShowSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  // Reset form when modal opens
+  // Derive facility_id directly from prop — never store it in form state
+  const facilityId = facility?.id ? Number(facility.id) : null
+
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -113,7 +111,6 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
         password: '',
         confirm_password: '',
         role: 'facility_admin',
-        facility_id: facilityData?.id || '',
         is_active: true
       })
       setErrors({})
@@ -123,16 +120,13 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
     }
   }, [isOpen, facility])
 
-  // Password validation function
-  const getPasswordRequirements = (password: string) => {
-    return {
-      minLength: password.length >= 8,
-      hasUpper: /[A-Z]/.test(password),
-      hasLower: /[a-z]/.test(password),
-      hasNumber: /\d/.test(password),
-      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-    }
-  }
+  const getPasswordRequirements = (password: string) => ({
+    minLength: password.length >= 8,
+    hasUpper: /[A-Z]/.test(password),
+    hasLower: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  })
 
   const clearFieldError = (field: string) => {
     if (errors[field]) {
@@ -143,31 +137,32 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    // Required fields validation
     if (!formData.first_name.trim()) newErrors.first_name = 'First name is required'
     if (!formData.last_name.trim()) newErrors.last_name = 'Last name is required'
     if (!formData.email.trim()) newErrors.email = 'Email is required'
     if (!formData.password.trim()) newErrors.password = 'Password is required'
     if (!formData.confirm_password.trim()) newErrors.confirm_password = 'Confirm password is required'
 
-    // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Invalid email format'
     }
 
-    // Password validation
     if (formData.password) {
-      const requirements = getPasswordRequirements(formData.password)
-      if (!requirements.minLength) newErrors.password = 'Password must be at least 8 characters'
-      else if (!requirements.hasUpper) newErrors.password = 'Password must contain uppercase letter'
-      else if (!requirements.hasLower) newErrors.password = 'Password must contain lowercase letter'
-      else if (!requirements.hasNumber) newErrors.password = 'Password must contain number'
-      else if (!requirements.hasSpecial) newErrors.password = 'Password must contain special character'
+      const req = getPasswordRequirements(formData.password)
+      if (!req.minLength) newErrors.password = 'Password must be at least 8 characters'
+      else if (!req.hasUpper) newErrors.password = 'Password must contain uppercase letter'
+      else if (!req.hasLower) newErrors.password = 'Password must contain lowercase letter'
+      else if (!req.hasNumber) newErrors.password = 'Password must contain number'
+      else if (!req.hasSpecial) newErrors.password = 'Password must contain special character'
     }
 
-    // Confirm password validation
     if (formData.password && formData.confirm_password && formData.password !== formData.confirm_password) {
       newErrors.confirm_password = 'Passwords do not match'
+    }
+
+    // Validate facility is available
+    if (!facilityId || isNaN(facilityId)) {
+      newErrors.submit = 'No facility linked. Please close and try again.'
     }
 
     setErrors(newErrors)
@@ -177,51 +172,46 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateForm()) {
-      const firstErrorField = Object.keys(errors)[0]
-      if (firstErrorField) {
-        const errorElement = document.querySelector(`[data-field="${firstErrorField}"]`)
-        if (errorElement) {
-          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        }
-      }
-      return
+    if (!validateForm()) return
+
+    const payload = {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      phone: formData.phone || undefined,
+      gender: formData.gender || undefined,
+      password: formData.password,
+      role: formData.role as 'facility_admin' | 'clinician',
+      facility_id: facilityId!,
+      is_active: formData.is_active
     }
 
+    // Log so you can verify in browser console
+    console.log('Creating admin with payload:', payload)
+
     await execute(async () => {
-      const newAdmin = await userService.createUser({
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone: formData.phone,
-        gender: formData.gender,
-        password: formData.password,
-        role: formData.role as 'facility_admin' | 'clinician',
-        facility_id: facilityData?.id ? Number(facilityData.id) : undefined,
-        is_active: formData.is_active
-      })
-
-      onSuccess(newAdmin)
-      setShowSuccess(true)
-
-      // Reset form
-      setFormData({
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        gender: '',
-        password: '',
-        confirm_password: '',
-        role: 'facility_admin',
-        facility_id: facilityData?.id || '',
-        is_active: true
-      })
+      try {
+        const newAdmin = await userService.createUser(payload)
+        onSuccess(newAdmin)
+        setShowSuccess(true)
+        setFormData({
+          first_name: '',
+          last_name: '',
+          email: '',
+          phone: '',
+          gender: '',
+          password: '',
+          confirm_password: '',
+          role: 'facility_admin',
+          is_active: true
+        })
+      } catch (err: any) {
+        const detail = err.response?.data?.detail || 'Failed to create admin'
+        console.error('Create admin failed:', err.response?.status, err.response?.data)
+        setErrors(prev => ({ ...prev, submit: detail }))
+        throw err
+      }
     })
-  }
-
-  const handleClose = () => {
-    onClose()
   }
 
   if (!isOpen) return null
@@ -229,13 +219,26 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
   return (
     <Modal
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       title={showSuccess ? "Admin Created" : "Create Facility Admin"}
       size="lg"
-      footer={showSuccess ? null : null}
+      footer={null}
     >
       {!showSuccess ? (
         <div className="space-y-6">
+          {/* Show facility being assigned to */}
+          <div className="bg-gray-800/50 border border-gray-700 rounded-md p-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-300">Assigning to:</span>
+              <span className="text-sm text-white">
+                {facility
+                  ? `${facility.name} (${facility.facilityCode}) — ID: ${facilityId}`
+                  : <span className="text-red-400">⚠ No facility selected</span>
+                }
+              </span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* First Name */}
@@ -246,14 +249,10 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                 <input
                   type="text"
                   value={formData.first_name}
-                  onChange={(e) => {
-                    setFormData(prev => ({ ...prev, first_name: e.target.value }))
-                    clearFieldError('first_name')
-                  }}
+                  onChange={(e) => { setFormData(prev => ({ ...prev, first_name: e.target.value })); clearFieldError('first_name') }}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Enter first name"
                   disabled={isSubmitting}
-                  data-field="first_name"
                 />
                 {errors.first_name && <p className="mt-1 text-sm text-red-500">{errors.first_name}</p>}
               </div>
@@ -266,14 +265,10 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                 <input
                   type="text"
                   value={formData.last_name}
-                  onChange={(e) => {
-                    setFormData(prev => ({ ...prev, last_name: e.target.value }))
-                    clearFieldError('last_name')
-                  }}
+                  onChange={(e) => { setFormData(prev => ({ ...prev, last_name: e.target.value })); clearFieldError('last_name') }}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Enter last name"
                   disabled={isSubmitting}
-                  data-field="last_name"
                 />
                 {errors.last_name && <p className="mt-1 text-sm text-red-500">{errors.last_name}</p>}
               </div>
@@ -286,23 +281,17 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => {
-                    setFormData(prev => ({ ...prev, email: e.target.value }))
-                    clearFieldError('email')
-                  }}
+                  onChange={(e) => { setFormData(prev => ({ ...prev, email: e.target.value })); clearFieldError('email') }}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Enter email address"
                   disabled={isSubmitting}
-                  data-field="email"
                 />
                 {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
               </div>
 
-              {/* Phone Number */}
+              {/* Phone */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Phone Number
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
                 <input
                   type="tel"
                   value={formData.phone}
@@ -310,15 +299,12 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="e.g., +254 712 345678"
                   disabled={isSubmitting}
-                  data-field="phone"
                 />
               </div>
 
               {/* Gender */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Gender
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
                 <FilterDropdown
                   value={formData.gender}
                   onChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
@@ -336,62 +322,33 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                   <input
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
-                    onChange={(e) => {
-                      setFormData(prev => ({ ...prev, password: e.target.value }))
-                      clearFieldError('password')
-                    }}
+                    onChange={(e) => { setFormData(prev => ({ ...prev, password: e.target.value })); clearFieldError('password') }}
                     className="w-full px-2 py-1.5 pr-10 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="Enter secure password"
                     autoComplete="new-password"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    style={{
-                      WebkitTextSecurity: 'none',
-                      MozTextSecurity: 'none'
-                    } as React.CSSProperties}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 focus:outline-none"
-                  >
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {errors.password && <p className="mt-1 text-sm text-red-500" data-field="password">{errors.password}</p>}
-
-                {/* Real-time password requirements */}
+                {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
                 <div className="mt-2 space-y-1">
-                  <div className="flex items-center text-xs">
-                    <span className={`mr-2 ${getPasswordRequirements(formData.password).minLength ? 'text-primary' : 'text-gray-600'}`}>
-                      {getPasswordRequirements(formData.password).minLength ? '✓' : '○'}
-                    </span>
-                    <span className={`${getPasswordRequirements(formData.password).minLength ? 'text-primary' : 'text-gray-400'}`}>At least 8 characters</span>
-                  </div>
-                  <div className="flex items-center text-xs">
-                    <span className={`mr-2 ${getPasswordRequirements(formData.password).hasUpper ? 'text-primary' : 'text-gray-600'}`}>
-                      {getPasswordRequirements(formData.password).hasUpper ? '✓' : '○'}
-                    </span>
-                    <span className={`${getPasswordRequirements(formData.password).hasUpper ? 'text-primary' : 'text-gray-400'}`}>One uppercase letter</span>
-                  </div>
-                  <div className="flex items-center text-xs">
-                    <span className={`mr-2 ${getPasswordRequirements(formData.password).hasLower ? 'text-primary' : 'text-gray-600'}`}>
-                      {getPasswordRequirements(formData.password).hasLower ? '✓' : '○'}
-                    </span>
-                    <span className={`${getPasswordRequirements(formData.password).hasLower ? 'text-primary' : 'text-gray-400'}`}>One lowercase letter</span>
-                  </div>
-                  <div className="flex items-center text-xs">
-                    <span className={`mr-2 ${getPasswordRequirements(formData.password).hasNumber ? 'text-primary' : 'text-gray-600'}`}>
-                      {getPasswordRequirements(formData.password).hasNumber ? '✓' : '○'}
-                    </span>
-                    <span className={`${getPasswordRequirements(formData.password).hasNumber ? 'text-primary' : 'text-gray-400'}`}>One number</span>
-                  </div>
-                  <div className="flex items-center text-xs">
-                    <span className={`mr-2 ${getPasswordRequirements(formData.password).hasSpecial ? 'text-primary' : 'text-gray-600'}`}>
-                      {getPasswordRequirements(formData.password).hasSpecial ? '✓' : '○'}
-                    </span>
-                    <span className={`${getPasswordRequirements(formData.password).hasSpecial ? 'text-primary' : 'text-gray-400'}`}>One special character</span>
-                  </div>
+                  {[
+                    { key: 'minLength', label: 'At least 8 characters' },
+                    { key: 'hasUpper', label: 'One uppercase letter' },
+                    { key: 'hasLower', label: 'One lowercase letter' },
+                    { key: 'hasNumber', label: 'One number' },
+                    { key: 'hasSpecial', label: 'One special character' },
+                  ].map(({ key, label }) => {
+                    const met = getPasswordRequirements(formData.password)[key as keyof ReturnType<typeof getPasswordRequirements>]
+                    return (
+                      <div key={key} className="flex items-center text-xs">
+                        <span className={`mr-2 ${met ? 'text-primary' : 'text-gray-600'}`}>{met ? '✓' : '○'}</span>
+                        <span className={met ? 'text-primary' : 'text-gray-400'}>{label}</span>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -404,26 +361,17 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={formData.confirm_password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, confirm_password: e.target.value }))}
+                    onChange={(e) => { setFormData(prev => ({ ...prev, confirm_password: e.target.value })); clearFieldError('confirm_password') }}
                     className="w-full px-2 py-1.5 pr-10 text-sm bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="Confirm your password"
                     autoComplete="new-password"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    style={{
-                      WebkitTextSecurity: 'none',
-                      MozTextSecurity: 'none'
-                    } as React.CSSProperties}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 focus:outline-none"
-                  >
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80">
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {errors.confirm_password && <p className="mt-1 text-sm text-red-500" data-field="confirm_password">{errors.confirm_password}</p>}
+                {errors.confirm_password && <p className="mt-1 text-sm text-red-500">{errors.confirm_password}</p>}
               </div>
             </div>
 
@@ -443,62 +391,41 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
               />
             </div>
 
-            {/* Facility Info */}
-            <div className="bg-gray-800/50 border border-gray-700 rounded-md p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium text-gray-300">Facility:</span>
-                <span className="text-sm text-white">
-                  {facility ? `${facility.name} (${facility.facilityCode})` : 'Loading facility...'}
-                </span>
-              </div>
-              <p className="text-xs text-gray-400">
-                Admin user will be assigned to this facility
-              </p>
-            </div>
-
             {/* Account Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Account Status
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Account Status</label>
               <div className="flex items-center gap-3 mt-3">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="status"
-                    checked={formData.is_active}
+                  <input type="radio" name="status" checked={formData.is_active}
                     onChange={() => setFormData(prev => ({ ...prev, is_active: true }))}
-                    className="text-primary focus:ring-primary"
-                  />
+                    className="text-primary focus:ring-primary" />
                   <span className="text-sm text-gray-300">Active</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="status"
-                    checked={!formData.is_active}
+                  <input type="radio" name="status" checked={!formData.is_active}
                     onChange={() => setFormData(prev => ({ ...prev, is_active: false }))}
-                    className="text-primary focus:ring-primary"
-                  />
+                    className="text-primary focus:ring-primary" />
                   <span className="text-sm text-gray-300">Inactive</span>
                 </label>
               </div>
             </div>
 
+            {/* Submit error */}
+            {errors.submit && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3">
+                <p className="text-sm text-red-400">{errors.submit}</p>
+              </div>
+            )}
+
             <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={handleClose}
+              <Button variant="outline" onClick={onClose}
                 className="px-4 py-2 border-none bg-transparent text-gray-300 hover:text-foreground hover:bg-transparent"
-                disabled={isSubmitting}
-              >
+                disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
+              <Button type="submit"
                 className="px-4 py-2 bg-primary/90 text-primary-foreground hover:bg-primary/80"
-                disabled={isSubmitting}
-              >
+                disabled={isSubmitting || !facilityId}>
                 {isSubmitting ? 'Creating...' : 'Create Admin'}
               </Button>
             </div>
@@ -513,12 +440,9 @@ export function AdminCreationModal({ isOpen, onClose, onSuccess, facility }: Adm
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">Admin Created Successfully!</h3>
           <p className="text-gray-400 mb-6">
-            {formData.first_name} {formData.last_name} has been added as an administrator for {facilityData?.name}.
+            The admin has been added to {facility?.name}.
           </p>
-          <Button
-            onClick={handleClose}
-            className="px-6 py-2 bg-primary/80 text-primary-foreground hover:bg-primary/70"
-          >
+          <Button onClick={onClose} className="px-6 py-2 bg-primary/80 text-primary-foreground hover:bg-primary/70">
             Done
           </Button>
         </div>

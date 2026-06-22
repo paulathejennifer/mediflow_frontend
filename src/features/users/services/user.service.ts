@@ -19,7 +19,7 @@ export interface CreateUserRequest {
   first_name: string
   last_name: string
   email: string
-  phone: string
+  phone?: string        // ← add ? to make it optional
   gender?: string
   password: string
   role: 'super_admin' | 'facility_admin' | 'clinician' | 'patient'
@@ -35,8 +35,13 @@ export interface UpdateUserRequest {
 
 export const userService = {
   createUser: async (data: CreateUserRequest): Promise<User> => {
-    const response = await apiClient.post('/users/', data)
-    return response.data
+    try {
+      const response = await apiClient.post('/users/', data)
+      return response.data
+    } catch (error: any) {
+      console.error('Create user error:', error.response?.status, error.response?.data)
+      throw error
+    }
   },
 
   getUsers: async (params?: {
