@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Building, Activity, TrendingUp, MapPin } from 'lucide-react'
+import { Plus, Building, Activity, TrendingUp } from 'lucide-react'
 import { OverviewCards, KPICardData } from '@/components/shared'
 import { SearchBar } from '@/components/shared'
 import { FacilityFilters } from '@/components/shared/forms/facility-filters'
@@ -32,6 +32,7 @@ export default function FacilitiesPage() {
   const [adminFacility, setAdminFacility] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
+  const [editFacility, setEditFacility] = useState<any>(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -85,12 +86,22 @@ export default function FacilitiesPage() {
 
   const paginatedFacilities = pagination.paginatedItems(filteredFacilities)
 
-  const handleFacilityCreated = () => fetchFacilitiesData()
+  const handleFacilityCreated = () => {
+    fetchFacilitiesData()
+  }
 
+  // Called from FacilityCreationModal success screen "Create Admin" button
   const handleCreateAdmin = (facility: any) => {
     setAdminFacility(facility)
     setIsFacilityModalOpen(false)
-    setIsAdminModalOpen(true)
+    // Small delay to let facility modal fully unmount before opening admin modal
+    setTimeout(() => setIsAdminModalOpen(true), 150)
+  }
+
+  // Called from FacilityTable "Edit" action
+  const handleEditFacility = (facility: any) => {
+    setEditFacility(facility)
+    setIsFacilityModalOpen(true)
   }
 
   const handleViewProfile = (facility: any) => {
@@ -117,80 +128,81 @@ export default function FacilitiesPage() {
     }
   }
 
+  // KPI calculations
   const now = new Date()
-const currentMonth = now.getMonth()
-const currentYear = now.getFullYear()
-const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
-const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear
+  const currentMonth = now.getMonth()
+  const currentYear = now.getFullYear()
+  const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
+  const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear
 
-const newThisMonth = facilitiesData.filter(f => {
-  const d = new Date(f.joined)
-  return d.getMonth() === currentMonth && d.getFullYear() === currentYear
-}).length
+  const newThisMonth = facilitiesData.filter(f => {
+    const d = new Date(f.joined)
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear
+  }).length
 
-const newLastMonth = facilitiesData.filter(f => {
-  const d = new Date(f.joined)
-  return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear
-}).length
+  const newLastMonth = facilitiesData.filter(f => {
+    const d = new Date(f.joined)
+    return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear
+  }).length
 
-const newThisMonthTrend = newLastMonth > 0
-  ? Math.round(((newThisMonth - newLastMonth) / newLastMonth) * 100)
-  : newThisMonth > 0 ? 100 : 0
+  const newThisMonthTrend = newLastMonth > 0
+    ? Math.round(((newThisMonth - newLastMonth) / newLastMonth) * 100)
+    : newThisMonth > 0 ? 100 : 0
 
-const activeFacilities = facilitiesData.filter(f => f.status === 'active').length
-const inactiveFacilities = facilitiesData.filter(f => f.status === 'inactive').length
-const totalFacilities = kpis?.total_facilities ?? facilitiesData.length
+  const activeFacilities = facilitiesData.filter(f => f.status === 'active').length
+  const inactiveFacilities = facilitiesData.filter(f => f.status === 'inactive').length
+  const totalFacilities = kpis?.total_facilities ?? facilitiesData.length
 
-const avgPerformance = facilitiesData.length > 0
-  ? Math.round(facilitiesData.reduce((sum, f) => sum + (f.performance ?? 0), 0) / facilitiesData.length)
-  : 0
+  const avgPerformance = facilitiesData.length > 0
+    ? Math.round(facilitiesData.reduce((sum, f) => sum + (f.performance ?? 0), 0) / facilitiesData.length)
+    : 0
 
-const facilitiesOverviewData: KPICardData[] = [
-  {
-    title: 'Total Facilities',
-    value: totalFacilities,
-    trend: {
-      value: `${activeFacilities} active, ${inactiveFacilities} inactive`,
-      isPositive: activeFacilities >= inactiveFacilities
+  const facilitiesOverviewData: KPICardData[] = [
+    {
+      title: 'Total Facilities',
+      value: totalFacilities,
+      trend: {
+        value: `${activeFacilities} active, ${inactiveFacilities} inactive`,
+        isPositive: activeFacilities >= inactiveFacilities
+      },
+      icon: <Building className="h-5 w-5" />
     },
-    icon: <Building className="h-5 w-5" />
-  },
-  {
-    title: 'Active Facilities',
-    value: activeFacilities,
-    trend: {
-      value: totalFacilities > 0
-        ? `${Math.round((activeFacilities / totalFacilities) * 100)}% of total`
-        : '0% of total',
-      isPositive: activeFacilities > inactiveFacilities
+    {
+      title: 'Active Facilities',
+      value: activeFacilities,
+      trend: {
+        value: totalFacilities > 0
+          ? `${Math.round((activeFacilities / totalFacilities) * 100)}% of total`
+          : '0% of total',
+        isPositive: activeFacilities > inactiveFacilities
+      },
+      icon: <Activity className="h-5 w-5" />
     },
-    icon: <Activity className="h-5 w-5" />
-  },
-  {
-    title: 'New This Month',
-    value: newThisMonth,
-    trend: {
-      value: newLastMonth > 0
-        ? `${newThisMonthTrend >= 0 ? '+' : ''}${newThisMonthTrend}% vs last month`
-        : newThisMonth > 0 ? 'first this period' : 'none last month',
-      isPositive: newThisMonthTrend >= 0
+    {
+      title: 'New This Month',
+      value: newThisMonth,
+      trend: {
+        value: newLastMonth > 0
+          ? `${newThisMonthTrend >= 0 ? '+' : ''}${newThisMonthTrend}% vs last month`
+          : newThisMonth > 0 ? 'first this period' : 'none last month',
+        isPositive: newThisMonthTrend >= 0
+      },
+      icon: <Plus className="h-5 w-5" />
     },
-    icon: <Plus className="h-5 w-5" />
-  },
-  {
-    title: 'Avg Performance',
-    value: `${avgPerformance}%`,
-    trend: {
-      value: avgPerformance >= 70
-        ? 'Good — above 70%'
-        : avgPerformance >= 40
-        ? 'Fair — above 40%'
-        : 'Low — needs attention',
-      isPositive: avgPerformance >= 50
-    },
-    icon: <TrendingUp className="h-5 w-5" />
-  }
-]
+    {
+      title: 'Avg Performance',
+      value: `${avgPerformance}%`,
+      trend: {
+        value: avgPerformance >= 70
+          ? 'Good — above 70%'
+          : avgPerformance >= 40
+          ? 'Fair — above 40%'
+          : 'Low — needs attention',
+        isPositive: avgPerformance >= 50
+      },
+      icon: <TrendingUp className="h-5 w-5" />
+    }
+  ]
 
   if (!isMounted || isLoading) {
     return (
@@ -203,6 +215,7 @@ const facilitiesOverviewData: KPICardData[] = [
 
   return (
     <div className="flex-1 space-y-6 overflow-x-hidden">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Facilities</h1>
@@ -212,15 +225,20 @@ const facilitiesOverviewData: KPICardData[] = [
         </div>
         <Button
           className="h-8 px-3 text-sm bg-primary/90 hover:bg-primary/80"
-          onClick={() => setIsFacilityModalOpen(true)}
+          onClick={() => {
+            setEditFacility(null)
+            setIsFacilityModalOpen(true)
+          }}
         >
           <Plus className="h-4 w-4 mr-1" />
           Add Facility
         </Button>
       </div>
 
+      {/* Overview */}
       <OverviewCards data={facilitiesOverviewData} />
 
+      {/* Search and Filters */}
       <Card className="bg-gray-900/60 border-border/50">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -248,15 +266,17 @@ const facilitiesOverviewData: KPICardData[] = [
         </CardContent>
       </Card>
 
+      {/* Facility Table */}
       <FacilityTable
         facilities={paginatedFacilities}
         userRole="super-admin"
         onViewProfile={handleViewProfile}
-        onEdit={(f) => { setAdminFacility(f); setIsFacilityModalOpen(true) }}
+        onEdit={handleEditFacility}
         onActivate={handleActivate}
         onDeactivate={handleDeactivate}
       />
 
+      {/* Pagination */}
       <Pagination
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
@@ -266,17 +286,28 @@ const facilitiesOverviewData: KPICardData[] = [
         onItemsPerPageChange={pagination.setItemsPerPage}
       />
 
+      {/* Facility Creation/Edit Modal */}
       <FacilityCreationModal
         isOpen={isFacilityModalOpen}
-        onClose={() => setIsFacilityModalOpen(false)}
+        onClose={() => {
+          setIsFacilityModalOpen(false)
+          setEditFacility(null)
+        }}
         onSuccess={handleFacilityCreated}
         onCreateAdmin={handleCreateAdmin}
       />
 
+      {/* Admin Creation Modal */}
       <AdminCreationModal
         isOpen={isAdminModalOpen}
-        onClose={() => setIsAdminModalOpen(false)}
-        onSuccess={() => fetchFacilitiesData()}
+        onClose={() => {
+          setIsAdminModalOpen(false)
+          setAdminFacility(null)
+        }}
+        onSuccess={() => {
+          fetchFacilitiesData()
+          setIsAdminModalOpen(false)
+        }}
         facility={adminFacility}
       />
     </div>
