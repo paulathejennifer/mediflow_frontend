@@ -298,25 +298,6 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     >
       {!showSuccess ? (
         <div className="space-y-6">
-          {/* AskMediFlow Panel */}
-          <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 border border-primary/20 rounded-xl p-4 flex items-start gap-3">
-            <Sparkles className="h-5 w-5 text-primary mt-0.5 animate-pulse flex-shrink-0" />
-            <div className="space-y-1">
-              <h4 className="text-sm font-medium text-white">AskMediFlow Auto-Fill Assistant</h4>
-              <p className="text-xs text-muted-foreground">
-                Have unstructured voice logs or referral PDFs? Let AskMediFlow populate this form automatically.
-              </p>
-              <Button
-                type="button"
-                variant="link"
-                size="sm"
-                className="text-primary text-xs p-0 h-auto font-medium hover:text-primary/80"
-                onClick={() => toast.info('AskMediFlow AI extraction drawer opening...')}
-              >
-                Launch AI Intake Processor →
-              </Button>
-            </div>
-          </div>
 
           {/* Real-time scanning indicator */}
           {isCheckingDuplicate && !duplicateWarning && (
