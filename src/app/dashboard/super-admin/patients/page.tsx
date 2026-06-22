@@ -107,33 +107,44 @@ export default function PatientsPage() {
     setSelectedPatient(patient)
     setIsEditModalOpen(true)
   }
-
-  const patientsOverviewData: KPICardData[] = [
-    {
-      title: 'Total Patients',
-      value: kpis?.totalPatients ?? patients.length,
-      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
-      icon: <Users className="h-5 w-5" />
+const patientsOverviewData: KPICardData[] = [
+  {
+    title: 'Total Patients',
+    value: kpis?.totalPatients ?? patients.length,
+    trend: {
+      value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${(kpis?.totalPatientsTrend ?? 0).toFixed(1)}%`,
+      isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0
     },
-    {
-      title: 'Active Patients',
-      value: kpis?.totalPatients ?? 0, // In production, backend provides 'active' status
-      trend: { value: `${(kpis?.totalPatientsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalPatientsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalPatientsTrend ?? 0) >= 0 },
-      icon: <Activity className="h-5 w-5" />
+    icon: <Users className="h-5 w-5" />
+  },
+  {
+    title: 'New This Month',
+    value: kpis?.newPatientsThisMonth ?? 0,
+    trend: {
+      value: `${(kpis?.newPatientsThisMonthTrend ?? 0) >= 0 ? '+' : ''}${(kpis?.newPatientsThisMonthTrend ?? 0).toFixed(1)}%`,
+      isPositive: (kpis?.newPatientsThisMonthTrend ?? 0) >= 0
     },
-    {
-      title: 'New This Month',
-      value: kpis?.newPatientsThisMonth ?? 0,
-      trend: { value: `${(kpis?.newPatientsThisMonthTrend ?? 0) >= 0 ? '+' : ''}${kpis?.newPatientsThisMonthTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.newPatientsThisMonthTrend ?? 0) >= 0 },
-      icon: <UserPlus className="h-5 w-5" />
+    icon: <UserPlus className="h-5 w-5" />
+  },
+  {
+    title: 'Total Referrals',
+    value: kpis?.totalReferrals ?? 0,
+    trend: {
+      value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${(kpis?.totalReferralsTrend ?? 0).toFixed(1)}%`,
+      isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0
     },
-    {
-      title: 'Referral Volume',
-      value: kpis?.totalReferrals ?? 0,
-      trend: { value: `${(kpis?.totalReferralsTrend ?? 0) >= 0 ? '+' : ''}${kpis?.totalReferralsTrend?.toFixed(1) ?? 0}%`, isPositive: (kpis?.totalReferralsTrend ?? 0) >= 0 },
-      icon: <Calendar className="h-5 w-5" />
-    }
-  ]
+    icon: <Calendar className="h-5 w-5" />
+  },
+  {
+    title: 'Active Referrals',
+    value: kpis?.activeReferrals ?? 0,
+    trend: {
+      value: `${kpis?.pendingReferrals ?? 0} pending`,
+      isPositive: (kpis?.pendingReferrals ?? 0) === 0
+    },
+    icon: <Activity className="h-5 w-5" />
+  }
+]
 
   if (!isMounted || isLoading) {
     return (

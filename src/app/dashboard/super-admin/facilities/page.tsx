@@ -15,6 +15,7 @@ import { usePagination } from '@/hooks/usePagination'
 import { FacilityCreationModal } from '@/components/modals/facility-creation-modal'
 import { AdminCreationModal } from '@/components/modals/admin-creation-modal'
 import { facilityService } from '@/features/facilities/services/facility.service'
+import { analyticsService, AnalyticsMetrics } from '@/features/analytics/services/analytics.service'
 
 export default function FacilitiesPage() {
   const router = useRouter()
@@ -24,13 +25,13 @@ export default function FacilitiesPage() {
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedCounty, setSelectedCounty] = useState('all')
   const [selectedSort, setSelectedSort] = useState('all')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [isFacilityModalOpen, setIsFacilityModalOpen] = useState(false)
   const [facilitiesData, setFacilitiesData] = useState<any[]>([])
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false)
   const [adminFacility, setAdminFacility] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -39,15 +40,13 @@ export default function FacilitiesPage() {
 
   const fetchFacilitiesData = async () => {
     try {
-      const data = await facilityService.getFacilities()
-      // Transform data to match component expectations
-      const transformedData = data.map((facility: any) => ({
-        ...facility,
-        status: facility.is_active ? 'active' : 'inactive',
-        joined: facility.created_at || new Date().toISOString(),
-        performance: facility.performance_score ?? 0
-      }))
-      setFacilitiesData(transformedData)
+      setIsLoading(true)
+      const [facilitiesResult, kpisResult] = await Promise.all([
+        facilityService.getFacilities(),
+        analyticsService.getDashboardKpis()
+      ])
+      setFacilitiesData(facilitiesResult)
+      setKpis(kpisResult)
     } catch (error) {
       console.error('Failed to fetch facilities data:', error)
       setFacilitiesData([])
@@ -58,26 +57,23 @@ export default function FacilitiesPage() {
 
   const filteredFacilities = facilitiesData.filter(facility => {
     const matchesSearch =
-      facility.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      facility.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      facility.phone.includes(searchTerm) ||
-      facility.facilityCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      facility.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      facility.county.toLowerCase().includes(searchTerm.toLowerCase())
+      facility.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      facility.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      facility.phone?.includes(searchTerm) ||
+      facility.facilityCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      facility.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      facility.county?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesType = selectedType === 'all' || facility.type === selectedType
-    const matchesLevel = selectedLevel === 'all' || facility.level.toString() === selectedLevel
+    const matchesLevel = selectedLevel === 'all' || facility.level?.toString() === selectedLevel
     const matchesStatus = selectedStatus === 'all' || facility.status === selectedStatus
     const matchesCounty = selectedCounty === 'all' || facility.county === selectedCounty
 
     return matchesSearch && matchesType && matchesLevel && matchesStatus && matchesCounty
   }).sort((a, b) => {
-    if (selectedSort === 'performance') {
-      return b.performance - a.performance
-    } else if (selectedSort === 'joined') {
-      const dateA = a.joined ? new Date(a.joined).getTime() : 0
-      const dateB = b.joined ? new Date(b.joined).getTime() : 0
-      return dateB - dateA
+    if (selectedSort === 'performance') return (b.performance ?? 0) - (a.performance ?? 0)
+    if (selectedSort === 'joined') {
+      return new Date(b.joined ?? 0).getTime() - new Date(a.joined ?? 0).getTime()
     }
     return 0
   })
@@ -89,10 +85,7 @@ export default function FacilitiesPage() {
 
   const paginatedFacilities = pagination.paginatedItems(filteredFacilities)
 
-  const handleFacilityCreated = (newFacility: any) => {
-    // Refresh the table data
-    fetchFacilitiesData()
-  }
+  const handleFacilityCreated = () => fetchFacilitiesData()
 
   const handleCreateAdmin = (facility: any) => {
     setAdminFacility(facility)
@@ -109,7 +102,7 @@ export default function FacilitiesPage() {
       await facilityService.updateFacility(facility.id, { is_active: true })
       toast.success('Facility activated successfully')
       fetchFacilitiesData()
-    } catch (err) {
+    } catch {
       toast.error('Failed to activate facility')
     }
   }
@@ -119,39 +112,51 @@ export default function FacilitiesPage() {
       await facilityService.updateDeactivate(facility.id, { is_active: false })
       toast.success('Facility deactivated')
       fetchFacilitiesData()
-    } catch (err) {
+    } catch {
       toast.error('Failed to deactivate facility')
     }
   }
 
+  const activeFacilities = facilitiesData.filter(f => f.status === 'active').length
+  const totalFacilities = kpis?.total_facilities ?? facilitiesData.length
+  const avgPerformance = facilitiesData.length > 0
+    ? Math.round(facilitiesData.reduce((sum, f) => sum + (f.performance ?? 0), 0) / facilitiesData.length)
+    : 0
+
+  const newThisMonth = facilitiesData.filter(f => {
+    const joined = new Date(f.joined)
+    const now = new Date()
+    return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear()
+  }).length
+
   const facilitiesOverviewData: KPICardData[] = [
     {
       title: 'Total Facilities',
-      value: facilitiesData.length,
-      trend: { value: '+8', isPositive: true },
+      value: totalFacilities,
+      trend: { value: '+0%', isPositive: true },
       icon: <Building className="h-5 w-5" />
     },
     {
       title: 'Active Facilities',
-      value: facilitiesData.filter(f => f.status === 'active').length,
-      trend: { value: '+5', isPositive: true },
+      value: activeFacilities,
+      trend: {
+        value: totalFacilities > 0
+          ? `${Math.round((activeFacilities / totalFacilities) * 100)}% active`
+          : '0% active',
+        isPositive: true
+      },
       icon: <Activity className="h-5 w-5" />
     },
     {
-      title: 'New Facilities',
-      value: facilitiesData.filter(f => {
-        const joinedDate = new Date(f.joined)
-        const currentMonth = new Date().getMonth()
-        const currentYear = new Date().getFullYear()
-        return joinedDate.getMonth() === currentMonth && joinedDate.getFullYear() === currentYear
-      }).length,
-      trend: { value: '+2', isPositive: true },
+      title: 'New This Month',
+      value: newThisMonth,
+      trend: { value: 'this month', isPositive: true },
       icon: <Plus className="h-5 w-5" />
     },
     {
-      title: 'Average Performance',
-      value: Math.round(facilitiesData.reduce((sum, f) => sum + f.performance, 0) / facilitiesData.length) + '%',
-      trend: { value: '+12%', isPositive: true },
+      title: 'Avg Performance',
+      value: `${avgPerformance}%`,
+      trend: { value: 'based on referrals', isPositive: avgPerformance >= 50 },
       icon: <TrendingUp className="h-5 w-5" />
     }
   ]
@@ -167,7 +172,6 @@ export default function FacilitiesPage() {
 
   return (
     <div className="flex-1 space-y-6 overflow-x-hidden">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Facilities</h1>
@@ -175,22 +179,17 @@ export default function FacilitiesPage() {
             Manage healthcare facilities and monitor performance
           </p>
         </div>
-
-        <div className="relative">
-          <Button 
-            className="h-8 px-3 text-sm bg-primary/90 hover:bg-primary/80"
-            onClick={() => setIsFacilityModalOpen(true)}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Add Facility
-          </Button>
-        </div>
+        <Button
+          className="h-8 px-3 text-sm bg-primary/90 hover:bg-primary/80"
+          onClick={() => setIsFacilityModalOpen(true)}
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Add Facility
+        </Button>
       </div>
 
-      {/* Overview */}
       <OverviewCards data={facilitiesOverviewData} />
 
-      {/* Search and Filters Card */}
       <Card className="bg-gray-900/60 border-border/50">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -200,7 +199,6 @@ export default function FacilitiesPage() {
               value={searchTerm}
               onChange={setSearchTerm}
             />
-            
             <div className="relative z-[999999]">
               <FacilityFilters
                 selectedType={selectedType}
@@ -219,17 +217,15 @@ export default function FacilitiesPage() {
         </CardContent>
       </Card>
 
-      {/* Facility Table */}
-      <FacilityTable 
-        facilities={paginatedFacilities} 
-        userRole="super-admin" 
+      <FacilityTable
+        facilities={paginatedFacilities}
+        userRole="super-admin"
         onViewProfile={handleViewProfile}
-        onEdit={(f) => { setAdminFacility(f); setIsFacilityModalOpen(true); }}
+        onEdit={(f) => { setAdminFacility(f); setIsFacilityModalOpen(true) }}
         onActivate={handleActivate}
         onDeactivate={handleDeactivate}
       />
 
-      {/* Pagination */}
       <Pagination
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
@@ -239,7 +235,6 @@ export default function FacilitiesPage() {
         onItemsPerPageChange={pagination.setItemsPerPage}
       />
 
-      {/* Facility Creation Modal */}
       <FacilityCreationModal
         isOpen={isFacilityModalOpen}
         onClose={() => setIsFacilityModalOpen(false)}
@@ -247,7 +242,6 @@ export default function FacilitiesPage() {
         onCreateAdmin={handleCreateAdmin}
       />
 
-      {/* Admin Creation Modal */}
       <AdminCreationModal
         isOpen={isAdminModalOpen}
         onClose={() => setIsAdminModalOpen(false)}
