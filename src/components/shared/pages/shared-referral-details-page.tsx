@@ -696,7 +696,11 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           Close
         </Button>
         <Button 
-          onClick={() => window.open(documentService.getDocumentDownloadUrl(selectedDoc.id), '_blank')}
+          onClick={async () => {
+            const res = await fetch(documentService.getDocumentDownloadUrl(selectedDoc.id));
+            const data = await res.json();
+            window.open(data.url, '_blank');
+          }}
         >
           Download
         </Button>

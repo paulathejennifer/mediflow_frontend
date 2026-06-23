@@ -43,7 +43,7 @@ export const documentService = {
     return response.data
   },
 
-  // New methods for preview and download
+  // Updated for S3 presigned URLs
   getDocumentPreviewUrl: (documentId: number): string => {
     return `/api/documents/${documentId}/view`
   },
@@ -51,7 +51,7 @@ export const documentService = {
   getDocumentDownloadUrl: (documentId: number): string => {
     return `/api/documents/${documentId}/download`
   },
-
+  
   extractTextFromDocument: async (documentId: number): Promise<Document> => {
     const response = await apiClient.post(`/documents/${documentId}/extract`)
     return response.data
