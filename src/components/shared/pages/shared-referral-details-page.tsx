@@ -478,7 +478,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                               document_type: f.documentType || 'other'
                             }))
                           )
-                          toast.success("Documents uploaded. Updating AI insights...")
+                          toast.success("Documents uploaded. Updating...")
                           await handleRefreshAI()
                           window.location.reload()
                         } catch (error) {
@@ -488,30 +488,34 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                       }} />
                     </div>
                   )}
-                  {(!referral.attachments?.documents || referral.attachments.documents.length === 0) ? (
-                    <div className="py-4 text-center text-sm text-muted-foreground">
-                      No documents attached
-                    </div>
-                  ) : (
+
+                  {referral.attachments?.documents && referral.attachments.documents.length > 0 ? (
                     <div className="space-y-2">
                       {referral.attachments.documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-3 border border-border rounded-lg gap-3">
-                          <div className="flex items-center gap-3">
-                            <FileText className="h-5 w-5 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium text-foreground">{doc.name}</p>
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between p-3 border border-border rounded-lg gap-3 hover:bg-gray-800/50 cursor-pointer group"
+                          onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                        >
+                          <div className="flex items-center gap-3 flex-1">
+                            <FileText className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
                               <p className="text-xs text-muted-foreground">{doc.size} KB • {doc.uploader}</p>
                             </div>
                           </div>
-                          <Badge variant="default" className="bg-primary/80 text-primary-foreground">
-                            AI: {doc.aiStatus}
+                          <Badge variant="default" className="bg-primary/80 text-primary-foreground group-hover:bg-primary transition-colors">
+                            View
                           </Badge>
                         </div>
                       ))}
                     </div>
+                  ) : (
+                    <div className="py-4 text-center text-sm text-muted-foreground">
+                      No documents attached
+                    </div>
                   )}
                 </TabsContent>
-
                 <TabsContent value="voiceNotes" className="mt-0">
                   {isAddingVoice && (
                     <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
