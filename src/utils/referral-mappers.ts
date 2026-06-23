@@ -236,3 +236,4 @@ export function mapApiReferralToDetailView(r: ApiReferral): ReferralDetailView {
   })(),
  }
 }
+
