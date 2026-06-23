@@ -67,9 +67,8 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
                   onChange(option.value)
                   setIsOpen(false)
                 }}
-                className={`w-full px-3 py-2 text-xs text-left hover:bg-gray-800 transition-colors ${
-                  option.value === value ? 'bg-gray-800 text-primary' : 'text-muted-foreground'
-                }`}
+                className={`w-full px-3 py-2 text-xs text-left hover:bg-gray-800 transition-colors ${option.value === value ? 'bg-gray-800 text-primary' : 'text-muted-foreground'
+                  }`}
               >
                 {option.label}
               </button>
@@ -275,9 +274,8 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
           medications: formData.medications,
           chronic_conditions: formData.chronic_conditions
         })
-
+        setShowSuccess(true)           // ← Show success screen FIRST
         onSuccess(newPatient)
-        setShowSuccess(true)
       })
     } catch (error: any) {
       const detail = error.response?.data?.detail
@@ -324,11 +322,10 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                 {duplicateWarning.matches.map((m: any, idx: number) => (
                   <div key={idx} className="flex items-center justify-between text-xs">
                     <span className="font-medium text-white">{m.existing_patient_name}</span>
-                    <span className={`font-mono font-semibold px-2 py-0.5 rounded-full text-xs ${
-                      m.combined_score >= 0.90
+                    <span className={`font-mono font-semibold px-2 py-0.5 rounded-full text-xs ${m.combined_score >= 0.90
                         ? 'bg-red-500/20 text-red-400'
                         : 'bg-amber-500/20 text-amber-400'
-                    }`}>
+                      }`}>
                       {Math.round(m.combined_score * 100)}% match
                     </span>
                   </div>
@@ -610,8 +607,8 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
                 {isSubmitting
                   ? 'Creating...'
                   : isCheckingDuplicate
-                  ? 'Scanning...'
-                  : 'Create Patient'}
+                    ? 'Scanning...'
+                    : 'Create Patient'}
               </Button>
             </div>
           </form>

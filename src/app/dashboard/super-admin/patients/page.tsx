@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { toast } from 'react-hot-toast'
 import { Plus, Users, Activity, Calendar, UserPlus } from 'lucide-react'
 import { OverviewCards, KPICardData } from '@/components/shared'
 import { SearchBar } from '@/components/shared'
@@ -29,7 +30,7 @@ export default function PatientsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
   const [kpis, setKpis] = useState<AnalyticsMetrics | null>(null)
-  const { patients, isLoading } = usePatients()
+  const { patients, isLoading, refetch } = usePatients()
 
   useEffect(() => {
     setIsMounted(true)
@@ -93,9 +94,9 @@ export default function PatientsPage() {
 
   const paginatedPatients = pagination.paginatedItems(filteredPatients)
 
-  const handlePatientCreated = (newPatient: any) => {
-    // In a real app, this would add to the database
-    // For now, just log it - in production this would refresh data or add to state
+const handlePatientCreated = (newPatient: any) => {
+    toast.success('Patient created successfully')
+    refetch() // ← Refresh data
   }
 
   const handleViewProfile = (patient: any) => {

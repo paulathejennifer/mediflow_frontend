@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { toast } from 'react-hot-toast'
 import { Plus, Users, Activity, Calendar, TrendingUp } from 'lucide-react'
 import { OverviewCards, KPICardData } from '@/components/shared'
 import { SearchBar } from '@/components/shared'
@@ -96,11 +97,9 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
   })
 
   const paginatedClinicians = pagination.paginatedItems(filteredClinicians)
-
   const handleClinicianCreated = (newClinician: any) => {
-    // In a real app, this would add to the database
-    // For now, just log it - in production this would refresh data or add to state
-    // Note: Don't close modal here - let the modal show success screen first
+    toast.success('Clinician created successfully')
+    fetchData() // ← This already exists and works
   }
 
   // Role-specific configurations
@@ -171,7 +170,7 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
         {/* Conditional Add Clinician Button - only for facility admin */}
         {config.showAddButton && (
           <div className="relative">
-            <Button 
+            <Button
               className="h-8 px-3 text-sm bg-primary/90 hover:bg-primary/80"
               onClick={() => setIsClinicianModalOpen(true)}
             >
@@ -195,7 +194,7 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
               value={searchTerm}
               onChange={setSearchTerm}
             />
-            
+
             <div className="relative z-[999999]">
               <StaffFilters
                 selectedStatus={selectedStatus}
@@ -212,11 +211,11 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
       </Card>
 
       {/* Clinician Table */}
-      <StaffTable 
-        staff={paginatedClinicians} 
-        userRole={userRole === ROLES.SUPER_ADMIN ? 'super-admin' : 
-                userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' : 
-                userRole === ROLES.CLINICIAN ? 'clinician' : 'clinician'}
+      <StaffTable
+        staff={paginatedClinicians}
+        userRole={userRole === ROLES.SUPER_ADMIN ? 'super-admin' :
+          userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' :
+            userRole === ROLES.CLINICIAN ? 'clinician' : 'clinician'}
       />
 
       {/* Pagination */}

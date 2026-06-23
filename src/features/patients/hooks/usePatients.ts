@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { patientService } from '../services/patient.service'
 
 export interface UIPatient {
@@ -21,48 +21,64 @@ export const usePatients = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const calculateAge = (dateOfBirth: string): number => {
+  const calculateAge = (dateOfBirth: string | null | undefined): number => {
+    if (!dateOfBirth) return 0
+
     const today = new Date()
     const birthDate = new Date(dateOfBirth)
+    
+    if (isNaN(birthDate.getTime())) return 0
+
     let age = today.getFullYear() - birthDate.getFullYear()
     const monthDiff = today.getMonth() - birthDate.getMonth()
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--
     }
-    return age
+    return Math.max(0, age) // Prevent negative ages
   }
 
-  const fetchPatients = async () => {
+  const fetchPatients = useCallback(async () => {
     try {
       setIsLoading(true)
       setError(null)
+
       const data = await patientService.getPatients()
-      const transformedData = data.map((patient: any) => ({
+
+      const transformedData: UIPatient[] = data.map((patient: any) => ({
         id: patient.id,
-        name: `${patient.first_name} ${patient.last_name}`,
-        email: patient.email,
-        phone: patient.phone,
-        mrn: patient.identifiers?.[0]?.mrn || '',
-        location: patient.identifiers?.[0]?.facility_name || '',
-        status: 'active' as const,
-        gender: patient.gender,
+        name: `${patient.first_name || ''} ${patient.last_name || ''}`.trim(),
+        email: patient.email || '',
+        phone: patient.phone || '',
+        mrn: patient.identifiers?.[0]?.mrn || 'N/A',
+        location: patient.identifiers?.[0]?.facility_name || patient.location || '',
+        status: (patient.status as 'active' | 'inactive' | 'pending') || 'active',
+        gender: patient.gender || 'other',
         age: calculateAge(patient.date_of_birth),
-        referrals: 0,
-        lastVisit: patient.updated_at,
-        registrationDate: patient.created_at
+        referrals: patient.referrals_count || 0,
+        lastVisit: patient.updated_at || patient.created_at || '',
+        registrationDate: patient.created_at || '',
       }))
+
       setPatients(transformedData)
-    } catch (error) {
-      console.error('Failed to fetch patients:', error)
-      setError('Failed to load patients')
+    } catch (err: any) {
+      console.error('Failed to fetch patients:', err)
+      setError(err?.message || 'Failed to load patients')
+      setPatients([])
     } finally {
       setIsLoading(false)
     }
-  }
-
-  useEffect(() => {
-    fetchPatients()
   }, [])
 
-  return { patients, isLoading, error, refetch: fetchPatients }
+  // Initial fetch
+  useEffect(() => {
+    fetchPatients()
+  }, [fetchPatients])
+
+  return {
+    patients,
+    isLoading,
+    error,
+    refetch: fetchPatients,
+  }
 }

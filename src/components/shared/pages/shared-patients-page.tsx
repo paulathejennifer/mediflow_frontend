@@ -127,11 +127,12 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
 
   const paginatedPatients = pagination.paginatedItems(filteredPatients)
 
-  const handlePatientCreated = (newPatient: any) => {
+const handlePatientCreated = (newPatient: any) => {
     toast.success('Patient created successfully')
-    setIsPatientModalOpen(false)
-    fetchKpis()
+    fetchPatientsData() // ← Refresh table
+    // Do NOT close modal here — let the modal handle closing after success screen
   }
+  
 
   const handleEditPatient = (patient: any) => {
     setSelectedPatient(patient)
