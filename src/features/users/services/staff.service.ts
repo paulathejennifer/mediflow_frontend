@@ -13,12 +13,14 @@ export const staffService = {
   getStaff: async (): Promise<StaffMember[]> => {
     const users = await userService.getUsers()
     const referrals = await referralService.getReferrals()
-    
+    console.log('Total referrals fetched:', referrals.length)
+    console.log('First referral:', JSON.stringify(referrals[0]))
+    console.log('First user id:', users[0]?.id, 'type:', typeof users[0]?.id)
     const staffWithFacilityNames = await Promise.all(
       users.map(async (user) => {
         let facilityName = 'Unknown Facility'
         let facilityCode = 'N/A'
-        
+
         if (user.facility_id) {
           try {
             const facility = await facilityService.getFacilityById(String(user.facility_id))
@@ -28,13 +30,13 @@ export const staffService = {
             console.error(`Failed to fetch facility for user ${user.id}`, error)
           }
         }
-        
+
         // Count referrals created by this user
-        const referralCount = referrals.filter((r: any) => 
-          r.created_by === user.id || 
+        const referralCount = referrals.filter((r: any) =>
+          r.created_by === user.id ||
           (r.created_by && typeof r.created_by === 'object' && r.created_by.id === user.id)
         ).length
-        
+
         return {
           ...user,
           facility: facilityName,
@@ -43,7 +45,7 @@ export const staffService = {
         }
       })
     )
-    
+
     return staffWithFacilityNames
   },
 
@@ -53,9 +55,9 @@ export const staffService = {
 
     let facilityName = 'Unknown Facility'
     let facilityCode = 'N/A'
-const referrals = await referralService.getReferrals()
-console.log('referrals sample:', referrals[0])  // ← add this
-// console.log('user sample id:', users[0]?.id, typeof users[0]?.id)
+    const referrals = await referralService.getReferrals()
+    console.log('referrals sample:', referrals[0])  // ← add this
+    // console.log('user sample id:', users[0]?.id, typeof users[0]?.id)
 
     if (user.facility_id) {
       try {
@@ -67,8 +69,8 @@ console.log('referrals sample:', referrals[0])  // ← add this
       }
     }
 
-    const referralCount = referrals.filter((r: any) => 
-      r.created_by === user.id || 
+    const referralCount = referrals.filter((r: any) =>
+      r.created_by === user.id ||
       (r.created_by && typeof r.created_by === 'object' && r.created_by.id === user.id)
     ).length
 
@@ -83,12 +85,12 @@ console.log('referrals sample:', referrals[0])  // ← add this
   getStaffByRole: async (role: string): Promise<StaffMember[]> => {
     const users = await userService.getUsers({ role })
     const referrals = await referralService.getReferrals()
-    
+
     const staffWithFacilityNames = await Promise.all(
       users.map(async (user) => {
         let facilityName = 'Unknown Facility'
         let facilityCode = 'N/A'
-        
+
         if (user.facility_id) {
           try {
             const facility = await facilityService.getFacilityById(String(user.facility_id))
@@ -98,12 +100,12 @@ console.log('referrals sample:', referrals[0])  // ← add this
             console.error(`Failed to fetch facility for user ${user.id}`, error)
           }
         }
-        
-        const referralCount = referrals.filter((r: any) => 
-          r.created_by === user.id || 
+
+        const referralCount = referrals.filter((r: any) =>
+          r.created_by === user.id ||
           (r.created_by && typeof r.created_by === 'object' && r.created_by.id === user.id)
         ).length
-        
+
         return {
           ...user,
           facility: facilityName,
@@ -112,22 +114,22 @@ console.log('referrals sample:', referrals[0])  // ← add this
         }
       })
     )
-    
+
     return staffWithFacilityNames
   },
 
   getStaffByStatus: async (status: string): Promise<StaffMember[]> => {
     const users = await userService.getUsers()
-    const filteredUsers = users.filter((u: any) => 
+    const filteredUsers = users.filter((u: any) =>
       u.is_active === (status === 'active')
     )
     const referrals = await referralService.getReferrals()
-    
+
     const staffWithFacilityNames = await Promise.all(
       filteredUsers.map(async (user) => {
         let facilityName = 'Unknown Facility'
         let facilityCode = 'N/A'
-        
+
         if (user.facility_id) {
           try {
             const facility = await facilityService.getFacilityById(String(user.facility_id))
@@ -137,12 +139,12 @@ console.log('referrals sample:', referrals[0])  // ← add this
             console.error(`Failed to fetch facility for user ${user.id}`, error)
           }
         }
-        
-        const referralCount = referrals.filter((r: any) => 
-          r.created_by === user.id || 
+
+        const referralCount = referrals.filter((r: any) =>
+          r.created_by === user.id ||
           (r.created_by && typeof r.created_by === 'object' && r.created_by.id === user.id)
         ).length
-        
+
         return {
           ...user,
           facility: facilityName,
@@ -151,7 +153,7 @@ console.log('referrals sample:', referrals[0])  // ← add this
         }
       })
     )
-    
+
     return staffWithFacilityNames
   },
 }
