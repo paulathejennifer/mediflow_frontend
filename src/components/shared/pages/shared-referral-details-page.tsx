@@ -185,7 +185,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
             risks: safeParseList(ai.risks || ai['KEY RISKS']),
             missing_info: safeParseList(ai.missing_info || ai['MISSING CRITICAL INFORMATION']),
             recommendations: safeParseList(ai.next_steps || ai.recommendations || ai['RECOMMENDED NEXT STEPS']),
-            completeness_score: parseInt(ai.completeness_score || ai['COMPLETENESS SCORE']) || 7,
+            completeness_score: parseInt(ai.completeness_score || ai['COMPLETENESS SCORE']) || 9,
             urgency_level: ai.uncertainty_level || ai['UNCERTAINTY LEVEL'] || (referral.priority === 'high' ? 'High' : 'Medium'),
           }
         } as ReferralDetailView) : null)
@@ -632,7 +632,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <p className="text-sm font-medium text-foreground">Quality Score</p>
-                      <p className={`text-2xl font-bold ${getQualityScoreColor(referral.aiAnalysis.completeness_score)}`}>
+                      <p className={`text-2xl font-bold ${getQualityScoreColor(referral.aiAnalysis.completeness_score)} text-yellow-400`}>
                         {referral.aiAnalysis.completeness_score}/10
                       </p>
                     </div>
