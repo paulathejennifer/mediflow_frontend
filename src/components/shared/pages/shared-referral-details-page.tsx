@@ -7,12 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  ArrowLeft, 
-  User, 
-  Building, 
-  FileText, 
-  Mic, 
+import {
+  ArrowLeft,
+  User,
+  Building,
+  FileText,
+  Mic,
   Calendar,
   CheckCircle,
   AlertTriangle,
@@ -38,14 +38,14 @@ import { VoiceRecorder } from '@/components/voice-notes/voice-recorder'
 // A simple Typewriter component to handle the "cool" word-by-word typing effect
 function Typewriter({ text, speed = 40 }: { text: string; speed?: number }) {
   const [displayedText, setDisplayedText] = useState('')
-  
+
   useEffect(() => {
     setDisplayedText('')
     if (!text || typeof text !== 'string') return
 
     const words = text.split(' ')
     let i = 0
-    
+
     const intervalId = setInterval(() => {
       const nextWord = words[i];
       if (nextWord !== undefined) {
@@ -106,7 +106,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   // Auto-trigger AI analysis if it's missing
   useEffect(() => {
     if (referral && !referral.aiAnalysis && !isLoading) {
-      console.log('🤖 [AI] Analysis missing, auto-triggering...');
       handleRefreshAI();
     }
   }, [referral?.id, referral?.aiAnalysis, referral?.status]);
@@ -163,18 +162,11 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     try {
       setIsAiLoading(true)
       const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-      const response = await referralService.refreshAISummary(numericId).catch(err => {
-        console.error("AI Refresh Error:", err)
-        if (err.response?.status === 500) {
-          throw new Error("Backend AI service crashed. Check server logs for strftime or async/await errors.")
-        }
-        throw err
-      })
-      
+      const response = await referralService.refreshAISummary(numericId)
+
       if (response && response.ai_summary) {
         const ai = response.ai_summary;
-        
-        // Helper to convert AI bulleted strings into arrays for the UI
+
         const safeParseList = (val: any) => {
           if (Array.isArray(val)) return val;
           if (typeof val === 'string') {
@@ -184,18 +176,17 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           }
           return [];
         };
-        
+
         setReferral(prev => prev ? ({
           ...prev,
           aiAnalysis: {
-            // Ensure we handle the case where 'ai' might be the whole response or a nested field
-            summary: ai.summary || ai.SUMMARY || (typeof ai === 'string' ? ai : 'No summary available'),
+            summary: ai.summary || ai.SUMMARY || ai.OVERVIEW || (typeof ai === 'string' ? ai : 'No summary available'),
             key_findings: safeParseList(ai.key_findings || ai['KEY CLINICAL FINDINGS']),
             risks: safeParseList(ai.risks || ai['KEY RISKS']),
             missing_info: safeParseList(ai.missing_info || ai['MISSING CRITICAL INFORMATION']),
             recommendations: safeParseList(ai.next_steps || ai.recommendations || ai['RECOMMENDED NEXT STEPS']),
-            completeness_score: parseInt(String(ai.completeness_score || ai['COMPLETENESS SCORE'])) || 7,
-            urgency_level: ai.uncertainty_level || 'medium'
+            completeness_score: parseInt(ai.completeness_score || ai['COMPLETENESS SCORE']) || 7,
+            urgency_level: ai.uncertainty_level || ai['UNCERTAINTY LEVEL'] || (referral.priority === 'high' ? 'High' : 'Medium'),
           }
         } as ReferralDetailView) : null)
       }
@@ -233,9 +224,9 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -285,19 +276,15 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
   const getTimelineIconClass = (action: string) => {
     switch (action) {
       case 'created':
-        return 'bg-primary text-primary-foreground'
+        return 'bg-blue-600 text-white'
       case 'submitted':
-        return 'bg-chart-5 text-white'
+        return 'bg-green-600 text-white'
       case 'accepted':
-        return 'bg-success text-success-foreground'
-      case 'in_progress':
-        return 'bg-warning text-warning-foreground'
+        return 'bg-emerald-600 text-white'     // Fixed styling
       case 'completed':
-        return 'bg-success text-success-foreground'
+        return 'bg-green-600 text-white'
       case 'rejected':
-        return 'bg-destructive text-destructive-foreground'
-      case 'updated':
-        return 'bg-muted text-muted-foreground'
+        return 'bg-red-600 text-white'
       default:
         return 'bg-muted text-muted-foreground'
     }
@@ -311,14 +298,12 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
   const createdDate = formatDate(referral.date)
 
-  // Explicit fields for timeline construction as requested
   const createdAt = referral.date
   const submittedAt = referral.submittedAt
   const acceptedAt = referral.acceptedAt
   const rejectedAt = referral.rejectedAt
   const completedAt = referral.completedAt
 
-  // Construct timeline from explicit fields as requested
   const timelineEvents = [
     { id: 'cre', action: 'created', timestamp: createdAt, user: (referral as any).creator || 'Clinician', description: 'Referral record created' },
     (submittedAt || ['submitted', 'accepted', 'completed'].includes(referral.status)) && { id: 'sub', action: 'submitted', timestamp: submittedAt || createdAt, user: (referral as any).creator || 'Clinician', description: 'Referral sent to receiving facility' },
@@ -327,7 +312,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     (completedAt || referral.status === 'completed') && { id: 'com', action: 'completed', timestamp: completedAt || createdAt, user: (referral as any).completed_by_user || 'Receiving Facility', description: 'Clinical handover completed' }
   ].filter(Boolean) as any[];
 
-  const sortedEvents = [...timelineEvents].sort((a, b) => 
+  const sortedEvents = [...timelineEvents].sort((a, b) =>
     new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
 
@@ -335,11 +320,10 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
     <div className="space-y-6">
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        {/* LEFT SECTION */}
         <div className="flex items-start gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleGoBack}
             className="text-muted-foreground hover:text-foreground hover:bg-transparent mt-1"
           >
@@ -355,8 +339,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
             <p className="text-sm text-muted-foreground mt-2">Created {createdDate}</p>
           </div>
         </div>
-        
-        {/* RIGHT SECTION */}
+
         <div className="flex items-center gap-2">
           <Badge variant="outline" className={`${getPriorityBadgeClass(referral.priority)} text-xs font-semibold px-3 py-1.5`}>
             {referral.priority.charAt(0).toUpperCase() + referral.priority.slice(1)} Priority
@@ -369,11 +352,9 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
       {/* MAIN CONTENT GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* MAIN CONTENT AREA */}
         <div className="lg:col-span-2 space-y-6">
           {/* PATIENT & FACILITY CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* PATIENT CARD */}
             <Card className="bg-gray-900/60 border-border/50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold flex items-center gap-2 text-foreground">
@@ -385,8 +366,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                 <p className="font-medium text-sm text-foreground">{referral.patient}</p>
                 <p className="text-sm text-muted-foreground">MRN: {referral.id.slice(-6)}</p>
                 <p className="text-sm text-muted-foreground">+234 801 234 5678</p>
-                <Button 
-                  variant="link" 
+                <Button
+                  variant="link"
                   className="text-sm text-primary p-0 h-auto"
                   onClick={() => router.push(`/dashboard/${userRole === ROLES.SUPER_ADMIN ? 'super-admin' : userRole === ROLES.FACILITY_ADMIN ? 'facility-admin' : 'clinician'}/patients/${referral.patientId}`)}
                 >
@@ -395,7 +376,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
               </CardContent>
             </Card>
 
-            {/* FACILITY CARD */}
             <Card className="bg-gray-900/60 border-border/50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold flex items-center gap-2 text-foreground">
@@ -417,25 +397,22 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
               <CardTitle className="text-lg font-semibold text-foreground">Referral Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* REASON FOR REFERRAL */}
               <div>
                 <p className="text-sm font-semibold mb-1 text-foreground">Reason for Referral</p>
                 <p className="text-sm text-muted-foreground">{referral.reason || referral.condition}</p>
               </div>
-              
+
               <Separator />
-              
-              {/* CLINICAL NOTES */}
+
               <div>
                 <p className="text-sm font-semibold mb-2 text-foreground">Clinical Notes</p>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
                   {referral.clinicalNotes || 'No clinical notes provided.'}
                 </p>
               </div>
-              
+
               <Separator />
-              
-              {/* REFERRING CLINICIAN */}
+
               {referral.referringClinician && (
                 <div>
                   <p className="text-sm font-semibold mb-1 text-foreground">Referring Clinician</p>
@@ -459,8 +436,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                   <TabsTrigger value="documents" className="flex items-center gap-2 group">
                     <FileText className="h-4 w-4" />
                     Documents ({referral.attachments?.documents.length || 0})
-                    <Plus 
-                      className="h-3.5 w-3.5 ml-1 opacity-50 group-hover:opacity-100 hover:text-primary transition-all" 
+                    <Plus
+                      className="h-3.5 w-3.5 ml-1 opacity-50 group-hover:opacity-100 hover:text-primary transition-all"
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsAddingDoc(!isAddingDoc);
@@ -471,8 +448,8 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                   <TabsTrigger value="voiceNotes" className="flex items-center gap-2 group">
                     <Mic className="h-4 w-4" />
                     Voice Notes ({referral.attachments?.voiceNotes.length || 0})
-                    <Plus 
-                      className="h-3.5 w-3.5 ml-1 opacity-50 group-hover:opacity-100 hover:text-primary transition-all" 
+                    <Plus
+                      className="h-3.5 w-3.5 ml-1 opacity-50 group-hover:opacity-100 hover:text-primary transition-all"
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsAddingVoice(!isAddingVoice);
@@ -481,7 +458,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                     />
                   </TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="documents" className="mt-0">
                   {isAddingDoc && (
                     <div className="mb-6 p-4 border border-primary/20 rounded-lg bg-primary/5 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -494,8 +471,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                         try {
                           setIsLoading(true)
                           const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-                          
-                          // Perform actual backend upload
                           await Promise.all(
                             files.map(f => documentService.uploadDocument({
                               file: f.file,
@@ -503,7 +478,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                               document_type: f.documentType || 'other'
                             }))
                           )
-                          
                           toast.success("Documents uploaded. Updating AI insights...")
                           await handleRefreshAI()
                           window.location.reload()
@@ -529,10 +503,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                               <p className="text-xs text-muted-foreground">{doc.size} KB • {doc.uploader}</p>
                             </div>
                           </div>
-                          <Badge 
-                            variant="default" 
-                            className="bg-primary/80 text-primary-foreground"
-                          >
+                          <Badge variant="default" className="bg-primary/80 text-primary-foreground">
                             AI: {doc.aiStatus}
                           </Badge>
                         </div>
@@ -540,34 +511,56 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                     </div>
                   )}
                 </TabsContent>
-                
+
+                {/* Voice Notes Tab */}
                 <TabsContent value="voiceNotes" className="mt-0">
                   {isAddingVoice && (
                     <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                       <VoiceRecorder 
-                         onRecordingComplete={async (file) => {
-                           if (!referral) return
-                           try {
-                             setIsLoading(true)
-                             const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
-                             await voiceNoteService.uploadVoiceNote({
-                               audio_file: file,
-                               referral_id: numericId
-                             })
-                             toast.success("Voice note uploaded. Updating AI insights...")
-                             await handleRefreshAI()
-                             window.location.reload()
-                           } catch (error) {
-                             toast.error("Failed to upload voice note")
-                             setIsLoading(false)
-                           }
-                         }} 
-                       />
+                      <VoiceRecorder
+                        onRecordingComplete={async (file) => {
+                          if (!referral) return
+                          try {
+                            setIsLoading(true)
+                            const numericId = parseInt(referral.id.replace(/\D/g, ''), 10)
+                            await voiceNoteService.uploadVoiceNote({
+                              audio_file: file,
+                              referral_id: numericId
+                            })
+                            toast.success("Voice note uploaded. Refreshing...")
+                            await handleRefreshAI()
+                            window.location.reload()
+                          } catch (error) {
+                            toast.error("Failed to upload voice note")
+                          } finally {
+                            setIsLoading(false)
+                          }
+                        }}
+                      />
                     </div>
                   )}
-                  <div className="py-4 text-center text-sm text-muted-foreground">
-                    No voice notes attached
-                  </div>
+
+                  {(referral.attachments?.voiceNotes?.length ?? 0) > 0 ? (
+                    <div className="space-y-2">
+                      {referral.attachments!.voiceNotes.map((note: any) => (
+                        <div key={note.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Mic className="h-5 w-5 text-primary" />
+                            <div>
+                              <p className="text-sm font-medium">{note.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {note.duration} • {note.uploader}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge variant="outline">Transcribed</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center text-sm text-muted-foreground">
+                      No voice notes attached yet
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -580,25 +573,18 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
             </CardHeader>
             <CardContent>
               <div className="relative space-y-0">
-                {/* VERTICAL LINE */}
                 <div className="absolute left-4 top-2 bottom-0 w-0.5 bg-border"></div>
-                
+
                 {sortedEvents.map((event, index) => (
                   <div key={event.id || index} className="relative pl-10 pb-6" style={{ paddingBottom: index === sortedEvents.length - 1 ? '0' : '1.5rem' }}>
-                    {/* ICON */}
                     <div className="absolute left-0 h-8 w-8 rounded-full flex items-center justify-center">
-                      <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                        event.action === 'created' ? 'bg-blue-600 text-white' :
-                        event.action === 'submitted' ? 'bg-green-600 text-white' :
-                        getTimelineIconClass(event.action)
-                      }`}>
-                        {event.action === 'created' ? <FileText className="h-4 w-4" /> :
-                         event.action === 'submitted' ? <Send className="h-4 w-4" /> :
-                         <Clock className="h-4 w-4" />}
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center ${getTimelineIconClass(event.action)}`}>
+                        {event.action === 'accepted' ? <Check className="h-4 w-4" /> :
+                          event.action === 'completed' ? <CheckCircle className="h-4 w-4" /> :
+                            <Clock className="h-4 w-4" />}
                       </div>
                     </div>
-                    
-                    {/* CONTENT */}
+
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium text-foreground">{event.action.replace('_', ' ')}</p>
@@ -626,9 +612,9 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                   AI Insights
                 </CardTitle>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-gray-900/30"
                 onClick={handleRefreshAI}
                 disabled={isLoading}
@@ -644,20 +630,15 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                 </div>
               ) : referral.aiAnalysis ? (
                 <>
-                  {/* QUALITY SCORE */}
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <p className="text-sm font-medium text-foreground">Quality Score</p>
-                      <p className={`text-2xl font-bold ${
-                        referral.aiAnalysis.completeness_score >= 8 ? 'text-green-500' :
-                        referral.aiAnalysis.completeness_score >= 5 ? 'text-yellow-600' :
-                        'text-red-500'
-                      }`}>
+                      <p className={`text-2xl font-bold ${getQualityScoreColor(referral.aiAnalysis.completeness_score)}`}>
                         {referral.aiAnalysis.completeness_score}/10
                       </p>
                     </div>
                     <div className="h-2 bg-border rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-primary"
                         style={{ width: `${referral.aiAnalysis.completeness_score * 10}%` }}
                       ></div>
@@ -666,21 +647,19 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
 
                   <Separator />
 
-                  {/* PATIENT SUMMARY */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-primary" />
                       <p className="text-sm font-semibold text-foreground">Patient Summary</p>
                     </div>
                     <div className="text-sm text-muted-foreground leading-relaxed min-h-[4em]">
-                      <Typewriter 
-                        text={referral.aiAnalysis.summary} 
-                        speed={30} 
+                      <Typewriter
+                        text={referral.aiAnalysis.summary}
+                        speed={30}
                       />
                     </div>
                   </div>
 
-                  {/* MISSING INFORMATION */}
                   {referral.aiAnalysis.missing_info.length > 0 && (
                     <>
                       <Separator />
@@ -701,7 +680,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                     </>
                   )}
 
-                  {/* RISK FACTORS */}
                   {referral.aiAnalysis.risks.length > 0 && (
                     <>
                       <Separator />
@@ -718,7 +696,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                     </>
                   )}
 
-                  {/* RECOMMENDATIONS */}
                   {referral.aiAnalysis.recommendations.length > 0 && (
                     <>
                       <Separator />
@@ -754,18 +731,18 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       {['pending', 'submitted'].includes(referral.status) && !acceptedAt && userRole !== ROLES.SUPER_ADMIN && isReceivingFacility && (
         <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50">
           <div className="flex flex-row gap-4">
-            <Button 
-              onClick={handleAccept} 
-              variant="default" 
-              className="px-10 h-12 bg-primary text-primary-foreground shadow-[0_0_25px_rgba(var(--primary-rgb),0.5)] animate-pulse hover:animate-none text-base font-semibold" 
+            <Button
+              onClick={handleAccept}
+              variant="default"
+              className="px-10 h-12 bg-primary text-primary-foreground shadow-[0_0_25px_rgba(var(--primary-rgb),0.5)] animate-pulse hover:animate-none text-base font-semibold"
               disabled={isLoading}
             >
               <Check className="h-5 w-5 mr-2" />
               Accept Referral
             </Button>
-            <Button 
+            <Button
               onClick={handleReject}
-              variant="outline" 
+              variant="outline"
               className="px-10 h-12 border-destructive/50 text-destructive hover:bg-destructive/10 text-base font-semibold"
               disabled={isLoading}
             >
@@ -779,10 +756,10 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       {referral.status === 'accepted' && isReceivingFacility && userRole !== ROLES.SUPER_ADMIN && (
         <div className="flex items-center justify-start gap-4 pt-8 mt-4 border-t border-border/50">
           <div className="flex flex-row gap-4">
-            <Button 
-              onClick={handleComplete} 
-              variant="default" 
-              className="px-10 h-12 bg-green-600 text-white shadow-[0_0_25px_rgba(22,163,74,0.4)] animate-pulse hover:animate-none text-base font-semibold" 
+            <Button
+              onClick={handleComplete}
+              variant="default"
+              className="px-10 h-12 bg-green-600 text-white shadow-[0_0_25px_rgba(22,163,74,0.4)] animate-pulse hover:animate-none text-base font-semibold"
               disabled={isLoading}
             >
               <CheckCircle className="h-5 w-5 mr-2" />
@@ -791,7 +768,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
           </div>
         </div>
       )}
-
     </div>
   )
 }

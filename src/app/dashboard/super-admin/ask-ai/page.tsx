@@ -11,16 +11,19 @@ const SUGGESTED_PROMPTS = [
 ]
 
 /**
- * Custom typewriter text with clean markdown stripping
+ * Custom typewriter text with aggressive markdown + typo cleaning
  */
 function TypewriterText({ text, isAnimated = true }: { text: string; isAnimated?: boolean }) {
   const cleanText = text
     .replace(/\*\*/g, '')
-    .replace(/Smmary:/g, 'Summary:')
-    .replace(/smmary:/g, 'Summary:')
-    .replace(/Smmry:/g, 'Summary:')
-    .replace(/Summarry:/g, 'Summary:')
-    .replace(/Summary\:/g, 'Summary:')
+    .replace(/Smmary:/gi, 'Overview:')
+    .replace(/smmary:/gi, 'Overview:')
+    .replace(/Smmry:/gi, 'Overview:')
+    .replace(/Summarry:/gi, 'Overview:')
+    .replace(/Summary:/gi, 'Overview:')
+    .replace(/summary:/gi, 'Overview:')
+    .replace(/OVERVIEW:/gi, 'Overview:')
+
   const [displayedText, setDisplayedText] = useState(isAnimated ? '' : cleanText)
 
   useEffect(() => {
