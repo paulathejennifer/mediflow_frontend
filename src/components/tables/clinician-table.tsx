@@ -9,9 +9,9 @@ interface Clinician {
   id: string | number
   first_name?: string
   last_name?: string
-  name?: string          // fallback
+  name?: string
   email: string
-  phone: string          // This must be the actual phone
+  phone: string
   speciality?: string
   status: 'active' | 'inactive'
   patients?: number
@@ -60,12 +60,10 @@ export function ClinicianTable({ clinicians, userRole, onEdit }: ClinicianTableP
                   </div>
                 </td>
 
-                {/* Email Column */}
                 <td className="px-4 py-3 text-xs text-muted-foreground">
                   {clinician.email}
                 </td>
 
-                {/* Phone Column - FIXED */}
                 <td className="px-4 py-3 text-xs text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Phone className="h-3.5 w-3.5" />
@@ -92,8 +90,10 @@ export function ClinicianTable({ clinicians, userRole, onEdit }: ClinicianTableP
                 <td className="px-4 py-3 text-sm text-foreground">
                   {clinician.patients ?? '—'}
                 </td>
-                <td className="px-4 py-3 text-sm text-foreground">
-                  {clinician.referrals ?? '—'}
+
+                {/* FIXED REFERRALS COLUMN */}
+                <td className="px-4 py-3 text-sm font-medium text-foreground">
+                  {clinician.referrals ?? 0}
                 </td>
 
                 <td className="px-4 py-3 text-right">

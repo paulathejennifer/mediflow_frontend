@@ -55,7 +55,7 @@ const transformedData = data.map((staff: any) => ({
   phone: staff.phone || 'No phone',
   status: staff.is_active ? 'active' : 'inactive',
   joinDate: staff.created_at,
-  referrals: staff.referralCount || 0,     // ← Add this line
+  referrals: staff.referralCount || 0,     // ← Critical fix
 }))
       setStaffData(transformedData)
     } catch (error) {

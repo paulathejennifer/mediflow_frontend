@@ -12,6 +12,7 @@ export interface ReferralSummary {
   priority: string
   reason_for_referral?: string
   created_at: string
+  created_by: number            // ← add this
 }
 
 export interface Referral {
