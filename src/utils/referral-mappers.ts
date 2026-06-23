@@ -218,7 +218,7 @@ export function mapApiReferralToDetailView(r: ApiReferral): ReferralDetailView {
         risks: safeParseList(data.risks || data['KEY RISKS']),
         missing_info: safeParseList(data.missing_info || data['MISSING CRITICAL INFORMATION']),
         recommendations: safeParseList(data.next_steps || data.recommendations || data['RECOMMENDED NEXT STEPS']),
-        completeness_score: parseInt(data.completeness_score) || 7,
+        completeness_score: parseInt(data.completeness_score) || 9,
         urgency_level: data.uncertainty_level || data['UNCERTAINTY LEVEL'] || (r.priority === 'emergency' || r.priority === 'high' ? 'High' : 'Medium'),
       };
     } catch (e) {
@@ -229,7 +229,7 @@ export function mapApiReferralToDetailView(r: ApiReferral): ReferralDetailView {
         risks: [],
         missing_info: [],
         recommendations: [],
-        completeness_score: 7,
+        completeness_score: 9,
         urgency_level: r.priority === 'emergency' || r.priority === 'high' ? 'High' : 'Medium',
       };
     }
