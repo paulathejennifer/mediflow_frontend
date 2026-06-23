@@ -53,7 +53,9 @@ export const staffService = {
 
     let facilityName = 'Unknown Facility'
     let facilityCode = 'N/A'
-    const referrals = await referralService.getReferrals()
+const referrals = await referralService.getReferrals()
+console.log('referrals sample:', referrals[0])  // ← add this
+// console.log('user sample id:', users[0]?.id, typeof users[0]?.id)
 
     if (user.facility_id) {
       try {
