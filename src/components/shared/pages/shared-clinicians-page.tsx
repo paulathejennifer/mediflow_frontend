@@ -49,14 +49,14 @@ export function SharedCliniciansPage({ userRole }: SharedCliniciansPageProps) {
       ])
       setKpis(kpiData)
       // Transform data to match component expectations
-      const transformedData = data.map((staff: any) => ({
-        ...staff,
-        name: `${staff.first_name} ${staff.last_name}`,
-        // Explicitly map phone number
-        phone: staff.phone || 'No phone',
-        status: staff.is_active ? 'active' : 'inactive',
-        joinDate: staff.created_at,
-      }))
+const transformedData = data.map((staff: any) => ({
+  ...staff,
+  name: `${staff.first_name} ${staff.last_name}`,
+  phone: staff.phone || 'No phone',
+  status: staff.is_active ? 'active' : 'inactive',
+  joinDate: staff.created_at,
+  referrals: staff.referralCount || 0,     // ← Add this line
+}))
       setStaffData(transformedData)
     } catch (error) {
       console.error('Failed to fetch staff data:', error)
