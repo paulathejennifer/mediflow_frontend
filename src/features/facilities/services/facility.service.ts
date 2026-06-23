@@ -52,7 +52,7 @@ interface ApiFacilitySummary {
   }
 }
 
-interface ApiFacilityResponse extends ApiFacilitySummary {}
+interface ApiFacilityResponse extends ApiFacilitySummary { }
 
 function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
   const levelNum = parseInt(String(f?.level || '').replace(/\D/g, ''), 10) || 1
@@ -67,7 +67,7 @@ function mapSummaryToFacility(f: ApiFacilitySummary): Facility {
     level: levelNum,
     county: f.county,
     address: f.address || '',
-    performance: f.performance_score ?? 65,
+    performance: f.performance_score ?? 0,  // ← honest zero
     joined: f.created_at || new Date().toISOString(),
     status: f.is_active === false ? 'inactive' : 'active',
     isActive: f.is_active !== false,
