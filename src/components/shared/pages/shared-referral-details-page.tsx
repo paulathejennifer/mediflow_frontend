@@ -664,32 +664,46 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
         </div>
       )}
 
-      {/* Document Preview Modal */}
-      {selectedDoc && (
-        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
-          <div className="bg-gray-900 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-800">
-              <h3 className="font-medium text-foreground truncate">{selectedDoc.name}</h3>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedDoc(null)}>
-                <XCircle className="h-5 w-5" />
-              </Button>
-            </div>
+{/* Document Preview Modal */}
+{selectedDoc && (
+  <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+    <div className="bg-gray-900 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+        <h3 className="font-medium text-foreground truncate">{selectedDoc.name}</h3>
+        <Button variant="ghost" size="sm" onClick={() => setSelectedDoc(null)}>
+          <XCircle className="h-5 w-5" />
+        </Button>
+      </div>
 
-            <div className="flex-1 overflow-auto p-4 bg-gray-950">
-              {selectedDoc.name.toLowerCase().endsWith('.pdf') ? (
-                <iframe src={documentService.getDocumentPreviewUrl(selectedDoc.id)} className="w-full h-[75vh] border border-gray-700 rounded-lg" title={selectedDoc.name} />
-              ) : (
-                <img src={documentService.getDocumentPreviewUrl(selectedDoc.id)} alt={selectedDoc.name} className="max-w-full max-h-[75vh] mx-auto rounded-lg" />
-              )}
-            </div>
+      <div className="flex-1 overflow-auto p-4 bg-gray-950 flex items-center justify-center">
+        {selectedDoc.name.toLowerCase().endsWith('.pdf') ? (
+          <iframe
+            src={documentService.getDocumentPreviewUrl(selectedDoc.id)}
+            className="w-full h-[75vh] border border-gray-700 rounded-lg"
+            title={selectedDoc.name}
+          />
+        ) : (
+          <img
+            src={documentService.getDocumentPreviewUrl(selectedDoc.id)}
+            alt={selectedDoc.name}
+            className="max-w-full max-h-[75vh] mx-auto rounded-lg"
+          />
+        )}
+      </div>
 
-            <div className="p-4 border-t border-gray-800 flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setSelectedDoc(null)}>Close</Button>
-              <Button onClick={() => window.open(documentService.getDocumentDownloadUrl(selectedDoc.id), '_blank')}>Download</Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="p-4 border-t border-gray-800 flex justify-end gap-3">
+        <Button variant="outline" onClick={() => setSelectedDoc(null)}>
+          Close
+        </Button>
+        <Button 
+          onClick={() => window.open(documentService.getDocumentDownloadUrl(selectedDoc.id), '_blank')}
+        >
+          Download
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   )
 }
