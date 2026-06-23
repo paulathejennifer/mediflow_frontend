@@ -43,6 +43,15 @@ export const documentService = {
     return response.data
   },
 
+  // New methods for preview and download
+  getDocumentPreviewUrl: (documentId: number): string => {
+    return `/api/documents/${documentId}/view`
+  },
+
+  getDocumentDownloadUrl: (documentId: number): string => {
+    return `/api/documents/${documentId}/download`
+  },
+
   extractTextFromDocument: async (documentId: number): Promise<Document> => {
     const response = await apiClient.post(`/documents/${documentId}/extract`)
     return response.data
