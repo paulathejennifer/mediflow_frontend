@@ -272,8 +272,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
           medical_history: formData.medical_history,
           allergies: formData.allergies,
           medications: formData.medications,
-          chronic_conditions: formData.chronic_conditions,
-          facility_id: user?.facility_id   // ← Added
+          chronic_conditions: formData.chronic_conditions  // ← Added
         })
         setShowSuccess(true)
         onSuccess(newPatient)
