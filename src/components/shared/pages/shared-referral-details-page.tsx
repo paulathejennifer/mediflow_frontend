@@ -280,7 +280,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
       case 'submitted':
         return 'bg-green-600 text-white'
       case 'accepted':
-        return 'bg-emerald-600 text-white'     // Fixed styling
+        return 'bg-emerald-600 text-white'
       case 'completed':
         return 'bg-green-600 text-white'
       case 'rejected':
@@ -512,7 +512,6 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                   )}
                 </TabsContent>
 
-                {/* Voice Notes Tab */}
                 <TabsContent value="voiceNotes" className="mt-0">
                   {isAddingVoice && (
                     <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -546,7 +545,7 @@ export function SharedReferralDetailsPage({ userRole }: SharedReferralDetailsPag
                           <div className="flex items-center gap-3">
                             <Mic className="h-5 w-5 text-primary" />
                             <div>
-                              <p className="text-sm font-medium">{note.name}</p>
+                              <p className="text-sm font-medium text-foreground">{note.name}</p>
                               <p className="text-xs text-muted-foreground">
                                 {note.duration} • {note.uploader}
                               </p>
