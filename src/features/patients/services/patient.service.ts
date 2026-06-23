@@ -72,8 +72,10 @@ export interface DuplicateCheckResponse {
 
 export const patientService = {
   createPatient: async (data: CreatePatientRequest & { force_save?: boolean }): Promise<Patient> => {
-    const response = await apiClient.post('/patients', data)
-    return response.data
+    // For super-admin or when facility_id is not provided, we can let backend handle it
+    // or pass current user's facility
+    const response = await apiClient.post('/patients', data);
+    return response.data;
   },
 
   getPatients: async (params?: {

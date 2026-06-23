@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, Sparkles, AlertTriangle, UserCheck } from 'lucide-react'
 import { patientService } from '@/features/patients/services/patient.service'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/store/auth-store'
 
 interface PatientCreationModalProps {
   isOpen: boolean
@@ -81,6 +82,8 @@ function FilterDropdown({ value, onChange, options, placeholder, disabled = fals
 }
 
 export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCreationModalProps) {
+  const { user } = useAuthStore()
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -148,22 +151,18 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
 
   // Real-time debounced duplicate check
   const triggerDuplicateCheck = useCallback((data: typeof formData) => {
-    // Need at least first + last name to bother checking
     if (!data.first_name.trim() || !data.last_name.trim()) {
       setDuplicateWarning(null)
       setIsCheckingDuplicate(false)
       return
     }
 
-    // Clear previous pending check
     if (duplicateCheckTimer.current) {
       clearTimeout(duplicateCheckTimer.current)
     }
 
-    // Show scanning indicator immediately
     setIsCheckingDuplicate(true)
 
-    // Debounce 800ms after user stops typing
     duplicateCheckTimer.current = setTimeout(async () => {
       try {
         const results = await patientService.preCheckDuplicate({
@@ -176,13 +175,11 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
 
         if (results.length > 0) {
           setDuplicateWarning({ isDuplicate: true, matches: results })
-          // Reset bypass if new matches are found after a field change
           setBypassDuplicate(false)
         } else {
           setDuplicateWarning(null)
         }
       } catch {
-        // Silently fail — don't block the form for a check error
         setDuplicateWarning(null)
       } finally {
         setIsCheckingDuplicate(false)
@@ -231,6 +228,11 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
     return Object.keys(newErrors).length === 0
   }
 
+  const handleClose = () => {
+    setShowSuccess(false)
+    onClose()
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -245,13 +247,11 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
       return
     }
 
-    // Block submit if duplicate warning is showing and not bypassed
     if (duplicateWarning?.isDuplicate && !bypassDuplicate) {
       toast.warning('Please review the potential duplicate records above before saving.')
       return
     }
 
-    // Also block if still scanning
     if (isCheckingDuplicate) {
       toast.info('Duplicate scan in progress, please wait a moment.')
       return
@@ -272,9 +272,10 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
           medical_history: formData.medical_history,
           allergies: formData.allergies,
           medications: formData.medications,
-          chronic_conditions: formData.chronic_conditions
+          chronic_conditions: formData.chronic_conditions,
+          facility_id: user?.facility_id   // ← Added
         })
-        setShowSuccess(true)           // ← Show success screen FIRST
+        setShowSuccess(true)
         onSuccess(newPatient)
       })
     } catch (error: any) {
@@ -289,7 +290,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}           // ← Fixed
       title={showSuccess ? "Patient Created" : "Create New Patient"}
       size="lg"
       footer={null}
@@ -592,7 +593,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
             <div className="border-t border-gray-800 pt-4 mt-6 flex justify-end gap-3">
               <Button
                 variant="outline"
-                onClick={onClose}
+                onClick={handleClose}           // ← Changed
                 type="button"
                 className="px-4 py-2 border-none bg-transparent text-gray-300 hover:text-foreground hover:bg-transparent"
                 disabled={isSubmitting}
@@ -623,7 +624,7 @@ export function PatientCreationModal({ isOpen, onClose, onSuccess }: PatientCrea
             {formData.first_name} {formData.last_name} has been added to the system.
           </p>
           <Button
-            onClick={onClose}
+            onClick={handleClose}           // ← Changed
             className="px-6 py-2 bg-primary/80 text-primary-foreground hover:bg-primary/70"
           >
             Done
