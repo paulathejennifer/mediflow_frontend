@@ -128,10 +128,20 @@ export function SharedPatientsPage({ userRole }: SharedPatientsPageProps) {
   const paginatedPatients = pagination.paginatedItems(filteredPatients)
 
 const handlePatientCreated = (newPatient: any) => {
-    toast.success('Patient created successfully')
-    fetchPatientsData() // ← Refresh table
-    // Do NOT close modal here — let the modal handle closing after success screen
-  }
+  toast.success('Patient created successfully')
+
+  fetchPatientsData()
+
+  router.push(
+    `/dashboard/${
+      userRole === ROLES.SUPER_ADMIN
+        ? 'super-admin'
+        : userRole === ROLES.FACILITY_ADMIN
+        ? 'facility-admin'
+        : 'clinician'
+    }/patients/${newPatient.id}`
+  )
+}
   
 
   const handleEditPatient = (patient: any) => {
