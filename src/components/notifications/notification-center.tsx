@@ -210,7 +210,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
             </div>
             {stats.unread > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-gray-400 bg-primary/70">Unread:</span>
+                <span className="text-gray-400">Unread:</span>
                 <Badge variant="default">{stats.unread}</Badge>
               </div>
             )}
