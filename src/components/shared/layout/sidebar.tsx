@@ -80,7 +80,7 @@ return (
 
       {/* LOGO */}
       <div className="h-20 px-6 flex items-center bg-gray-900">
-        <Link href={navigation[0]?.href || '/dashboard'} className="flex items-center gap-3 group">
+        <Link href={navigation[0]?.href || '/auth/login'} className="flex items-center gap-3 group">
 
           <div className="relative h-10 w-10 rounded-xl overflow-hidden ring-1 ring-primary/40 shadow-lg shadow-primary/20">
             <Image
