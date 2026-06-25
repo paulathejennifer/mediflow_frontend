@@ -8,7 +8,7 @@ import { SystemActivityTrend } from '@/components/charts/system-activity-trend'
 import { ReferralTrends } from '@/components/charts/referral-trends'
 import { ReferralsByStatusPie } from '@/components/charts/referrals-by-status-pie'
 import { TurnaroundTimeTrend } from '@/components/charts/turnaround-time-trend'
-// import { ReferralsBySpecialty } from '@/components/charts/referrals-by-specialty'
+import { ReferralsBySpecialty } from '@/components/charts/referrals-by-specialty'
 import { FacilityPerformance } from '@/components/charts/facility-performance'
 import { TopReferringFacilities } from '@/components/tables/top-referring-facilities'
 import { 
